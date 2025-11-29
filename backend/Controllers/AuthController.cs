@@ -1,4 +1,5 @@
-﻿using Core.Models;
+﻿using Core.DTOs;
+using Core.Models;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -28,6 +29,25 @@ namespace backend.Controllers
             var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
             if (!result.Succeeded)
                 return Unauthorized("Invalid login");
+
+            var token = await _jwtTokenService.CreateTokenAsync(user);
+
+            return Ok(new { token });
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(RegisterDTO model)
+        {
+            var user = new ApplicationUser()
+            {
+                Email = model.Email,
+                UserName = model.Email
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
 
             var token = await _jwtTokenService.CreateTokenAsync(user);
 
