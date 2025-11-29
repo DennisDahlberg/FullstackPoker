@@ -1,6 +1,12 @@
-﻿namespace Infrastructure.Data
+﻿using Core.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+namespace Infrastructure.Data
 {
-    internal class ApplicationDbContext
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        {
+        }
     }
 }
