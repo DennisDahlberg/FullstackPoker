@@ -1,5 +1,6 @@
 using Core.Models;
 using Infrastructure.Data;
+using Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,7 @@ namespace backend
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
+            builder.Services.AddTransient<JwtTokenService>();
 
             //EF Core
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
