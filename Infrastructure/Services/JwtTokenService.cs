@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Core.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,15 +11,15 @@ namespace Infrastructure.Services
     public class JwtTokenService
     {
         private readonly IConfiguration _config;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public JwtTokenService(IConfiguration config, UserManager<IdentityUser> userManager)
+        public JwtTokenService(IConfiguration config, UserManager<ApplicationUser> userManager)
         {
             _config = config;
             _userManager = userManager;
         }
 
-        public async Task<string> CreateTokenAsync(IdentityUser user)
+        public async Task<string> CreateTokenAsync(ApplicationUser user)
         {
             var jwtSettings = _config.GetSection("Jwt");
 

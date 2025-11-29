@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Coins, Menu, X, Play } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,9 +31,11 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="outline" className="border-emerald-500 text-emerald-400 hover:bg-emerald-500/10">
-              Sign In
-            </Button>
+            <Link to="/login">
+              <Button variant="outline" className="border-emerald-500 text-emerald-400 hover:bg-emerald-500/10">
+                Sign In
+              </Button>
+            </Link>
             <Button className="bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white shadow-lg">
               <Play className="w-4 h-4 mr-2" />
               Play Now
@@ -57,7 +60,9 @@ export default function Navbar() {
             <a href="#how-to-play" className="block text-gray-300 hover:text-emerald-400 transition-colors">How to Play</a>
             <a href="#ai-opponents" className="block text-gray-300 hover:text-emerald-400 transition-colors">AI Opponents</a>
             <div className="pt-4 space-y-3">
-              <Button variant="outline" className="w-full border-emerald-500 text-emerald-400">Sign In</Button>
+              <Link to="/login">
+                <Button variant="outline" className="w-full border-emerald-500 text-emerald-400">Sign In</Button>
+              </Link>
               <Button className="w-full bg-gradient-to-r from-emerald-500 to-green-600">
                 <Play className="w-4 h-4 mr-2" /> Play Now
               </Button>

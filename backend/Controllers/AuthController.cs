@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace backend.Controllers
 {
+    [ApiController]
+    [Route("[Controller]")]
     public class AuthController : Controller
     {
         private readonly UserManager<ApplicationUser> _userManager;
@@ -20,13 +22,13 @@ namespace backend.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(string email, string password)
+        public async Task<IActionResult> Login(LoginDTO model)
         {
-            var user = await _userManager.FindByNameAsync(email);
+            var user = await _userManager.FindByNameAsync(model.Email);
             if (user is null)
                 return Unauthorized("Invalid login");
 
-            var result = await _signInManager.CheckPasswordSignInAsync(user, password, false);
+            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
             if (!result.Succeeded)
                 return Unauthorized("Invalid login");
 
