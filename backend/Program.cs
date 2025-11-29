@@ -12,6 +12,9 @@ namespace backend
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
 
+
+
+            //CORS
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy("AllowFrontend", policy =>
