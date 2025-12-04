@@ -20,6 +20,23 @@ export const api = {
         }
         throw 'An error occurred during login';
       }
+    },
+    async register(email:string, password:string) {
+        try {
+          const response = await axios.post(`${backendUrl}/auth/register`, {
+            email,
+            password,
+          });
+
+          localStorage.setItem('token', response.data.token);
+
+          return response.data;
+        } catch (err) {
+          if (axios.isAxiosError(err)) {
+            throw err.response?.data || 'Registration failed';
+          }
+          throw 'An error occurred during registration';
+        }
     }
   }
 };

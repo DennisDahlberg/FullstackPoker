@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Coins, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { api } from '@/lib/api';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -28,22 +29,11 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('https://localhost:7289/auth/register', {
-        email,
-        password,
-      });
-
-      localStorage.setItem('token', response.data.token);
+      await api.auth.register(email, password);
       navigate('/');
-
     } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const errorData = err.response?.data;
-        if (Array.isArray(errorData)) {
-          setError(errorData.map((e: { description: string }) => e.description).join(', '));
-        } else {
-          setError(errorData || 'Registration failed');
-        }
+      if (Array.isArray(err)) {
+        setError(err[0].description || 'Registration failed');
       } else {
         setError('An error occurred during registration');
       }
