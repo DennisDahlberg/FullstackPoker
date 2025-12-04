@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Coins, LogIn, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { api } from '@/lib/api';
 import axios from 'axios';
 
 export default function Login() {
@@ -20,21 +21,13 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post('https://localhost:7289/auth/login', {
-        email,
-        password,
-      });
-
-      // Save JWT token to localStorage
-      localStorage.setItem('token', response.data.token);
-      
-      // Navigate to home page after successful login
+      await api.auth.login(email, password);
       navigate('/');
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        setError(err.response?.data || 'Invalid login credentials');
-      } else {
-        setError('An error occurred during login');
+    } catch (err) { 
+      if (axios.isAxiosError(err)) { 
+        setError(err.response?.data || 'Invalid login credentials'); 
+      } else { 
+        setError('An error occurred during login'); 
       }
     } finally {
       setIsLoading(false);

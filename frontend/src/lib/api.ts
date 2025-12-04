@@ -1,0 +1,25 @@
+import axios from "axios";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+export const api = {
+  auth: {
+    async login(email:string, password:string) {
+      try {
+        const response = await axios.post(`${backendUrl}/auth/login`, {
+          email,
+          password,
+        });
+
+        localStorage.setItem('token', response.data.token);
+
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Invalid login credentials';
+        }
+        throw 'An error occurred during login';
+      }
+    }
+  }
+};
