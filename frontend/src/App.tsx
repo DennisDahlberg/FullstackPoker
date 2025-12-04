@@ -10,7 +10,7 @@ import Register from "./pages/Register";
 
 function App() {
   const location = useLocation();
-  const hideNavbar = location.pathname === '/login' || location.pathname === '/register';
+  const hideNavbar = location.pathname === '/test' || location.pathname === '/test2';
 
   return (
     <>
