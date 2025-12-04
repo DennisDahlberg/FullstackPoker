@@ -5,7 +5,6 @@ import { Input } from '@/components/ui/input';
 import { Coins, LogIn, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api';
-import axios from 'axios';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -23,9 +22,9 @@ export default function Login() {
     try {
       await api.auth.login(email, password);
       navigate('/');
-    } catch (err) { 
-      if (axios.isAxiosError(err)) { 
-        setError(err.response?.data || 'Invalid login credentials'); 
+    } catch (err) {
+      if (typeof err === "string") {
+        setError(err); 
       } else { 
         setError('An error occurred during login'); 
       }
