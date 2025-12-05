@@ -11,7 +11,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="flex items-center space-x-3">
+          <Link to="/" className="flex items-center space-x-3">
             <div className="relative">
               <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
                 <Coins className="w-6 h-6 text-white" />
@@ -21,7 +21,7 @@ export default function Navbar() {
             <span className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
               PokerAI
             </span>
-          </div>
+          </Link>
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-8">
