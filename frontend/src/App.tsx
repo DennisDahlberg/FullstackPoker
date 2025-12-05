@@ -1,5 +1,5 @@
 // src/App.tsx
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 // import PrivateRoute from "@/components/PrivateRoute";
 import PublicRoute from "@/components/PublicRoute";
@@ -9,12 +9,10 @@ import Register from "./pages/Register";
 
 
 function App() {
-  const location = useLocation();
-  const hideNavbar = location.pathname === '/test' || location.pathname === '/test2';
 
   return (
     <>
-      {!hideNavbar && <Navbar />}
+      <Navbar />
       <Routes>
         <Route path="/" element={<Home/>} />
         <Route path="/login" element={<PublicRoute><Login/></PublicRoute>} />
