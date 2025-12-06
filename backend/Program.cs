@@ -19,7 +19,10 @@ namespace backend
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
+
             builder.Services.AddTransient<JwtTokenService>();
+            builder.Services.AddTransient<UserService>();
+
 
             //EF Core
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
