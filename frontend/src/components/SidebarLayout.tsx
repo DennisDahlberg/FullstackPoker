@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { useAuthContext } from '@/context/AuthContext';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Settings, LogOut, Coins, PanelLeft, User, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Skeleton } from './ui/skeleton';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +20,7 @@ import {
 
 export default function SidebarLayout() {
   const [isOpen, setIsOpen] = useState(window.innerWidth >= 768);
+  const { data, loading } = useAuthContext();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -85,7 +88,16 @@ export default function SidebarLayout() {
 
         {/* Footer / User Profile */}
         <div className="p-4">
-          <DropdownMenu>
+          {loading ? (
+            <div className="flex items-center gap-3 px-2 py-2">
+             <Skeleton className="h-8 w-8 rounded-lg bg-gray-800" />
+             <div className="space-y-2">
+               <Skeleton className="h-3 w-24 bg-gray-800" />
+               <Skeleton className="h-2 w-16 bg-gray-800" />
+             </div>
+           </div>
+          ) : (
+             <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button 
                 variant="ghost" 
@@ -118,7 +130,7 @@ export default function SidebarLayout() {
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">Player One</span>
-                    <span className="truncate text-xs text-gray-500">user@example.com</span>
+                    <span className="truncate text-xs text-gray-500">{data?.user?.email}</span>
                   </div>
                 </div>
               </DropdownMenuLabel>
@@ -141,6 +153,8 @@ export default function SidebarLayout() {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          )}
+         
         </div>
       </aside>
 
