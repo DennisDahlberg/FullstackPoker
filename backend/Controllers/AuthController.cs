@@ -55,7 +55,8 @@ namespace backend.Controllers
                 Email = model.Email,
                 UserName = model.Email,
                 Rank = "Beginner",
-                Balance = 1000
+                Balance = 1000,
+                RefreshToken = ""
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);

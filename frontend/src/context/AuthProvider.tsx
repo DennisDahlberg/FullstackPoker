@@ -54,16 +54,31 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
             }
         });
     }
+    
+   const register = async (email: string, password: string) => {
+        await api.auth.register(email, password);
+        const profile = await api.auth.getProfile();
 
-        const logout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("refreshToken");
-        setData(null);
-        window.location.href = '/login';
+        setData({
+            token: localStorage.getItem("token"),
+            user: {
+                id: profile.id,
+                name: profile.username,
+                email: profile.email,
+                rank: profile.rank
+            }
+        });
+    }
+
+    const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
+    setData(null);
+    window.location.href = '/login';
     };
 
     return (
-        <AuthContext.Provider value={{data, loading, error, login, logout}}>
+        <AuthContext.Provider value={{data, loading, error, login, register, logout}}>
             {children}
         </AuthContext.Provider>
     )

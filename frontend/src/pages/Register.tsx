@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Coins, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { api } from '@/lib/api';
+import { useAuthContext } from '@/context/AuthContext';
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -14,6 +15,8 @@ export default function Register() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const { register: register } = useAuthContext();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,8 +31,8 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      await api.auth.register(email, password);
-      navigate('/');
+      await register(email, password);
+      navigate('/dashboard');
     } catch (err) {
       if (Array.isArray(err)) {
         setError(err[0].description || 'Registration failed');
