@@ -14,7 +14,7 @@ namespace Infrastructure.Services
             _userManager = userManager;
         }
 
-        public async Task<Result<UserDTO>> GetUserData(string userId)
+        public async Task<Result<UserDTO>> GetUserDataAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user is null)
