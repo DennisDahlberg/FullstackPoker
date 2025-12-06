@@ -1,7 +1,20 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Settings, LogOut, Coins, PanelLeft } from 'lucide-react';
+import { LayoutDashboard, Settings, LogOut, Coins, PanelLeft, User, ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@/components/ui/avatar"
 
 export default function SidebarLayout() {
   const [isOpen, setIsOpen] = useState(window.innerWidth >= 768);
@@ -70,16 +83,64 @@ export default function SidebarLayout() {
           })}
         </nav>
 
-        {/* Footer / Logout */}
-        <div className="p-4 border-t border-gray-800">
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20"
-              onClick={handleLogOut}
+        {/* Footer / User Profile */}
+        <div className="p-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="ghost" 
+                className="w-full h-auto py-3 px-2 flex items-center justify-between hover:bg-gray-900 text-gray-300 hover:text-white"
+              >
+                <div className="flex items-center gap-3 text-left">
+                  <Avatar className="h-8 w-8 rounded-lg border border-gray-700">
+                    <AvatarImage src="" alt="User" />
+                    <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">CN</AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">Player One</span>
+                    <span className="truncate text-xs text-gray-500">Beginner</span>
+                  </div>
+                </div>
+                <ChevronsUpDown className="ml-auto size-4 text-gray-500" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent 
+              className="w-56 min-w-56 rounded-lg bg-gray-950 border-gray-800 text-gray-200" 
+              side="right" 
+              align="end" 
+              sideOffset={4}
             >
-                <LogOut className="w-5 h-5 mr-2" />
-                Sign Out
-            </Button>
+              <DropdownMenuLabel className="p-0 font-normal">
+                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                  <Avatar className="h-8 w-8 rounded-lg border border-gray-700">
+                    <AvatarImage src="" alt="User" />
+                    <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">CN</AvatarFallback>
+                  </Avatar>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">Player One</span>
+                    <span className="truncate text-xs text-gray-500">user@example.com</span>
+                  </div>
+                </div>
+              </DropdownMenuLabel>
+              <DropdownMenuSeparator className="bg-gray-800" />
+              <DropdownMenuItem className="focus:bg-gray-900 focus:text-white cursor-pointer">
+                <User className="mr-2 h-4 w-4" />
+                Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem className="focus:bg-gray-900 focus:text-white cursor-pointer">
+                <Settings className="mr-2 h-4 w-4" />
+                Settings
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-gray-800" />
+              <DropdownMenuItem 
+                className="text-red-400 focus:text-red-300 focus:bg-red-900/20 cursor-pointer"
+                onClick={handleLogOut}
+              >
+                <LogOut className="mr-2 h-4 w-4" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </aside>
 
