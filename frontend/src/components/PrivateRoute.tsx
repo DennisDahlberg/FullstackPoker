@@ -1,6 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '@/context/AuthContext';
-import { Spinner } from './ui/spinner';
+import FullScreenLoader from './Loader';
 
 
 interface PrivateRouteProps {
@@ -12,7 +12,7 @@ export default function PrivateRoute({ children }: PrivateRouteProps) {
   const location = useLocation();
 
   if (loading) {
-    return <Spinner />;
+    return <FullScreenLoader />;
   }
 
   if (!data?.user) {

@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Coins, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api } from '@/lib/api';
 import { useAuthContext } from '@/context/AuthContext';
 
 export default function Register() {

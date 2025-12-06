@@ -20,7 +20,7 @@ import {
 
 export default function SidebarLayout() {
   const [isOpen, setIsOpen] = useState(window.innerWidth >= 768);
-  const { data, loading } = useAuthContext();
+  const { data, loading, logout } = useAuthContext();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -30,7 +30,7 @@ export default function SidebarLayout() {
   ];
 
   function handleLogOut() {
-    localStorage.removeItem('token');
+    logout();
     navigate('/');
   }
 
