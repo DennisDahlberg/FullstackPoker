@@ -2,6 +2,16 @@ import axios from "axios";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
+function isTokenExpired(token: string) {
+  if (!token) return true;
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return Date.now() >= payload.exp * 1000;
+  } catch {
+    return true;
+  }
+}
+
 export const api = {
   auth: {
     async login(email:string, password:string) {
@@ -12,6 +22,8 @@ export const api = {
         });
 
         localStorage.setItem('token', response.data.token);
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+        console.log('Login response:', response.data);
 
         return response.data;
       } catch (err) {
@@ -29,6 +41,7 @@ export const api = {
           });
 
           localStorage.setItem('token', response.data.token);
+          localStorage.setItem('refreshToken', response.data.refreshToken);
 
           return response.data;
         } catch (err) {
@@ -53,6 +66,10 @@ export const api = {
         }
         throw 'An error occurred while fetching profile';
       }
+    },
+    async refreshToken() {
+      const refreshToken = localStorage.getItem('refreshToken');
+      console.log(refreshToken);
     }
   }
 };
