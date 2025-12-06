@@ -36,9 +36,9 @@ namespace backend.Controllers
             if (!result.Succeeded)
                 return Unauthorized("Invalid login");
 
-            var token = await _jwtTokenService.CreateTokenAsync(user);
+            var (token, refreshToken) = await _jwtTokenService.CreateTokensAsync(user);
 
-            return Ok(new { token });
+            return Ok(new { token, refreshToken });
         }
 
         [HttpPost("register")]
@@ -57,9 +57,26 @@ namespace backend.Controllers
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
-            var token = await _jwtTokenService.CreateTokenAsync(user);
+            var (token, refreshToken) = await _jwtTokenService.CreateTokensAsync(user);
 
-            return Ok(new { token });
+            return Ok(new { token, refreshToken });
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] string refreshToken)
+        {
+            var user = _userManager.Users.FirstOrDefault(u => u.RefreshToken == refreshToken);
+
+            if (user is null || user.RefreshTokenExpires < DateTime.UtcNow)
+                return Unauthorized("Invalid refresh token");
+
+            var (newToken, newRefreshToken) = await _jwtTokenService.CreateTokensAsync(user);
+
+            return Ok(new
+            {
+                token = newToken,
+                refreshToken = newRefreshToken
+            });
         }
 
 
