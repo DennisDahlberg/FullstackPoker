@@ -20,6 +20,18 @@ namespace Infrastructure.Services
             _userManager = userManager;
         }
 
+        public async Task<(string token, string refreshToken)> CreateTokensAsync(ApplicationUser user)
+        {
+            var token = await CreateTokenAsync(user);
+            var refreshToken = GenerateRefreshToken();
+
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpires = DateTime.UtcNow.AddDays(2);
+            await _userManager.UpdateAsync(user);
+
+            return (token, refreshToken);
+        }
+
         public async Task<string> CreateTokenAsync(ApplicationUser user)
         {
             var jwtSettings = _config.GetSection("Jwt");
