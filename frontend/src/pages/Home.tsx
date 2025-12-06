@@ -3,7 +3,7 @@ import { Play, Sparkles } from 'lucide-react';
 
 export default function Home() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div className="mb-8">

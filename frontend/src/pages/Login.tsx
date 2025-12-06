@@ -34,7 +34,7 @@ export default function Login() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">  
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">  
 
       <div className="relative z-10 w-full max-w-md px-4">
         {/* Logo */}
