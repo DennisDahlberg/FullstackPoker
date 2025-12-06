@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { Home, LayoutDashboard, Settings, LogOut, Coins, PanelLeft } from 'lucide-react';
+import { LayoutDashboard, Settings, LogOut, Coins, PanelLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function SidebarLayout() {
@@ -9,7 +9,6 @@ export default function SidebarLayout() {
   const navigate = useNavigate();
 
   const navItems = [
-    { icon: Home, label: 'Home', href: '/' },
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
     { icon: Settings, label: 'Settings', href: '/settings' },
   ];

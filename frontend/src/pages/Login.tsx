@@ -21,7 +21,7 @@ export default function Login() {
 
     try {
       await api.auth.login(email, password);
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       if (typeof err === "string") {
         setError(err); 
