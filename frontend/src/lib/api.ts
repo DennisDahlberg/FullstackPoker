@@ -37,6 +37,22 @@ export const api = {
           }
           throw 'An error occurred during registration';
         }
+    },
+    async getProfile() {
+      try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`${backendUrl}/auth/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to fetch profile';
+        }
+        throw 'An error occurred while fetching profile';
+      }
     }
   }
 };

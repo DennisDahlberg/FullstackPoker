@@ -28,7 +28,7 @@ namespace backend.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDTO model)
         {
-            var user = await _userManager.FindByNameAsync(model.Email);
+            var user = await _userManager.FindByEmailAsync(model.Email);
             if (user is null)
                 return Unauthorized("Invalid login");
 
@@ -47,7 +47,9 @@ namespace backend.Controllers
             var user = new ApplicationUser()
             {
                 Email = model.Email,
-                UserName = model.Email
+                UserName = model.Email,
+                Rank = "Beginner",
+                Balance = 1000
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);

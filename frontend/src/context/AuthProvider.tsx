@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { AuthContext, type ContextData } from "./AuthContext";
+import { api } from "@/lib/api";
 
 export function AuthProvider({children}: {children: React.ReactNode}) {
     const [data, setData] = useState<ContextData | null>(null);
@@ -8,21 +9,39 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
 
     useEffect(() => {        
         async function load() {
+            // try {
+            //     await new Promise(resolve => setTimeout(resolve, 1000)); 
+            //     setData({
+            //     token: localStorage.getItem("token"),
+            //     user: {
+            //         id: '42',
+            //         name: 'John Doe',
+            //         email: 'john.doe@gmail.com',
+            //         rank: 'Beginner'
+            //     }
+            //     });
+            // } catch (err) {
+            //     setError("Failed to load authentication data: " + (err as Error).message);
+            // } finally {
+            //     setLoading(false);
+            // }
             try {
-                await new Promise(resolve => setTimeout(resolve, 1000)); 
+                const profile =  await api.auth.getProfile();
+                console.log(profile);
                 setData({
-                token: localStorage.getItem("token"),
-                user: {
-                    id: '42',
-                    name: 'John Doe',
-                    email: 'john.doe@gmail.com'
-                }
+                    token: localStorage.getItem("token"),
+                    user: {
+                        id: profile.id,
+                        name: profile.username,
+                        email: profile.email,
+                        rank: profile.rank
+                    }
                 });
             } catch (err) {
-                setError("Failed to load authentication data: " + (err as Error).message);
+                setError("Error fetching profile: " + (err as Error).message);
             } finally {
                 setLoading(false);
-            }          
+            }
         }
 
         load();        

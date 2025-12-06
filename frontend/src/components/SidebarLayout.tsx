@@ -109,8 +109,8 @@ export default function SidebarLayout() {
                     <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">CN</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Player One</span>
-                    <span className="truncate text-xs text-gray-500">Beginner</span>
+                    <span className="truncate font-semibold">{data?.user?.name || "Player One"}</span>
+                    <span className="truncate text-xs text-gray-500">{data?.user?.rank}</span>
                   </div>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4 text-gray-500" />
@@ -129,7 +129,7 @@ export default function SidebarLayout() {
                     <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">CN</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Player One</span>
+                    <span className="truncate font-semibold">{data?.user?.name}</span>
                     <span className="truncate text-xs text-gray-500">{data?.user?.email}</span>
                   </div>
                 </div>
