@@ -2,21 +2,72 @@ import axios from "axios";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-function isTokenExpired(token: string) {
-  if (!token) return true;
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    return Date.now() >= payload.exp * 1000;
-  } catch {
-    return true;
+const apiClient = axios.create({
+  baseURL: backendUrl,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;    
   }
-}
+  return config;
+  },
+  (error) => {
+      return Promise.reject(error);
+});
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+
+      try {
+        const refreshToken = localStorage.getItem('refreshToken');
+        if (!refreshToken) {
+          throw new Error('No refresh token available');
+        }
+
+        const response = await axios.post(`${backendUrl}/auth/refresh`, {
+          refreshToken,
+        });
+        console.log('Token refreshed successfully', response.data);
+        const { token: newToken, refreshToken: newRefreshToken } = response.data;
+        localStorage.setItem('token', newToken);
+        localStorage.setItem('refreshToken', newRefreshToken);
+
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return apiClient(originalRequest);
+
+      } catch (refreshError) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        const publicPaths = ['/', '/login', '/register'];
+        if (!publicPaths.includes(window.location.pathname)) {
+          window.location.href = '/login';
+        }
+        return Promise.reject(refreshError);
+      }
+    }
+    return Promise.reject(error);
+  }
+)
 
 export const api = {
+
+  client: apiClient,
+
   auth: {
     async login(email:string, password:string) {
       try {
-        const response = await axios.post(`${backendUrl}/auth/login`, {
+        const response = await apiClient.post(`${backendUrl}/auth/login`, {
           email,
           password,
         });
@@ -35,7 +86,7 @@ export const api = {
     },
     async register(email:string, password:string) {
         try {
-          const response = await axios.post(`${backendUrl}/auth/register`, {
+          const response = await apiClient.post(`${backendUrl}/auth/register`, {
             email,
             password,
           });
@@ -53,12 +104,7 @@ export const api = {
     },
     async getProfile() {
       try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`${backendUrl}/auth/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await apiClient.get(`${backendUrl}/auth/profile`);
         return response.data;
       } catch (err) {
         if (axios.isAxiosError(err)) {
@@ -69,7 +115,18 @@ export const api = {
     },
     async refreshToken() {
       const refreshToken = localStorage.getItem('refreshToken');
-      console.log(refreshToken);
+      if (!refreshToken) return null;
+
+      try {
+        const response = await axios.post(`${backendUrl}/auth/refresh`, {
+          refreshToken,
+        });
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('refreshToken', response.data.refreshToken);
+        return response.data;
+      } catch {
+        return null;
+      }
     }
   }
 };

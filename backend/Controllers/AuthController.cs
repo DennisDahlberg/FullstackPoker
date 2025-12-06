@@ -8,6 +8,12 @@ using System.Security.Claims;
 
 namespace backend.Controllers
 {
+    public class RefreshRequest
+    {
+        public string RefreshToken { get; set; } = null!;
+    }
+
+
     [ApiController]
     [Route("[Controller]")]
     public class AuthController : Controller
@@ -63,9 +69,9 @@ namespace backend.Controllers
         }
 
         [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh([FromBody] string refreshToken)
+        public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
         {
-            var user = _userManager.Users.FirstOrDefault(u => u.RefreshToken == refreshToken);
+            var user = _userManager.Users.FirstOrDefault(u => u.RefreshToken == request.RefreshToken);
 
             if (user is null || user.RefreshTokenExpires < DateTime.UtcNow)
                 return Unauthorized("Invalid refresh token");

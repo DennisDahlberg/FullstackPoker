@@ -9,22 +9,13 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
 
     useEffect(() => {        
         async function load() {
-            // try {
-            //     await new Promise(resolve => setTimeout(resolve, 1000)); 
-            //     setData({
-            //     token: localStorage.getItem("token"),
-            //     user: {
-            //         id: '42',
-            //         name: 'John Doe',
-            //         email: 'john.doe@gmail.com',
-            //         rank: 'Beginner'
-            //     }
-            //     });
-            // } catch (err) {
-            //     setError("Failed to load authentication data: " + (err as Error).message);
-            // } finally {
-            //     setLoading(false);
-            // }
+            const token = localStorage.getItem("token");
+            const refreshToken = localStorage.getItem("refreshToken");
+            if (!token && !refreshToken) {
+                setLoading(false);
+                return;
+            }
+
             try {
                 const profile =  await api.auth.getProfile();
                 console.log(profile);
@@ -49,8 +40,30 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
         
     },[])
 
+    const login = async (email: string, password: string) => {
+        await api.auth.login(email, password);
+        const profile = await api.auth.getProfile();
+
+        setData({
+            token: localStorage.getItem("token"),
+            user: {
+                id: profile.id,
+                name: profile.username,
+                email: profile.email,
+                rank: profile.rank
+            }
+        });
+    }
+
+        const logout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        setData(null);
+        window.location.href = '/login';
+    };
+
     return (
-        <AuthContext.Provider value={{data, loading, error}}>
+        <AuthContext.Provider value={{data, loading, error, login, logout}}>
             {children}
         </AuthContext.Provider>
     )

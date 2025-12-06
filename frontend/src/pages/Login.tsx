@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Coins, LogIn, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api } from '@/lib/api';
+import { useAuthContext } from '@/context/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -12,6 +12,8 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const { login: logIn } = useAuthContext();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,7 +22,7 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      await api.auth.login(email, password);
+      await logIn(email, password);
       navigate('/dashboard');
     } catch (err) {
       if (typeof err === "string") {
