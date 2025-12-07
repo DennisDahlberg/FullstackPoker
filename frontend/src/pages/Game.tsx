@@ -21,10 +21,15 @@ function PlayerSeat({
     7: 'bottom-13 right-4 md:right-16',                
   };
 
-  // const isEmpty = !player;
+  const isEmpty = !player;
 
   return (
     <div className={`absolute ${positions[position]} z-10`}>
+      {isEmpty ? (
+        <div className="w-24 h-24 rounded-full bg-gray-800 border-4 border-gray-700 flex items-center justify-center text-gray-600">
+          <span>Empty</span>
+        </div>
+      ) : (
       <div className={`relative flex flex-col`}>
         <div className='flex flex-col items-center z-10 bg-gray-900 rounded text-sm w-35'>
           <span className='w-full text-center border-b border-gray-700'>{player?.name}</span>
@@ -38,6 +43,7 @@ function PlayerSeat({
           </div>
         )}
       </div>
+      )}
     </div>
   );
 }
