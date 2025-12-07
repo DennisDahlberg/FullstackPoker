@@ -21,46 +21,21 @@ function PlayerSeat({
     7: 'bottom-13 right-4 md:right-16',                
   };
 
-  const isEmpty = !player;
+  // const isEmpty = !player;
 
   return (
     <div className={`absolute ${positions[position]} z-10`}>
-      <div className={`
-        flex flex-col items-center gap-1 p-2 rounded-xl min-w-[80px] md:min-w-[100px]
-        ${isEmpty 
-          ? 'border-2 border-dashed border-gray-700 bg-gray-900/50' 
-          : player?.isTurn 
-            ? 'bg-amber-900/80 border-2 border-amber-500 shadow-lg shadow-amber-500/30' 
-            : 'bg-gray-900/90 border border-gray-700'
-        }
-      `}>
-        {isEmpty ? (
-          <span className="text-gray-600 text-xs">Empty Seat</span>
-        ) : (
-          <>
-            {/* Player Cards */}
-            <div className="flex gap-1 -mt-6">              
-              <PlayingCard hidden={position !== 0} value={player?.cards?.[0]} />
-              <PlayingCard hidden={position !== 0} value={player?.cards?.[1]} />
-            </div>
-            
-            {/* Player Info */}
-            <div className="flex flex-col items-center">
-              <span className="text-white text-xs md:text-sm font-medium truncate max-w-[80px]">
-                {player?.name}
-              </span>
-              <span className="text-amber-400 text-xs font-bold">
-                ${player?.chips.toLocaleString()}
-              </span>
-            </div>
-            
-            {/* Dealer/Action indicator */}
-            {player?.isActive && (
-              <div className="absolute -top-4 -right-1 w-5 h-5 bg-amber-500 rounded-full flex items-center justify-center text-[10px] font-bold text-black">
-                D
-              </div>
-            )}
-          </>
+      <div className={`relative flex flex-col`}>
+        <div className='flex flex-col items-center z-10 bg-gray-900 rounded text-sm w-35'>
+          <span className='w-full text-center border-b border-gray-700'>{player?.name}</span>
+          <span className='self-end pr-2'>${player?.chips.toLocaleString()}</span>
+        </div>
+        <img src="/images/players/placeholder_robot.jpg" className='z-15 absolute -left-12 -bottom-3 h-16 w-16 rounded-full object-cover border-4 border-gray-700' alt="" />
+        {player?.cards && (
+          <div className='absolute bottom-7 left-1 z-5 flex gap-1'>
+            <PlayingCard hidden={position !== 0} value={player.cards[0]} />
+            <PlayingCard hidden={position !== 0} value={player.cards[1]} />
+          </div>
         )}
       </div>
     </div>
@@ -89,13 +64,7 @@ export default function Game() {
     <div className="fixed inset-0 bg-gray-950 flex flex-col">
       
       {/* Header */}
-      <div className="h-14 bg-gray-900/80 border-b border-gray-800 flex items-center justify-between px-4">
-        <div className="flex items-center gap-4">
-          <h1 className="text-amber-500 font-bold text-lg">Table #1</h1>
-          <span className="text-gray-400 text-sm">No Limit Hold'em</span>
-          <span className="text-gray-500 text-sm">Blinds: $10/$20</span>
-        </div>
-        
+      <div className="h-14 bg-gray-900/80 border-b border-gray-800 flex items-center justify-end px-4">        
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="text-gray-400 hover:text-white">
             <Settings className="w-5 h-5" />
