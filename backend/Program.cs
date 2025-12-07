@@ -1,3 +1,4 @@
+using Application.Services;
 using Core.Models;
 using Infrastructure.Data;
 using Infrastructure.Services;
@@ -22,6 +23,7 @@ namespace backend
 
             builder.Services.AddTransient<JwtTokenService>();
             builder.Services.AddTransient<UserService>();
+            builder.Services.AddTransient<GameService>();
 
 
             //EF Core
@@ -35,6 +37,15 @@ namespace backend
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+
+            //Session
+            builder.Services.AddDistributedMemoryCache();
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(40);
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
 
             //CORS
             builder.Services.AddCors(options =>
@@ -85,6 +96,8 @@ namespace backend
 
             app.UseAuthentication();
             app.UseAuthorization();
+
+            app.UseSession();
 
             app.MapControllers();
 
