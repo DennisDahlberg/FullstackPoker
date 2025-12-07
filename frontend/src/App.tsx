@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import SidebarLayout from "./components/SidebarLayout";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
+import Game from "./pages/Game";
 
 
 function App() {
@@ -17,6 +18,8 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="*" element={<div className="pt-20 text-center text-4xl">404 - Not Found</div>} />
         </Route>
+        <Route path="/game" element={<PrivateRoute><Game /></PrivateRoute>} />
+
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<PublicRoute><Login/></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><Register/></PublicRoute>} />        

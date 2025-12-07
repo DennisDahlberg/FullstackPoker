@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuthContext } from '@/context/AuthContext';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Settings, LogOut, Coins, PanelLeft, User, ChevronsUpDown } from 'lucide-react';
+import { LayoutDashboard, Settings, LogOut, Coins, PanelLeft, User, ChevronsUpDown, CirclePlay } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from './ui/skeleton';
 import {
@@ -26,6 +26,7 @@ export default function SidebarLayout() {
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
+    { icon: CirclePlay, label: 'Game', href: '/game' },
     { icon: Settings, label: 'Settings', href: '/settings' },
   ];
 
