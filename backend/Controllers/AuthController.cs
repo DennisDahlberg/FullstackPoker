@@ -53,7 +53,7 @@ namespace backend.Controllers
             var user = new ApplicationUser()
             {
                 Email = model.Email,
-                UserName = model.Email,
+                UserName = model.Username,
                 Rank = "Beginner",
                 Balance = 1000,
                 RefreshToken = ""

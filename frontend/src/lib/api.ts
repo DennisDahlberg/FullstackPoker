@@ -84,10 +84,11 @@ export const api = {
         throw 'An error occurred during login';
       }
     },
-    async register(email:string, password:string) {
+    async register(email:string, username:string, password:string) {
         try {
           const response = await apiClient.post(`${backendUrl}/auth/register`, {
             email,
+            username,
             password,
           });
 

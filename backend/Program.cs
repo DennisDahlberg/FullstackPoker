@@ -29,7 +29,10 @@ namespace backend
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             //Identity
-            builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
+            builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+            })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 

@@ -8,6 +8,7 @@ import { useAuthContext } from '@/context/AuthContext';
 
 export default function Register() {
   const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -30,7 +31,7 @@ export default function Register() {
     setIsLoading(true);
 
     try {
-      await register(email, password);
+      await register(email, username, password);
       navigate('/dashboard');
     } catch (err) {
       if (Array.isArray(err)) {
@@ -88,6 +89,21 @@ export default function Register() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   autoComplete="email"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="username" className="text-sm font-medium text-gray-300">
+                  Username
+                </label>
+                <Input
+                  id="username"
+                  type="text"
+                  placeholder="Choose a username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                  autoComplete="username"
                 />
               </div>
 
