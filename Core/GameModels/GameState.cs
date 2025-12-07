@@ -13,6 +13,7 @@
     {
         public List<Player> Players { get; set; } = [];
         public List<Card> CommunityCards { get; set; } = [];
+        public List<Card> Deck { get; set; } = [];
         public int Pot { get; set; }
         public GameStage Stage { get; set; } = GameStage.PreFlop;
     }

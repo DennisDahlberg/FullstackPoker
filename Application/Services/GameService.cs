@@ -6,12 +6,18 @@ namespace Application.Services
     {
         private static readonly Random _random = new Random();
 
-        public void InitializeGame()
+        public GameState InitializeGame()
         {
             var gameState = new GameState();
-            var deck = InitializeDeck();
+
+            gameState.Players.Add(new Player { Name = "Dennis" });
+            gameState.Players.Add(new Player { Name = "Albert" });
+            gameState.Players.Add(new Player { Name = "Otto" });
+
+            gameState.Deck = InitializeDeck();
             foreach (var player in gameState.Players)
-                GetStartingHand(player, deck);
+                GetStartingHand(player, gameState.Deck);
+            return gameState;
         }
 
         public void GetStartingHand(Player player, List<Card> deck)

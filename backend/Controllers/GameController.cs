@@ -22,11 +22,9 @@ namespace backend.Controllers
             var json = HttpContext.Session.GetString("GameState");
             GameState gameState = json != null
                 ? JsonSerializer.Deserialize<GameState>(json)!
-                : new GameState();
+                : _gameService.InitializeGame();
 
-            _gameService.InitializeGame();
-
-            return Ok();
+            return Ok(gameState);
         }
     }
 }
