@@ -1,20 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-function Card({ value, hidden = false }: { value?: string; hidden?: boolean }) {
-  return (
-    <div className={`
-      w-10 h-14 md:w-12 md:h-16 rounded-lg flex items-center justify-center text-sm font-bold
-      ${hidden 
-        ? 'bg-blue-800 border-2 border-blue-700' 
-        : 'bg-white text-gray-900 border-2 border-gray-300'
-      }
-    `}>
-      {!hidden && value}
-    </div>
-  );
-}
+import PlayingCard from '@/components/PlayingCard';
 
 function PlayerSeat({ 
   position, 
@@ -52,9 +39,9 @@ function PlayerSeat({
         ) : (
           <>
             {/* Player Cards */}
-            <div className="flex gap-1 -mt-6">
-              <Card hidden={position !== 0} value={player?.cards?.[0]} />
-              <Card hidden={position !== 0} value={player?.cards?.[1]} />
+            <div className="flex gap-1 -mt-6">              
+              <PlayingCard hidden={position !== 0} value={player?.cards?.[0]} />
+              <PlayingCard hidden={position !== 0} value={player?.cards?.[1]} />
             </div>
             
             {/* Player Info */}
@@ -84,7 +71,7 @@ export default function Game() {
   const navigate = useNavigate();
   
   const mockPlayers = [
-    { name: 'You', chips: 5000, cards: ['A♠', 'K♠'], isTurn: true },
+    { name: 'You', chips: 5000, cards: ['AS', 'KS'], isTurn: true },
     { name: 'Player 2', chips: 3200, cards: ['??', '??'] },
     { name: 'Player 3', chips: 8100, cards: ['??', '??'], isActive: true },
     null, 
@@ -94,7 +81,7 @@ export default function Game() {
     { name: 'Player 8', chips: 4100, cards: ['??', '??'] },
   ];
 
-  const communityCards = ['10♥', 'J♥', 'Q♥', '?', '?'];
+  const communityCards = ['10H', 'JH', 'QH', '?', '?'];
   const pot = 1250;
   const currentBet = 200;
 
@@ -149,19 +136,7 @@ export default function Game() {
               {/* Community Cards */}
               <div className="flex gap-2 md:gap-3">
                 {communityCards.map((card, index) => (
-                  <div 
-                    key={index} 
-                    className={`
-                      w-12 h-16 md:w-14 md:h-20 rounded-lg flex items-center justify-center 
-                      text-lg md:text-xl font-bold shadow-lg
-                      ${card === '?' 
-                        ? 'bg-gray-800 border-2 border-gray-700 text-gray-600' 
-                        : 'bg-white text-gray-900 border-2 border-gray-300'
-                      }
-                    `}
-                  >
-                    {card}
-                  </div>
+                  <PlayingCard key={index} value={card} hidden={card === '?'} />
                 ))}
               </div>
               
