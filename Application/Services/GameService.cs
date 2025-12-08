@@ -17,13 +17,32 @@ namespace Application.Services
             gameState.Deck = InitializeDeck();
             foreach (var player in gameState.Players)
                 GetStartingHand(player, gameState.Deck);
+            GetCommunityCards(gameState);
+
             return gameState;
         }
 
         public void GetStartingHand(Player player, List<Card> deck)
         {
-            DrawCard(deck, player);
-            DrawCard(deck, player);
+            player.Hand.Add(DrawCard(deck));
+            player.Hand.Add(DrawCard(deck));
+            if (player.IsPlayer is true)
+            {
+                player.Hand[0].IsHidden = false;
+                player.Hand[1].IsHidden = false;
+            }
+        }
+
+        public void GetCommunityCards(GameState state)
+        {
+            state.CommunityCards.Add(DrawCard(state.Deck));
+            state.CommunityCards.Add(DrawCard(state.Deck));
+            state.CommunityCards.Add(DrawCard(state.Deck));
+            state.CommunityCards[0].IsHidden = false;
+            state.CommunityCards[1].IsHidden = false;
+            state.CommunityCards[2].IsHidden = false;
+            state.CommunityCards.Add(DrawCard(state.Deck));
+            state.CommunityCards.Add(DrawCard(state.Deck));
         }
 
         public List<Card> InitializeDeck()
@@ -37,21 +56,18 @@ namespace Application.Services
             {
                 foreach (var suit in suits)
                 {
-
                     cards.Add(new Card { Rank = rank, Suit = suit, IsHidden = true });
                 }
             }
             return cards;
         }
 
-        public void DrawCard(List<Card> deck, Player player)
+        public Card DrawCard(List<Card> deck)
         {
             var index = _random.Next(deck.Count);
             var card = deck[index];
-            if (player.IsPlayer is true)
-                card.IsHidden = false;
-            player.Hand.Add(card);
             deck.RemoveAt(index);
+            return card;
         }
     }
 }

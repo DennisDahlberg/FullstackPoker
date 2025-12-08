@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PlayingCard from '@/components/PlayingCard';
+import { useEffect } from 'react';
+import axios from 'axios';
 
 function PlayerSeat({ 
   position, 
@@ -50,6 +52,14 @@ function PlayerSeat({
 
 export default function Game() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    async function fetchData() {
+      const response = await axios.get(`http://localhost:5132/game/start`);
+      console.log('Game start response:', response.data);
+    }
+    fetchData();
+  }, []);
   
   const mockPlayers = [
     { name: 'You', chips: 5000, cards: ['AS', 'KS'], isTurn: true },
