@@ -1,5 +1,24 @@
+export default interface Card {
+    suit: string;
+    rank: string;
+    isHidden: boolean;
+}
+
+export interface Player { 
+    name: string;
+    chips: number;
+    currentBet: number;
+    hand: Card[];
+    isFolded: boolean;
+    isPlayer: boolean;
+}
+
 export interface GameState {
-    pot: number
+    players: Player[];
+    communityCards: Card[];
+    deck: Card[];
+    pot: number;
+    stage: string;
 }
 
 export type GameActionPayload = 

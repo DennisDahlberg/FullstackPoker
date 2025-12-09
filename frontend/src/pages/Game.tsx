@@ -3,7 +3,8 @@ import { LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PlayingCard from '@/components/PlayingCard';
 import { useEffect } from 'react';
-import axios from 'axios';
+// import axios from 'axios';
+import { useGameStore } from '@/stores/useGameStore';
 
 function PlayerSeat({ 
   position, 
@@ -52,14 +53,16 @@ function PlayerSeat({
 
 export default function Game() {
   const navigate = useNavigate();
+  const game = useGameStore((s) => s.game);
+  const loading = useGameStore((s) => s.loading);
+  const initGame = useGameStore((s) => s.initGame);
+
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await axios.get(`http://localhost:5132/game/start`);
-      console.log('Game start response:', response.data);
-    }
-    fetchData();
+    initGame();    
   }, []);
+
+  
   
   const mockPlayers = [
     { name: 'You', chips: 5000, cards: ['AS', 'KS'], isTurn: true },
@@ -72,9 +75,9 @@ export default function Game() {
     { name: 'Player 8', chips: 4100, cards: ['??', '??'] },
   ];
 
-  const communityCards = ['10H', 'JH', 'QH', '?', '?'];
-  const pot = 1250;
   const currentBet = 200;
+
+  if (loading || !game) return <div>Loading...</div>
 
   return (
     <div className="fixed inset-0 bg-gray-950 flex flex-col">
@@ -114,14 +117,14 @@ export default function Game() {
               {/* Pot */}
               <div className="bg-black/40 px-6 py-2 rounded-full">
                 <span className="text-amber-400 font-bold text-lg md:text-xl">
-                  Pot: ${pot.toLocaleString()}
+                  Pot: ${game.pot.toLocaleString()}
                 </span>
               </div>
               
               {/* Community Cards */}
               <div className="flex gap-2 md:gap-3">
-                {communityCards.map((card, index) => (
-                  <PlayingCard key={index} value={card} hidden={card === '?'} />
+                {game.communityCards.map((card, index) => (
+                  <PlayingCard key={index} value={`${card.rank}${card.suit}`} hidden={card.isHidden} />
                 ))}
               </div>
               
