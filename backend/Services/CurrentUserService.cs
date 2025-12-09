@@ -1,5 +1,4 @@
 ﻿using Core.DTOs;
-using System.Security.Claims;
 
 namespace backend.Services
 {
@@ -16,7 +15,7 @@ namespace backend.Services
         {
             return new PlayerInfoDTO
             {
-                Name = _contextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.Name)?.Value!,
+                Name = _contextAccessor.HttpContext?.User?.Identity?.Name!,
                 Chips = 5000
             };
         }

@@ -64,6 +64,13 @@ export const api = {
 
   client: apiClient,
 
+  game: {
+    async initGame() {
+      const response = await apiClient.get(`${backendUrl}/game/start`);
+      return response.data;
+    }
+  },
+
   auth: {
     async login(email:string, password:string) {
       try {

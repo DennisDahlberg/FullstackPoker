@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { GameState } from "@/types/GameState";
-// import type { GameActionPayload } from "@/types/GameState";
+import { api } from "@/lib/api";
 
 interface GameStore {
   game: GameState | null;
@@ -21,8 +21,7 @@ export const useGameStore = create<GameStore>((set) => ({
   initGame: async () => {
     set({ loading: true });
 
-    const res = await fetch("http://localhost:5132/game/start"); 
-    const data = await res.json();
+    const data = await api.game.initGame();
 
     console.log("Initialized game:", data);
 
