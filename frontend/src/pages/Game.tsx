@@ -4,7 +4,6 @@ import { LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PlayingCard from '@/components/PlayingCard';
 import { useEffect } from 'react';
-// import axios from 'axios';
 import { useGameStore } from '@/stores/useGameStore';
 
 export default function Game() {
@@ -16,23 +15,9 @@ export default function Game() {
 
   useEffect(() => {
     initGame();    
-  }, []);
+  }, []); 
 
-  
-  
-  const mockPlayers = [
-    { name: 'You', chips: 5000, cards: ['AS', 'KS'], isTurn: true },
-    { name: 'Player 2', chips: 3200, cards: ['??', '??'] },
-    { name: 'Player 3', chips: 8100, cards: ['??', '??'], isActive: true },
-    null, 
-    { name: 'Player 5', chips: 2400, cards: ['??', '??'] },
-    null, 
-    { name: 'Player 7', chips: 6800, cards: ['??', '??'] },
-    { name: 'Player 8', chips: 4100, cards: ['??', '??'] },
-  ];
-
-  const currentBet = 200;
-
+  // Loading will be used later for animations and wait for backend to finish
   if (loading || !game) return <div>Loading...</div>
 
   return (
@@ -88,7 +73,7 @@ export default function Game() {
           </div>
           
           {/* Player Seats */}
-          {mockPlayers.map((player, index) => (
+          {game.players.map((player, index) => (
             <PlayerSeat 
               key={index} 
               position={index} 
@@ -116,13 +101,6 @@ export default function Game() {
               className="w-24 h-12 bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
             >
               Check
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="w-24 h-12 bg-green-900/30 border-green-700 text-green-400 hover:bg-green-900/50 hover:text-green-300"
-            >
-              Call ${currentBet}
             </Button>
           </div>         
         </div>

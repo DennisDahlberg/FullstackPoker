@@ -1,18 +1,30 @@
-﻿using Core.GameModels;
+﻿using Core.DTOs;
+using Core.GameModels;
+using Core.Models;
+using Microsoft.AspNetCore.Identity;
 
 namespace Application.Services
 {
     public class GameService
     {
+        private readonly UserManager<ApplicationUser> _userManager;
         private static readonly Random _random = new Random();
 
-        public GameState InitializeGame()
+        public GameService(UserManager<ApplicationUser> userManager)
+        {
+            _userManager = userManager;
+        }
+
+        public GameState InitializeGame(PlayerInfoDTO playerInfo)
         {
             var gameState = new GameState();
 
-            gameState.Players.Add(new Player { Name = "Dennis" });
+            gameState.Players.Add(new Player { Name = playerInfo.Name, Chips = playerInfo.Chips, IsPlayer = true });
             gameState.Players.Add(new Player { Name = "Albert" });
             gameState.Players.Add(new Player { Name = "Otto" });
+            gameState.Players.Add(new Player { Name = "Corre" });
+            gameState.Players.Add(new Player { Name = "Calle" });
+            gameState.Players.Add(new Player { Name = "Lotta" });
 
             gameState.Deck = InitializeDeck();
             foreach (var player in gameState.Players)

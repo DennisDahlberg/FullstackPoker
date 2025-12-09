@@ -1,4 +1,5 @@
 using Application.Services;
+using backend.Services;
 using Core.Models;
 using Infrastructure.Data;
 using Infrastructure.Services;
@@ -20,10 +21,12 @@ namespace backend
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
+            builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddTransient<JwtTokenService>();
             builder.Services.AddTransient<UserService>();
             builder.Services.AddTransient<GameService>();
+            builder.Services.AddTransient<CurrentUserService>();
 
 
             //EF Core

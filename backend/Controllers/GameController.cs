@@ -1,4 +1,5 @@
 ﻿using Application.Services;
+using backend.Services;
 using Core.GameModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -10,21 +11,28 @@ namespace backend.Controllers
     public class GameController : Controller
     {
         private readonly GameService _gameService;
+        private readonly CurrentUserService _currentUserService;
 
-        public GameController(GameService gameService)
+        public GameController(GameService gameService, CurrentUserService currentUserService)
         {
             _gameService = gameService;
+            _currentUserService = currentUserService;
         }
 
         [HttpGet("start")]
         public IActionResult Start()
         {
             var json = HttpContext.Session.GetString("GameState");
-            GameState gameState = json != null
-                ? JsonSerializer.Deserialize<GameState>(json)!
-                : _gameService.InitializeGame();
+            if (json is not null)
+            {
+                var gameState = JsonSerializer.Deserialize<GameState>(json);
+                return Ok(gameState);
+            }
 
-            return Ok(gameState);
+            var playerInfo = _currentUserService.GetPlayerInfo();
+            var newGameState = _gameService.InitializeGame(playerInfo);
+
+            return Ok(newGameState);
         }
     }
 }
