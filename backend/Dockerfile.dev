@@ -1,9 +1,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:9.0
 
-WORKDIR /app
+WORKDIR /src
 
-COPY . .
+COPY ../ ./
 
-EXPOSE 5000
+WORKDIR /src/backend
 
-CMD ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:5000"]
+EXPOSE 5132
+
+CMD ["dotnet", "watch", "run", "--urls", "http://0.0.0.0:5132"]
