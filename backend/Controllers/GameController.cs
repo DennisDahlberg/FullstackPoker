@@ -34,5 +34,17 @@ namespace backend.Controllers
 
             return Ok(newGameState);
         }
+
+        [HttpPost("action")]
+        public IActionResult PlayerAction([FromBody] PlayerActionRequest playerAction)
+        {
+            var json = HttpContext.Session.GetString("GameState");
+            if (json is null)
+                return RedirectToAction(nameof(Start));
+
+            var gameState = JsonSerializer.Deserialize<GameState>(json);
+
+            return Ok();
+        }
     }
 }
