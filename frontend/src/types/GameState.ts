@@ -19,6 +19,7 @@ export interface GameState {
     deck: Card[];
     pot: number;
     stage: string;
+    availableActions: string[];
 }
 
 export type GameActionPayload = 

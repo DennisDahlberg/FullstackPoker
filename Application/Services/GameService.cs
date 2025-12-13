@@ -20,11 +20,11 @@ namespace Application.Services
             var gameState = new GameState();
 
             gameState.Players.Add(new Player { Name = playerInfo.Name, Chips = playerInfo.Chips, IsPlayer = true });
-            gameState.Players.Add(new Player { Name = "Albert" });
-            gameState.Players.Add(new Player { Name = "Otto" });
-            gameState.Players.Add(new Player { Name = "Corre" });
-            gameState.Players.Add(new Player { Name = "Calle" });
-            gameState.Players.Add(new Player { Name = "Lotta" });
+            gameState.Players.Add(new Player { Name = "Albert", Chips = 1000 });
+            gameState.Players.Add(new Player { Name = "Otto", Chips = 1000 });
+            gameState.Players.Add(new Player { Name = "Corre", Chips = 1000 });
+            gameState.Players.Add(new Player { Name = "Calle", Chips = 1000 });
+            gameState.Players.Add(new Player { Name = "Lotta", Chips = 1000 });
 
             gameState.Deck = InitializeDeck();
             foreach (var player in gameState.Players)

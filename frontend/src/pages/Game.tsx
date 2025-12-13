@@ -18,6 +18,40 @@ export default function Game() {
     initGame();    
   }, []); 
 
+  const getButtonConfig = (action: string) => {
+    switch (action) {
+      // case 'fold':
+      //   return {
+      //     label: 'Fold',
+      //     className: 'w-24 h-12 bg-red-900/30 border-red-700 text-red-400 hover:bg-red-900/50 hover:text-red-300',
+      //     onClick: () => playerAction('fold')
+      //   };
+      case 'check':
+        return {
+          label: 'Check',
+          className: 'w-24 h-12 bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white',
+          onClick: () => playerAction('check')
+        };
+      case 'call':
+        return {
+          label: 'Call',
+          className: 'w-24 h-12 bg-blue-800/30 border-blue-700 text-blue-400 hover:bg-blue-800/50 hover:text-blue-300',
+          onClick: () => playerAction('call')
+        };
+      case 'raise':
+        return {
+          label: 'Raise',
+          className: 'w-24 h-12 bg-green-800/30 border-green-700 text-green-400 hover:bg-green-800/50 hover:text-green-300',
+          onClick: () => playerAction('raise', { amount: 100 }) // Example amount
+        };
+      case 'all-in':
+        return {
+          label: 'All In',
+          className: 'w-24 h-12 bg-purple-800/30 border-purple-700 text-purple-400 hover:bg-purple-800/50 hover:text-purple-300',
+          onClick: () => playerAction('all-in')
+        };
+  }}
+
   // Loading will be used later for animations and wait for backend to finish
   if (loading || !game) return <div>Loading...</div>
 
@@ -90,20 +124,19 @@ export default function Game() {
         <div className="max-w-2xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4">          
           
           <div className="flex items-center gap-3">
-            <Button 
-              variant="outline" 
-              className="w-24 h-12 bg-red-900/30 border-red-700 text-red-400 hover:bg-red-900/50 hover:text-red-300"
-              onClick={() => playerAction('fold')}
-            >
-              Fold
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              className="w-24 h-12 bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
-            >
-              Check
-            </Button>
+            {game.availableActions.map((action) => {
+            const buttonConfig = getButtonConfig(action);
+            return (
+                <Button 
+                  key={action}
+                  variant="outline" 
+                  className={buttonConfig?.className}
+                  onClick={() => playerAction(action)}
+                >
+                  {buttonConfig?.label}
+                </Button>
+        );
+      })}
           </div>         
         </div>
       </div>
