@@ -79,15 +79,16 @@ namespace backend
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtSettings["Issuer"],
                     ValidAudience = jwtSettings["Audience"],
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!))
                 };
             });
 
             //OpenAI
             builder.Services.AddSingleton<ChatClient>(serviceProvider =>
             {
-                var model = "gpt-4.1-nano";
-                return new ChatClient(model, "trest");
+                var apiKey = builder.Configuration["OpenAI:APIKey"];
+                var model = builder.Configuration["OpenAI:Model"];
+                return new ChatClient(model, apiKey);
             });
 
             builder.Services.AddAuthentication();
