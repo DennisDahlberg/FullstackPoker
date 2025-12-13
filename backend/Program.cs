@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using OpenAI.Chat;
 using System.Text;
 
 
@@ -80,6 +81,13 @@ namespace backend
                     ValidAudience = jwtSettings["Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]))
                 };
+            });
+
+            //OpenAI
+            builder.Services.AddSingleton<ChatClient>(serviceProvider =>
+            {
+                var model = "gpt-4.1-nano";
+                return new ChatClient(model, "trest");
             });
 
             builder.Services.AddAuthentication();
