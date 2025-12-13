@@ -40,6 +40,11 @@ export default function PlayerSeat({
             <PlayingCard hidden={player.hand[1].isHidden} value={`${player.hand[1].rank}${player.hand[1].suit}`} />
           </div>
         )}
+        {player.isDealer && (
+          <div className='absolute -top-3 -left-13 bg-yellow-400 text-black rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold border-2 border-gray-900 z-20'>
+            D
+          </div>
+        )}
       </div>
       )}
     </div>
