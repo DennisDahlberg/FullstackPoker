@@ -128,10 +128,10 @@ export default function Game() {
             const buttonConfig = getButtonConfig(action);
             return (
                 <Button 
-                  key={action}
-                  variant="outline" 
-                  className={buttonConfig?.className}
-                  onClick={() => playerAction(action)}
+                key={action}
+                variant="outline" 
+                className={buttonConfig?.className}
+                onClick={() => playerAction(action)}
                 >
                   {buttonConfig?.label}
                 </Button>

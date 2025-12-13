@@ -20,6 +20,7 @@ export interface GameState {
     pot: number;
     stage: string;
     availableActions: string[];
+    curreentPlayerIndex: number;
 }
 
 export type GameActionPayload = 
