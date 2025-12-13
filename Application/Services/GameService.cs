@@ -30,6 +30,7 @@ namespace Application.Services
             foreach (var player in gameState.Players)
                 GetStartingHand(player, gameState.Deck);
             GetCommunityCards(gameState);
+            gameState.AvailableActions = GetAvailableActions(gameState);
 
             return gameState;
         }
@@ -80,6 +81,27 @@ namespace Application.Services
             var card = deck[index];
             deck.RemoveAt(index);
             return card;
+        }
+
+        public List<string> GetAvailableActions(GameState state)
+        {
+            var actions = new List<string>();
+
+            var currentBet = state.Players.Max(p => p.CurrentBet);
+            var player = state.Players.First(p => p.IsPlayer == true);
+            var playerBet = player.CurrentBet;
+            var callAmount = currentBet - playerBet;
+
+            if (callAmount == 0)
+                actions.Add("check");
+            else if (player.Chips >= callAmount)
+                actions.Add("call");
+            if (player.Chips >= callAmount)
+                actions.Add("raise");
+            if (player.Chips > 0)
+                actions.Add("all-in");
+
+            return actions;
         }
     }
 }

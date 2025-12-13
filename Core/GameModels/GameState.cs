@@ -16,5 +16,6 @@
         public List<Card> Deck { get; set; } = [];
         public int Pot { get; set; }
         public GameStage Stage { get; set; } = GameStage.PreFlop;
+        public List<string> AvailableActions { get; set; } = [];
     }
 }
