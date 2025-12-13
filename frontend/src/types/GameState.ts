@@ -11,6 +11,8 @@ export interface Player {
     hand: Card[];
     isFolded: boolean;
     isPlayer: boolean;
+    isActive: boolean;
+    isDealer: boolean;
 }
 
 export interface GameState {
@@ -20,7 +22,12 @@ export interface GameState {
     pot: number;
     stage: string;
     availableActions: string[];
-    curreentPlayerIndex: number;
+    bigBlind: number;
+    smallBlind: number;
+    dealerPosition: number;
+    smallBlindPosition: number;
+    bigBlindPosition: number;
+    currentPlayerIndex: number;
 }
 
 export type GameActionPayload = 

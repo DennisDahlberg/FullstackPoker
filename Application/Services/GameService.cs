@@ -26,6 +26,8 @@ namespace Application.Services
             gameState.Players.Add(new Player { Name = "Calle", Chips = 1000 });
             gameState.Players.Add(new Player { Name = "Lotta", Chips = 1000 });
 
+            SetupBlinds(gameState);
+
             gameState.Deck = InitializeDeck();
             foreach (var player in gameState.Players)
                 GetStartingHand(player, gameState.Deck);
@@ -33,6 +35,32 @@ namespace Application.Services
             gameState.AvailableActions = GetAvailableActions(gameState);
 
             return gameState;
+        }
+
+        public void SetupBlinds(GameState state)
+        {
+            var playerCount = state.Players.Count;
+
+            foreach (var player in state.Players)
+            {
+                player.IsDealer = false;
+            }
+
+            state.DealerPosition = 0;
+            var smallBlindPlayer = state.Players[state.SmallBlindPosition];
+            var bigBlindPlayer = state.Players[state.BigBlindPosition];
+
+            state.Players[state.DealerPosition].IsDealer = true;
+
+            var smallBlindAmount = Math.Min(state.SmallBlind, smallBlindPlayer.Chips);
+            smallBlindPlayer.Chips -= smallBlindAmount;
+            smallBlindPlayer.CurrentBet = smallBlindAmount;
+            state.Pot += smallBlindAmount;
+
+            var bigBlindAmount = Math.Min(state.BigBlind, bigBlindPlayer.Chips);
+            bigBlindPlayer.Chips -= bigBlindAmount;
+            bigBlindPlayer.CurrentBet = bigBlindAmount;
+            state.Pot += bigBlindAmount;
         }
 
         public void GetStartingHand(Player player, List<Card> deck)

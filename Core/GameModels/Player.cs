@@ -9,5 +9,6 @@
         public bool IsFolded { get; set; }
         public bool IsActive { get; set; }
         public bool IsPlayer { get; set; }
+        public bool IsDealer { get; set; } = false;
     }
 }
