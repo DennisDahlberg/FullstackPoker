@@ -84,7 +84,7 @@ export default function Game() {
         </div>
       </div>
 
-      {/* Action Bar */}
+      {/* Actions */}
       <div className=" bg-gray-900 border-t border-gray-800 p-6">
         <div className="max-w-2xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4">          
           

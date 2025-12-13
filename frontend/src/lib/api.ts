@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { GameActionPayload } from "@/types/GameState";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -67,6 +68,13 @@ export const api = {
   game: {
     async initGame() {
       const response = await apiClient.get(`${backendUrl}/game/start`);
+      return response.data;
+    },
+    async playerAction(action:string, payload?:GameActionPayload) {
+      const response = await apiClient.post(`${backendUrl}/game/action`, {
+        action,
+        payload
+      });
       return response.data;
     }
   },
