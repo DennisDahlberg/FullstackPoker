@@ -11,6 +11,7 @@ export default function Game() {
   const game = useGameStore((s) => s.game);
   const loading = useGameStore((s) => s.loading);
   const initGame = useGameStore((s) => s.initGame);
+  const playerAction = useGameStore((s) => s.playerAction);
 
 
   useEffect(() => {
@@ -92,6 +93,7 @@ export default function Game() {
             <Button 
               variant="outline" 
               className="w-24 h-12 bg-red-900/30 border-red-700 text-red-400 hover:bg-red-900/50 hover:text-red-300"
+              onClick={() => playerAction('fold')}
             >
               Fold
             </Button>

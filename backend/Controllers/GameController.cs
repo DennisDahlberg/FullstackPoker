@@ -32,6 +32,7 @@ namespace backend.Controllers
             var playerInfo = _currentUserService.GetPlayerInfo();
             var newGameState = _gameService.InitializeGame(playerInfo);
 
+            HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(newGameState));
             return Ok(newGameState);
         }
 
@@ -44,7 +45,7 @@ namespace backend.Controllers
 
             var gameState = JsonSerializer.Deserialize<GameState>(json);
 
-            return Ok();
+            return Ok(gameState);
         }
     }
 }
