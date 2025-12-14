@@ -45,6 +45,9 @@ namespace backend.Controllers
 
             var gameState = JsonSerializer.Deserialize<GameState>(json);
 
+            _gameService.HandlePlayerAction(playerAction, gameState!);
+
+            HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(gameState));
             return Ok(gameState);
         }
     }

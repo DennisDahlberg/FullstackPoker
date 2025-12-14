@@ -133,5 +133,38 @@ namespace Application.Services
 
             return actions;
         }
+
+        public void HandlePlayerAction(PlayerActionRequest actionRequest, GameState state)
+        {
+            var currentPlayer = state.Players[state.CurrentPlayerIndex];
+            switch (actionRequest.Action)
+            {
+                case "fold":
+                    currentPlayer.IsFolded = true;
+                    currentPlayer.IsActive = false;
+                    break;
+                case "call":
+                    var callAmount = state.HighestBet - currentPlayer.CurrentBet;
+                    var actualCallAmount = Math.Min(callAmount, currentPlayer.Chips);
+                    currentPlayer.CurrentBet += callAmount;
+                    currentPlayer.Chips -= callAmount;
+                    state.Pot += actualCallAmount;
+                    if (actualCallAmount < callAmount)
+                    {
+                        currentPlayer.IsActive = false;
+                    }
+                    break;
+                case "check":
+                    break;
+                case "raise":
+                    break;
+            }
+
+            state.CurrentPlayerIndex++;
+            if (state.CurrentPlayerIndex >= state.Players.Count)
+                state.CurrentPlayerIndex = 0;
+            
+            state.AvailableActions = GetAvailableActions(state);
+        }
     }
 }
