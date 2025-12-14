@@ -46,7 +46,6 @@ namespace Application.Services
                 player.IsDealer = false;
             }
 
-            state.DealerPosition = 0;
             var smallBlindPlayer = state.Players[state.SmallBlindPosition];
             var bigBlindPlayer = state.Players[state.BigBlindPosition];
 
@@ -61,6 +60,7 @@ namespace Application.Services
             bigBlindPlayer.Chips -= bigBlindAmount;
             bigBlindPlayer.CurrentBet = bigBlindAmount;
             state.Pot += bigBlindAmount;
+            state.HighestBet = bigBlindAmount;
         }
 
         public void GetStartingHand(Player player, List<Card> deck)
@@ -126,8 +126,10 @@ namespace Application.Services
                 actions.Add("call");
             if (player.Chips >= callAmount)
                 actions.Add("raise");
-            if (player.Chips > 0)
-                actions.Add("all-in");
+            // if (player.Chips > 0)
+            //     actions.Add("all-in");
+
+            actions.Add("fold");
 
             return actions;
         }

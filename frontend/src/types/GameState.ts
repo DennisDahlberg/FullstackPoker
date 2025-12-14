@@ -28,6 +28,7 @@ export interface GameState {
     smallBlindPosition: number;
     bigBlindPosition: number;
     currentPlayerIndex: number;
+    highestBet: number;
 }
 
 export type GameActionPayload = 

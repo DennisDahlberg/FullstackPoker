@@ -16,16 +16,22 @@ export default function Game() {
 
   useEffect(() => {
     initGame();    
-  }, []); 
+  }, [initGame]);
+
+    const getCallAmount = () => {
+    if (!game) return 0;
+    const currentPlayer = game.players[game.currentPlayerIndex];
+    return game.highestBet - (currentPlayer?.currentBet || 0);
+  };
 
   const getButtonConfig = (action: string) => {
     switch (action) {
-      // case 'fold':
-      //   return {
-      //     label: 'Fold',
-      //     className: 'w-24 h-12 bg-red-900/30 border-red-700 text-red-400 hover:bg-red-900/50 hover:text-red-300',
-      //     onClick: () => playerAction('fold')
-      //   };
+      case 'fold':
+        return {
+          label: 'Fold',
+          className: 'w-24 h-12 bg-red-900/30 border-red-700 text-red-400 hover:bg-red-900/50 hover:text-red-300',
+          onClick: () => playerAction('fold')
+        };
       case 'check':
         return {
           label: 'Check',
@@ -34,7 +40,7 @@ export default function Game() {
         };
       case 'call':
         return {
-          label: 'Call',
+          label: `Call ($${getCallAmount()})`,
           className: 'w-24 h-12 bg-blue-800/30 border-blue-700 text-blue-400 hover:bg-blue-800/50 hover:text-blue-300',
           onClick: () => playerAction('call')
         };
@@ -113,6 +119,7 @@ export default function Game() {
               key={index} 
               position={index} 
               player={player || undefined} 
+              isCurrentPlayer={index === game.currentPlayerIndex}
             />
           ))}
           

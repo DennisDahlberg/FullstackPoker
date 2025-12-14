@@ -3,10 +3,12 @@ import type {Player} from "@/types/GameState";
 
 export default function PlayerSeat({ 
   position, 
-  player 
+  player, 
+  isCurrentPlayer
 }: { 
   position: number; 
   player: Player;
+  isCurrentPlayer: boolean;
 }) {
   const positions: Record<number, string> = {
     0: 'bottom-3 left-1/2 -translate-x-1/2',           
@@ -33,7 +35,7 @@ export default function PlayerSeat({
           <span className='w-full text-center border-b border-gray-700'>{player?.name}</span>
           <span className='self-end pr-2'>${player?.chips.toLocaleString()}</span>
         </div>
-        <img src="/images/players/placeholder_robot.jpg" className='z-15 absolute -left-12 -bottom-3 h-16 w-16 rounded-full object-cover border-4 border-gray-700' alt="" />
+        <img src="/images/players/placeholder_robot.jpg" className={`z-15 absolute -left-12 -bottom-3 h-16 w-16 rounded-full object-cover border-4 ${isCurrentPlayer ? 'border-yellow-400' : 'border-gray-700'}`} alt="" />
         {player?.hand && (
           <div className='absolute bottom-7 left-1 z-5 flex gap-1'>
             <PlayingCard hidden={player.hand[0].isHidden} value={`${player.hand[0].rank}${player.hand[0].suit}`} />
