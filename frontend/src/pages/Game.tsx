@@ -3,7 +3,7 @@ import PlayerSeat from '@/components/PlayerSeat';
 import { LogOut, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PlayingCard from '@/components/PlayingCard';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useGameStore } from '@/stores/useGameStore';
 
 export default function Game() {
@@ -12,6 +12,7 @@ export default function Game() {
   const loading = useGameStore((s) => s.loading);
   const initGame = useGameStore((s) => s.initGame);
   const playerAction = useGameStore((s) => s.playerAction);
+  const [isRaiseModalOpen, setIsRaiseModalOpen] = useState(false);
 
 
   useEffect(() => {
@@ -48,7 +49,7 @@ export default function Game() {
         return {
           label: 'Raise',
           className: 'w-24 h-12 bg-green-800/30 border-green-700 text-green-400 hover:bg-green-800/50 hover:text-green-300',
-          onClick: () => playerAction('raise', { amount: 100 }) // Example amount
+          onClick: () => setIsRaiseModalOpen(true)
         };
       case 'all-in':
         return {
@@ -138,14 +139,21 @@ export default function Game() {
                 key={action}
                 variant="outline" 
                 className={buttonConfig?.className}
-                onClick={() => playerAction(action)}
+                onClick={() => buttonConfig?.label !== 'Raise' ? playerAction(action) : setIsRaiseModalOpen(true)} 
                 >
                   {buttonConfig?.label}
                 </Button>
-        );
-      })}
+            );
+            })}
           </div>         
         </div>
+        {isRaiseModalOpen && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-1000">
+            <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
+              <h2 className="text-xl font-bold mb-4 text-white">Enter Raise Amount</h2>
+            </div>
+          </div>
+        )}
       </div>
       
     </div>
