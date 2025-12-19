@@ -20,14 +20,16 @@ export default function Game() {
   const game = useGameStore((s) => s.game);
   const loading = useGameStore((s) => s.loading);
   const initGame = useGameStore((s) => s.initGame);
-  const playerAction = useGameStore((s) => s.playerAction);
+  const playerAction = useGameStore((s) => s.playerAction);  
 
-  const [raiseValue, setRaiseValue] = useState(Number(game?.smallBlind));
+  const [raiseValue, setRaiseValue] = useState(0);
   const [isRaiseModalOpen, setIsRaiseModalOpen] = useState(false);
+  const minRaise = game ? game.smallBlind : 0;
 
   useEffect(() => {
     initGame();
   }, [initGame]);
+
 
   const getCallAmount = () => {
     if (!game) return 0;
@@ -63,7 +65,10 @@ export default function Game() {
           label: "Raise",
           className:
             "w-24 h-12 bg-green-800/30 border-green-700 text-green-400 hover:bg-green-800/50 hover:text-green-300",
-          onClick: () => setIsRaiseModalOpen(true),
+          onClick: () => {    
+            setRaiseValue(minRaise);        
+            setIsRaiseModalOpen(true);
+          },
         };
       case "all-in":
         return {
@@ -155,11 +160,7 @@ export default function Game() {
                   key={action}
                   variant="outline"
                   className={buttonConfig?.className}
-                  onClick={() =>
-                    buttonConfig?.label !== "Raise"
-                      ? playerAction(action)
-                      : setIsRaiseModalOpen(true)
-                  }
+                  onClick={buttonConfig?.onClick}
                 >
                   {buttonConfig?.label}
                 </Button>
@@ -167,15 +168,6 @@ export default function Game() {
             })}
           </div>
         </div>
-        {isRaiseModalOpen && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-1000">
-            <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
-              <h2 className="text-xl font-bold mb-4 text-white">
-                Enter Raise Amount
-              </h2>
-            </div>
-          </div>
-        )}
       </div>
       <Dialog open={isRaiseModalOpen} onOpenChange={setIsRaiseModalOpen}>
         <DialogContent className="sm:max-w-md bg-gray-900 text-white border-gray-700">
@@ -192,7 +184,7 @@ export default function Game() {
                 type="number"
                 value={raiseValue}
                 max={game.players[game.currentPlayerIndex].chips}
-                min={Number(game?.smallBlind)}
+                min={minRaise}
                 step={5}
                 onChange={(e) => setRaiseValue(Number(e.target.value))}
                 className="text-3xl h-16 text-center font-mono bg-black/20"
@@ -202,7 +194,7 @@ export default function Game() {
             <Slider
               value={[raiseValue]}
               max={game.players[game.currentPlayerIndex].chips}
-              min={Number(game?.smallBlind)}
+              min={minRaise}
               step={1}
               onValueChange={([val]) => setRaiseValue(val)}
               className="py-2 bg-gray-800/50 rounded-lg"
