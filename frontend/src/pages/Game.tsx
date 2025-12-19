@@ -22,8 +22,8 @@ export default function Game() {
   const initGame = useGameStore((s) => s.initGame);
   const playerAction = useGameStore((s) => s.playerAction);
 
-  const [raiseValue, setRaiseValue] = useState(20);
-  const [isRaiseModalOpen, setIsRaiseModalOpen] = useState(false);  
+  const [raiseValue, setRaiseValue] = useState(Number(game?.smallBlind));
+  const [isRaiseModalOpen, setIsRaiseModalOpen] = useState(false);
 
   useEffect(() => {
     initGame();
@@ -185,10 +185,15 @@ export default function Game() {
 
           <div className="flex flex-col gap-6 py-4">
             <div className="relative flex items-center justify-center gap-2">
-              <span className="text-2xl font-bold text-green-400 absolute left-4">$</span>
+              <span className="text-2xl font-bold text-green-400 absolute left-4">
+                $
+              </span>
               <Input
                 type="number"
                 value={raiseValue}
+                max={game.players[game.currentPlayerIndex].chips}
+                min={Number(game?.smallBlind)}
+                step={5}
                 onChange={(e) => setRaiseValue(Number(e.target.value))}
                 className="text-3xl h-16 text-center font-mono bg-black/20"
               />
@@ -196,27 +201,46 @@ export default function Game() {
 
             <Slider
               value={[raiseValue]}
-              max={1000}
-              min={20}
+              max={game.players[game.currentPlayerIndex].chips}
+              min={Number(game?.smallBlind)}
               step={1}
               onValueChange={([val]) => setRaiseValue(val)}
               className="py-2 bg-gray-800/50 rounded-lg"
             />
 
             <div className="grid grid-cols-4 gap-2">
-              <Button variant="outline" onClick={() => setRaiseValue(1000 / 4)}>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  setRaiseValue(game.players[game.currentPlayerIndex].chips / 4)
+                }
+              >
                 1/4 Pot
               </Button>
-              <Button variant="outline" onClick={() => setRaiseValue(1000 / 2)}>
+              <Button
+                variant="outline"
+                onClick={() =>
+                  setRaiseValue(game.players[game.currentPlayerIndex].chips / 2)
+                }
+              >
                 1/2 Pot
               </Button>
-              <Button variant="outline" onClick={() => setRaiseValue(1000)}>
-                Pot
+              <Button
+                variant="outline"
+                onClick={() =>
+                  setRaiseValue(
+                    (game.players[game.currentPlayerIndex].chips * 3) / 4
+                  )
+                }
+              >
+                3/4 Pot
               </Button>
               <Button
                 variant="outline"
                 className="border-purple-500"
-                onClick={() => setRaiseValue(1000)}
+                onClick={() =>
+                  setRaiseValue(game.players[game.currentPlayerIndex].chips)
+                }
               >
                 All-In
               </Button>
