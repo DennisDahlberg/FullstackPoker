@@ -73,8 +73,8 @@ export const api = {
     },
     async playerAction(action:string, payload?:GameActionPayload) {
       const response = await apiClient.post(`${backendUrl}/game/action`, {
-        action,
-        payload
+        action: action,
+        amount: payload?.amount
       });
       return response.data;
     }

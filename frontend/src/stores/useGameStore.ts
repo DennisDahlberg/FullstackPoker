@@ -38,8 +38,6 @@ export const useGameStore = create<GameStore>((set) => ({
 
     const data = await api.game.playerAction(action, payload);
 
-    console.log("Player action:", data);
-
     set({
       game: data,
       loading: false
