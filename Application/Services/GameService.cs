@@ -126,8 +126,6 @@ namespace Application.Services
                 actions.Add("call");
             if (player.Chips >= callAmount)
                 actions.Add("raise");
-            // if (player.Chips > 0)
-            //     actions.Add("all-in");
 
             actions.Add("fold");
 
@@ -157,6 +155,11 @@ namespace Application.Services
                 case "check":
                     break;
                 case "raise":
+                    var safeRaiseAmount = Math.Min(actionRequest.Amount ?? 0, currentPlayer.Chips);
+                    currentPlayer.Chips -= safeRaiseAmount;
+                    currentPlayer.CurrentBet += safeRaiseAmount;
+                    state.Pot += safeRaiseAmount;
+                    state.HighestBet = currentPlayer.CurrentBet;
                     break;
             }
 
