@@ -58,7 +58,7 @@ namespace backend.Controllers
             if (json is null)
                 return RedirectToAction(nameof(Start));
             var gameState = JsonSerializer.Deserialize<GameState>(json);
-            //_gameService.HandleBotAction(gameState!);
+            _gameService.HandleBotAction(gameState!);
             HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(gameState));
             return Ok(gameState);
         }

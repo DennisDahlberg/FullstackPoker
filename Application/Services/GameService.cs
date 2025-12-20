@@ -169,5 +169,10 @@ namespace Application.Services
             
             state.AvailableActions = GetAvailableActions(state);
         }
+
+        public void HandleBotAction(GameState gameState)
+        {
+
+        }
     }
 }
