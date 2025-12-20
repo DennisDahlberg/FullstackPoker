@@ -77,6 +77,10 @@ export const api = {
         amount: payload?.amount
       });
       return response.data;
+    },
+    async botAction() {
+      const response = await apiClient.post(`${backendUrl}/game/bot-action`);
+      return response.data;
     }
   },
 

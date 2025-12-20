@@ -28,6 +28,7 @@ namespace backend
             builder.Services.AddTransient<UserService>();
             builder.Services.AddTransient<GameService>();
             builder.Services.AddTransient<CurrentUserService>();
+            builder.Services.AddTransient<BotAiService>();
 
 
             //EF Core

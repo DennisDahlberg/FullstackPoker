@@ -52,13 +52,13 @@ namespace backend.Controllers
         }
 
         [HttpPost("bot-action")]
-        public IActionResult BotAction()
+        public async Task<IActionResult> BotAction()
         {
             var json = HttpContext.Session.GetString("GameState");
             if (json is null)
                 return RedirectToAction(nameof(Start));
             var gameState = JsonSerializer.Deserialize<GameState>(json);
-            _gameService.HandleBotAction(gameState!);
+            await _gameService.HandleBotAction(gameState!);
             HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(gameState));
             return Ok(gameState);
         }

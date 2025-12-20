@@ -7,11 +7,13 @@ namespace Application.Services
 {
     public class GameService
     {
+        private readonly BotAiService _botAiService;
         private readonly UserManager<ApplicationUser> _userManager;
         private static readonly Random _random = new Random();
 
-        public GameService(UserManager<ApplicationUser> userManager)
+        public GameService(BotAiService botAiService, UserManager<ApplicationUser> userManager)
         {
+            _botAiService = botAiService;
             _userManager = userManager;
         }
 
@@ -170,9 +172,9 @@ namespace Application.Services
             state.AvailableActions = GetAvailableActions(state);
         }
 
-        public void HandleBotAction(GameState gameState)
+        public async Task HandleBotAction(GameState gameState)
         {
-
+            var botAction = await _botAiService.GetBotAction(gameState);
         }
     }
 }

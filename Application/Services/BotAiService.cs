@@ -17,9 +17,11 @@ namespace Application.Services
             _chatClient = chatClient;
         }
 
-        public void GetBotAction(GameState gameState)
+        public async Task<string> GetBotAction(GameState gameState)
         {
-            
+            var prompt = BuildBotPrompt(gameState);
+            var response = await _chatClient.CompleteChatAsync(prompt);
+            return response.Value.Content[0].Text;
         }
 
         public string BuildBotPrompt(GameState gameState)
@@ -28,8 +30,9 @@ namespace Application.Services
             {
                 Bot = gameState.Players[gameState.CurrentPlayerIndex],
                 HighestBet = gameState.HighestBet,
-                CommunityCards = (List<Card>)gameState.CommunityCards
-                    .Where(c => c.IsHidden == false),
+                CommunityCards = gameState.CommunityCards
+                    .Where(c => c.IsHidden == false)
+                    .ToList(),
                 Pot = gameState.Pot,
                 Stage = gameState.Stage,
                 PlayersLeft = gameState.Players
