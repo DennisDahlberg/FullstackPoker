@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 export default function Game() {
   const navigate = useNavigate();
   const game = useGameStore((s) => s.game);
-  const loading = useGameStore((s) => s.loading);
+  // const loading = useGameStore((s) => s.loading);
   const initGame = useGameStore((s) => s.initGame);
   const playerAction = useGameStore((s) => s.playerAction);  
 
@@ -81,7 +81,7 @@ export default function Game() {
   };
 
   // Loading will be used later for animations and wait for backend to finish
-  if (loading || !game) return <div>Loading...</div>;
+  if (!game) return <div>Loading...</div>;
 
   return (
     <div className="fixed inset-0 bg-gray-950 flex flex-col">

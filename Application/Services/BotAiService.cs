@@ -43,7 +43,7 @@ namespace Application.Services
 You are an Texas Hold'em Poker player bot. 
 Given the following game state, decide your next action. 
 Respond ONLY with a JSON object in this format: 
-{{ ""action"": ""fold|call|check|raise"", ""amount"": int (if action is raise, otherwise 0) }}
+{{ ""action"": ""fold|call|check|raise"", ""amount"": number (if action is raise, otherwise 0) }}
 
 Game state:
 - Your state: {botPayload.Bot}
