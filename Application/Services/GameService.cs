@@ -1,4 +1,5 @@
-﻿using Core.DTOs;
+﻿using System.Text.Json;
+using Core.DTOs;
 using Core.GameModels;
 using Core.Models;
 using Microsoft.AspNetCore.Identity;
@@ -174,7 +175,26 @@ namespace Application.Services
 
         public async Task HandleBotAction(GameState gameState)
         {
-            var botAction = await _botAiService.GetBotAction(gameState);
+            var botActionJson = await _botAiService.GetBotAction(gameState);
+
+            var botAction = JsonSerializer.Deserialize<BotAction>(botActionJson, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (botAction is null)
+            {
+                HandlePlayerAction(new PlayerActionRequest { Action = "call" }, gameState);
+                return;
+            }                
+            
+            var actionRequest = new PlayerActionRequest
+            {
+                Action = botAction.Action,
+                Amount = botAction.Amount
+            };
+
+            HandlePlayerAction(actionRequest, gameState);
         }
     }
 }
