@@ -260,7 +260,7 @@ namespace Application.Services
                 Amount = botAction.Amount
             };
 
-            Thread.Sleep(2200);
+            await Task.Delay(2000);
 
             HandlePlayerAction(actionRequest, gameState);
 
