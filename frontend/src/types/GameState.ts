@@ -29,6 +29,8 @@ export interface GameState {
     bigBlindPosition: number;
     currentPlayerIndex: number;
     highestBet: number;
+    isGameOver: boolean;
+    winnersPositions: number[];
 }
 
 export type GameActionPayload = 

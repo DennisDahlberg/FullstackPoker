@@ -80,8 +80,17 @@ export default function Game() {
     }
   };
 
-  // Loading will be used later for animations and wait for backend to finish
   if (!game) return <div>Loading...</div>;
+
+  if (game.isGameOver) 
+    return (
+      <div className="fixed inset-0 bg-gray-950 flex flex-col items-center justify-center text-white">
+        <h1 className="text-4xl font-bold mb-6">Game Over!</h1>
+        <div className="bg-gray-900/80 p-6 rounded-lg border border-gray-700">
+          Winners: {game.winnersPositions.map(pos => game.players[pos].name).join(", ")}
+        </div>
+      </div>
+    )
 
   return (
     <div className="fixed inset-0 bg-gray-950 flex flex-col">
