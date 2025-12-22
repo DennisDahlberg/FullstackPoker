@@ -22,7 +22,7 @@ namespace Application.Services
         {
             var gameState = new GameState();
 
-            gameState.Players.Add(new Player { Name = playerInfo.Name, Chips = playerInfo.Chips, IsPlayer = true });
+            gameState.Players.Add(new Player { Name = playerInfo.Name, Chips = 1000, IsPlayer = true });
             gameState.Players.Add(new Player { Name = "Albert", Chips = 1000 });
             gameState.Players.Add(new Player { Name = "Otto", Chips = 1000 });
             gameState.Players.Add(new Player { Name = "Corre", Chips = 1000 });
@@ -82,9 +82,6 @@ namespace Application.Services
             state.CommunityCards.Add(DrawCard(state.Deck));
             state.CommunityCards.Add(DrawCard(state.Deck));
             state.CommunityCards.Add(DrawCard(state.Deck));
-            state.CommunityCards[0].IsHidden = false;
-            state.CommunityCards[1].IsHidden = false;
-            state.CommunityCards[2].IsHidden = false;
             state.CommunityCards.Add(DrawCard(state.Deck));
             state.CommunityCards.Add(DrawCard(state.Deck));
         }
@@ -169,7 +166,7 @@ namespace Application.Services
             state.CurrentPlayerIndex++;
             if (state.CurrentPlayerIndex >= state.Players.Count)
                 state.CurrentPlayerIndex = 0;
-            
+
             state.AvailableActions = GetAvailableActions(state);
         }
 
@@ -186,8 +183,8 @@ namespace Application.Services
             {
                 HandlePlayerAction(new PlayerActionRequest { Action = "call" }, gameState);
                 return;
-            }                
-            
+            }
+
             var actionRequest = new PlayerActionRequest
             {
                 Action = botAction.Action,
@@ -195,6 +192,43 @@ namespace Application.Services
             };
 
             HandlePlayerAction(actionRequest, gameState);
+        }
+
+        public void HandleEndOfStage(GameState state)
+        {
+            if (state.Players.Any(p => p.HasActedThisRound == false))
+                return;
+
+            switch (state.Stage)
+            {
+                case GameStage.PreFlop:
+                    state.Stage = GameStage.Flop;
+                    state.CommunityCards[0].IsHidden = false;
+                    state.CommunityCards[1].IsHidden = false;
+                    state.CommunityCards[2].IsHidden = false;
+                    break;
+                case GameStage.Flop:
+                    state.Stage = GameStage.Turn;
+                    state.CommunityCards[3].IsHidden = false;
+                    break;
+                case GameStage.Turn:
+                    state.Stage = GameStage.River;
+                    state.CommunityCards[4].IsHidden = false;
+                    break;
+                case GameStage.River:
+                    state.Stage = GameStage.Showdown;
+                    break;
+            }
+
+            state.CurrentPlayerIndex = state.DealerPosition + 1;
+            if (state.CurrentPlayerIndex >= state.Players.Count)
+                state.CurrentPlayerIndex = 0;
+
+            foreach (var player in state.Players)
+            {
+                player.CurrentBet = 0;
+                player.HasActedThisRound = false;
+            }
         }
     }
 }

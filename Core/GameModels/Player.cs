@@ -10,5 +10,6 @@
         public bool IsActive { get; set; } = true;
         public bool IsPlayer { get; set; }
         public bool IsDealer { get; set; } = false;
+        public bool HasActedThisRound { get; set; } = false;
     }
 }
