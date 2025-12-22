@@ -124,7 +124,7 @@ namespace Application.Services
                 actions.Add("check");
             else if (player.Chips >= callAmount)
                 actions.Add("call");
-            if (player.Chips >= callAmount)
+            if (player.Chips >= callAmount && player.HasActedThisRound == false)
                 actions.Add("raise");
 
             actions.Add("fold");
@@ -167,6 +167,13 @@ namespace Application.Services
 
             currentPlayer.HasActedThisRound = true;
 
+            if (state.Players.All(p => p.HasActedThisRound == true))
+            {
+                HandleEndOfStage(state);
+                state.AvailableActions = GetAvailableActions(state);
+                return;
+            }
+
             HandleNextPlayer(state);
 
             state.AvailableActions = GetAvailableActions(state);
@@ -174,12 +181,6 @@ namespace Application.Services
 
         public void HandleNextPlayer(GameState state)
         {
-            if (state.Players.All(p => p.HasActedThisRound == true))
-            {
-                HandleEndOfStage(state);
-                return;
-            }
-
             do
             {
                 state.CurrentPlayerIndex++;
@@ -210,6 +211,8 @@ namespace Application.Services
                 Amount = botAction.Amount
             };
 
+            Thread.Sleep(1500);
+
             HandlePlayerAction(actionRequest, gameState);
         }
 
@@ -239,15 +242,14 @@ namespace Application.Services
                     break;
             }
 
-            state.CurrentPlayerIndex = state.DealerPosition + 1;
-            if (state.CurrentPlayerIndex >= state.Players.Count)
-                state.CurrentPlayerIndex = 0;
-
             foreach (var player in state.Players)
             {
                 player.CurrentBet = 0;
                 player.HasActedThisRound = false;
             }
+
+            state.CurrentPlayerIndex = state.DealerPosition;
+            HandleNextPlayer(state);
         }
     }
 }
