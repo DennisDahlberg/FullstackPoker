@@ -13,8 +13,8 @@
     {
         public List<Player> Players { get; set; } = [];
         public int CurrentPlayerIndex { get; set; } = 0;
-        public List<Card> CommunityCards { get; set; } = [];
-        public List<Card> Deck { get; set; } = [];
+        public List<PlayerCard> CommunityCards { get; set; } = [];
+        public List<PlayerCard> Deck { get; set; } = [];
         public int Pot { get; set; }
         public GameStage Stage { get; set; } = GameStage.PreFlop;
         public List<string> AvailableActions { get; set; } = [];
@@ -25,5 +25,7 @@
         public int BigBlindPosition { get; set; } = 5;
         public int CurrentPlayerPosition { get; set; } = 0;
         public int HighestBet { get; set; } = 0;
+        public bool IsGameOver { get; set; }
+        public List<int> WinnersPositions { get; set; } = [];
     }
 }

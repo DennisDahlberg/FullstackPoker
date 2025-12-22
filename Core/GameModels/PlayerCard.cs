@@ -1,6 +1,6 @@
 ﻿namespace Core.GameModels
 {
-    public class Card
+    public class PlayerCard
     {
         public string Rank { get; set; } = null!;
         public string Suit { get; set; } = null!;

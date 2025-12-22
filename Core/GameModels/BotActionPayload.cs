@@ -10,7 +10,7 @@ namespace Core.GameModels
     {
         public Player Bot { get; set; } = null!;
         public int HighestBet { get; set; }
-        public List<Card> CommunityCards { get; set; } = [];
+        public List<PlayerCard> CommunityCards { get; set; } = [];
         public int Pot { get; set; }
         public GameStage Stage { get; set; }
         public int PlayersLeft{ get; set; }

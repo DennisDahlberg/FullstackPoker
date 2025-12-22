@@ -3,6 +3,8 @@ using Core.DTOs;
 using Core.GameModels;
 using Core.Models;
 using Microsoft.AspNetCore.Identity;
+using HoldemPoker.Cards;
+using HoldemPoker.Evaluator;
 
 namespace Application.Services
 {
@@ -66,7 +68,7 @@ namespace Application.Services
             state.HighestBet = bigBlindAmount;
         }
 
-        public void GetStartingHand(Player player, List<Card> deck)
+        public void GetStartingHand(Player player, List<PlayerCard> deck)
         {
             player.Hand.Add(DrawCard(deck));
             player.Hand.Add(DrawCard(deck));
@@ -86,9 +88,9 @@ namespace Application.Services
             state.CommunityCards.Add(DrawCard(state.Deck));
         }
 
-        public List<Card> InitializeDeck()
+        public List<PlayerCard> InitializeDeck()
         {
-            var cards = new List<Card>();
+            var cards = new List<PlayerCard>();
 
             var ranks = new List<string> { "A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K" };
             var suits = new List<string> { "H", "D", "S", "C" };
@@ -97,13 +99,13 @@ namespace Application.Services
             {
                 foreach (var suit in suits)
                 {
-                    cards.Add(new Card { Rank = rank, Suit = suit, IsHidden = true });
+                    cards.Add(new PlayerCard { Rank = rank, Suit = suit, IsHidden = true });
                 }
             }
             return cards;
         }
 
-        public Card DrawCard(List<Card> deck)
+        public PlayerCard DrawCard(List<PlayerCard> deck)
         {
             var index = _random.Next(deck.Count);
             var card = deck[index];
@@ -219,6 +221,8 @@ namespace Application.Services
             Thread.Sleep(2200);
 
             HandlePlayerAction(actionRequest, gameState);
+
+
         }
 
         public void HandleEndOfStage(GameState state)
@@ -244,6 +248,7 @@ namespace Application.Services
                     break;
                 case GameStage.River:
                     state.Stage = GameStage.Showdown;
+                    HandleEndOfRound(state);
                     break;
             }
 
@@ -255,6 +260,50 @@ namespace Application.Services
 
             state.CurrentPlayerIndex = state.DealerPosition;
             HandleNextPlayer(state);
+        }
+
+        public void HandleEndOfRound(GameState state)
+        {
+            var activePlayers = state.Players
+                .Where(p => p.IsFolded == false)
+                .ToList();
+
+            if (activePlayers.Count == 1)
+            {
+                activePlayers[0].Chips += state.Pot;
+                state.Pot = 0;
+                return;
+            }
+
+            var board = state.CommunityCards
+                .Select(ConvertToHoldemPokerCard)
+                .ToArray();
+
+            var results = activePlayers.Select(p => new
+            {
+                Player = p,
+                Ranking = HoldemHandEvaluator.GetHandRanking(
+                    p.Hand.Select(ConvertToHoldemPokerCard).Concat(board).ToArray()
+                )
+            }).ToList();
+
+            var bestRanking = results.Min(r => r.Ranking);
+            var winners = results.Where(r => r.Ranking == bestRanking).ToList();
+
+            int winAmount = state.Pot / winners.Count;
+            foreach (var winner in winners)
+            {
+                winner.Player.Chips += winAmount;
+                state.WinnersPositions.Add(state.Players.IndexOf(winner.Player));
+            }
+            state.IsGameOver = true;
+        }
+
+        public Card ConvertToHoldemPokerCard(PlayerCard card)
+        {
+            string rank = card.Rank == "10" ? "T" : card.Rank;
+            string suit = card.Suit.ToLower();
+            return Card.Parse($"{rank}{suit}");
         }
     }
 }
