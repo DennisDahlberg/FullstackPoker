@@ -12,6 +12,7 @@ interface GameStore {
   setAnimating: (v: boolean) => void;
   playerAction: (action: string, payload?: GameActionPayload) => Promise<void>;
   botAction: () => Promise<void>;
+  startNewRound: () => Promise<void>;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -66,5 +67,14 @@ export const useGameStore = create<GameStore>((set) => ({
     if (state.game?.players[data.currentPlayerIndex]?.isPlayer === false) {
       await useGameStore.getState().botAction();
     }
+  },
+
+  startNewRound: async () => {
+    set({ loading: true });
+    const data = await api.game.initGame();
+    set({
+      game: data,
+      loading: false
+    });
   }
 }));

@@ -62,5 +62,18 @@ namespace backend.Controllers
             HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(gameState));
             return Ok(gameState);
         }
+
+        [HttpPost("new-round")]
+        public IActionResult NewRound()
+        {
+            var json = HttpContext.Session.GetString("GameState");
+            if (json is null)
+                return RedirectToAction(nameof(Start));
+            var gameState = JsonSerializer.Deserialize<GameState>(json);
+            var newGameState = _gameService.NewRound(gameState!);
+
+            HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(newGameState));
+            return Ok(newGameState);
+        }
     }
 }

@@ -81,6 +81,10 @@ export const api = {
     async botAction() {
       const response = await apiClient.post(`${backendUrl}/game/bot-action`);
       return response.data;
+    },
+    async startNewRound() {
+      const response = await apiClient.get(`${backendUrl}/game/new-round`);
+      return response.data;
     }
   },
 

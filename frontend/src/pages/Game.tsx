@@ -21,6 +21,7 @@ export default function Game() {
   // const loading = useGameStore((s) => s.loading);
   const initGame = useGameStore((s) => s.initGame);
   const playerAction = useGameStore((s) => s.playerAction);  
+  const startNewRound = useGameStore((s) => s.startNewRound);
 
   const [raiseValue, setRaiseValue] = useState(0);
   const [isRaiseModalOpen, setIsRaiseModalOpen] = useState(false);
@@ -89,6 +90,7 @@ export default function Game() {
         <div className="bg-gray-900/80 p-6 rounded-lg border border-gray-700">
           Winners: {game.winnersPositions.map(pos => game.players[pos].name).join(", ")}
         </div>
+        <Button onClick={startNewRound}>Start New Round</Button>
       </div>
     )
 

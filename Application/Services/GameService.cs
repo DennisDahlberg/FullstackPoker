@@ -42,6 +42,48 @@ namespace Application.Services
             return gameState;
         }
 
+        public GameState NewRound(GameState gameState)
+        {
+            gameState.Deck = InitializeDeck();
+            gameState.CommunityCards.Clear();
+            GetCommunityCards(gameState);
+            gameState.HighestBet = 0;
+            gameState.CurrentPlayerIndex = (gameState.BigBlindPosition + 1) % gameState.Players.Count;
+            gameState.IsGameOver = false;
+            foreach (var player in gameState.Players)
+            {
+                player.Hand.Clear();
+                player.CurrentBet = 0;
+                player.IsFolded = false;
+                player.IsActive = true;
+                player.HasActedThisRound = false;
+                GetStartingHand(player, gameState.Deck);
+            }
+            gameState.Pot = 0;
+            gameState.Stage = GameStage.PreFlop;
+            gameState.DealerPosition = (gameState.DealerPosition + 1) % gameState.Players.Count;
+            gameState.Players[gameState.DealerPosition].IsDealer = true;
+            gameState.SmallBlindPosition = (gameState.DealerPosition + 1) % gameState.Players.Count;
+            gameState.BigBlindPosition = (gameState.DealerPosition + 2) % gameState.Players.Count;
+            gameState.AvailableActions = GetAvailableActions(gameState);
+
+            var smallBlindPlayer = gameState.Players[gameState.SmallBlindPosition];
+            var bigBlindPlayer = gameState.Players[gameState.BigBlindPosition];
+
+            var smallBlindAmount = Math.Min(gameState.SmallBlind, smallBlindPlayer.Chips);
+            smallBlindPlayer.Chips -= smallBlindAmount;
+            smallBlindPlayer.CurrentBet = smallBlindAmount;
+            gameState.Pot += smallBlindAmount;
+
+            var bigBlindAmount = Math.Min(gameState.BigBlind, bigBlindPlayer.Chips);
+            bigBlindPlayer.Chips -= bigBlindAmount;
+            bigBlindPlayer.CurrentBet = bigBlindAmount;
+            gameState.Pot += bigBlindAmount;
+            gameState.HighestBet = bigBlindAmount;
+
+            return gameState;
+        }
+
         public void SetupBlinds(GameState state)
         {
             var playerCount = state.Players.Count;
@@ -160,7 +202,7 @@ namespace Application.Services
                 case "check":
                     break;
                 case "raise":
-                    var safeRaiseAmount = Math.Min(actionRequest.Amount ?? 0, currentPlayer.Chips);
+                    var safeRaiseAmount = Math.Min(actionRequest.Amount + (state.HighestBet - currentPlayer.CurrentBet) ?? 0, currentPlayer.Chips);
                     currentPlayer.Chips -= safeRaiseAmount;
                     currentPlayer.CurrentBet += safeRaiseAmount;
                     state.Pot += safeRaiseAmount;
