@@ -120,6 +120,9 @@ namespace Application.Services
             var playerBet = player.CurrentBet;
             var callAmount = currentBet - playerBet;
 
+            if (player.IsActive == false)
+                return actions;
+
             if (callAmount == 0)
                 actions.Add("check");
             else if (player.Chips >= callAmount)
@@ -186,6 +189,8 @@ namespace Application.Services
                 state.CurrentPlayerIndex++;
                 if (state.CurrentPlayerIndex >= state.Players.Count)
                     state.CurrentPlayerIndex = 0;
+                if (state.Players[state.CurrentPlayerIndex].IsActive == false)
+                    state.Players[state.CurrentPlayerIndex].HasActedThisRound = true;
             } 
             while (state.Players[state.CurrentPlayerIndex].IsActive == false);
         }
@@ -211,7 +216,7 @@ namespace Application.Services
                 Amount = botAction.Amount
             };
 
-            Thread.Sleep(1500);
+            Thread.Sleep(2200);
 
             HandlePlayerAction(actionRequest, gameState);
         }
@@ -244,7 +249,7 @@ namespace Application.Services
 
             foreach (var player in state.Players)
             {
-                player.CurrentBet = 0;
+                player.CurrentBet = 0;                
                 player.HasActedThisRound = false;
             }
 

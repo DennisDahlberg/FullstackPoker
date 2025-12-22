@@ -24,7 +24,7 @@ export default function PlayerSeat({
   const isEmpty = !player;
 
   return (
-    <div className={`absolute ${positions[position]} z-10`}>
+    <div className={`absolute ${positions[position]} z-10 ${player.isFolded ? 'opacity-50 grayscale' : ''}`}>
       {isEmpty ? (
         <div className="w-24 h-24 rounded-full bg-gray-800 border-4 border-gray-700 flex items-center justify-center text-gray-600">
           <span>Empty</span>
