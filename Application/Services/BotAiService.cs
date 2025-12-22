@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Application.Services
@@ -46,7 +47,7 @@ Respond ONLY with a JSON object in this format:
 {{ ""action"": ""fold|call|check|raise"", ""amount"": number (if action is raise, otherwise 0) }}
 
 Game state:
-- Your state: {botPayload.Bot}
+- Your state: {JsonSerializer.Serialize(botPayload.Bot)}
 - Highest bet: {botPayload.HighestBet}
 - Community cards: {string.Join(", ", botPayload.CommunityCards.Select(c => c.ToString()))}
 - Pot: {botPayload.Pot}
