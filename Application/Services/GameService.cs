@@ -160,14 +160,33 @@ namespace Application.Services
                     currentPlayer.CurrentBet += safeRaiseAmount;
                     state.Pot += safeRaiseAmount;
                     state.HighestBet = currentPlayer.CurrentBet;
+                    foreach (var player in state.Players)
+                        player.HasActedThisRound = false;
                     break;
             }
 
-            state.CurrentPlayerIndex++;
-            if (state.CurrentPlayerIndex >= state.Players.Count)
-                state.CurrentPlayerIndex = 0;
+            currentPlayer.HasActedThisRound = true;
+
+            HandleNextPlayer(state);
 
             state.AvailableActions = GetAvailableActions(state);
+        }
+
+        public void HandleNextPlayer(GameState state)
+        {
+            if (state.Players.All(p => p.HasActedThisRound == true))
+            {
+                HandleEndOfStage(state);
+                return;
+            }
+
+            do
+            {
+                state.CurrentPlayerIndex++;
+                if (state.CurrentPlayerIndex >= state.Players.Count)
+                    state.CurrentPlayerIndex = 0;
+            } 
+            while (state.Players[state.CurrentPlayerIndex].IsActive == false);
         }
 
         public async Task HandleBotAction(GameState gameState)
