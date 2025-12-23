@@ -65,6 +65,7 @@ namespace Application.Services
             gameState.Players[gameState.DealerPosition].IsDealer = true;
             gameState.SmallBlindPosition = (gameState.DealerPosition + 1) % gameState.Players.Count;
             gameState.BigBlindPosition = (gameState.DealerPosition + 2) % gameState.Players.Count;
+            gameState.LastAggressorIndex = (gameState.BigBlindPosition + 1) % gameState.Players.Count;
             gameState.AvailableActions = GetAvailableActions(gameState);
 
             var smallBlindPlayer = gameState.Players[gameState.SmallBlindPosition];
@@ -108,6 +109,8 @@ namespace Application.Services
             bigBlindPlayer.CurrentBet = bigBlindAmount;
             state.Pot += bigBlindAmount;
             state.HighestBet = bigBlindAmount;
+
+            state.LastAggressorIndex = (state.BigBlindPosition + 1) % state.Players.Count;
         }
 
         public void GetStartingHand(Player player, List<PlayerCard> deck)
@@ -207,14 +210,23 @@ namespace Application.Services
                     currentPlayer.CurrentBet += safeRaiseAmount;
                     state.Pot += safeRaiseAmount;
                     state.HighestBet = currentPlayer.CurrentBet;
-                    foreach (var player in state.Players)
+                    if (currentPlayer.Chips <= 0)
+                        currentPlayer.IsActive = false;
+                    foreach (var player in state.Players.Where(p => p.IsActive == true))
                         player.HasActedThisRound = false;
                     break;
             }
 
             currentPlayer.HasActedThisRound = true;
 
-            if (state.Players.All(p => p.HasActedThisRound == true))
+            if (state.Players.Count(p => p.IsActive) == 1)
+            {
+                HandleEndOfRound(state);
+                state.AvailableActions = GetAvailableActions(state);
+                return;
+            }
+
+            if (state.Players.Where(p => p.IsActive == true).All(p => p.HasActedThisRound == true))
             {
                 HandleEndOfStage(state);
                 state.AvailableActions = GetAvailableActions(state);

@@ -72,7 +72,7 @@ export const useGameStore = create<GameStore>((set) => ({
 
   startNewRound: async () => {
     set({ loading: true });
-    const data = await api.game.initGame();
+    const data = await api.game.startNewRound();
     set({
       game: data,
       loading: false

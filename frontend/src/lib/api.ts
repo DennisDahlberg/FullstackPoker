@@ -83,7 +83,7 @@ export const api = {
       return response.data;
     },
     async startNewRound() {
-      const response = await apiClient.get(`${backendUrl}/game/new-round`);
+      const response = await apiClient.post(`${backendUrl}/game/new-round`);
       return response.data;
     }
   },
