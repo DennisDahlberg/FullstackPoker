@@ -258,13 +258,9 @@ namespace Application.Services
             {
                 Action = botAction.Action,
                 Amount = botAction.Amount
-            };
-
-            await Task.Delay(2000);
+            };           
 
             HandlePlayerAction(actionRequest, gameState);
-
-
         }
 
         public void HandleEndOfStage(GameState state)

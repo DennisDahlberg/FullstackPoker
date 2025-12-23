@@ -53,19 +53,20 @@ export const useGameStore = create<GameStore>((set) => ({
   },
 
   botAction: async () => {
-    set({ loading: true });
+    let state = useGameStore.getState();
 
-    const state = useGameStore.getState();
+    while (
+      state.game &&
+      !state.game.isGameOver &&
+      state.game?.players[state.game.currentPlayerIndex]?.isPlayer === false
+    ) {
+      set({ loading: true });
 
-    const data = await api.game.botAction();
+      const data = await api.game.botAction();
+      set({ game: data, loading: false });
 
-    set({
-      game: data,
-      loading: false
-    });
-
-    if (state.game?.players[data.currentPlayerIndex]?.isPlayer === false) {
-      await useGameStore.getState().botAction();
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      state = useGameStore.getState();
     }
   },
 
