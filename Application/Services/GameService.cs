@@ -311,8 +311,7 @@ namespace Application.Services
             }
 
             foreach (var player in state.Players)
-            {
-                player.CurrentBet = 0;                
+            {           
                 player.HasActedThisRound = false;
                 player.LastAction = null;
                 player.LastActionAmount = null;

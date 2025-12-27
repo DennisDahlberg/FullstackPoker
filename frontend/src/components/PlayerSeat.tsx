@@ -23,6 +23,8 @@ export default function PlayerSeat({
 
   const isEmpty = !player;
 
+  console.log(player);
+
   return (
     <div className={`absolute ${positions[position]} z-10 ${player.isFolded ? 'opacity-50 grayscale' : ''}`}>
       {isEmpty ? (
@@ -47,7 +49,7 @@ export default function PlayerSeat({
             D
           </div>
         )}
-        <span className="absolute -bottom-7 bg-gray-900 w-full rounded text-md text-center">Call $10</span>
+        <span className="absolute -bottom-7 bg-gray-900 w-full rounded text-md text-center">{player.lastAction ? `${player.lastAction} ${player.lastActionAmount ?? ''}` : ''}</span>
       </div>
       )}
     </div>
