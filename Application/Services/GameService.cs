@@ -191,6 +191,7 @@ namespace Application.Services
                 case "fold":
                     currentPlayer.IsFolded = true;
                     currentPlayer.IsActive = false;
+                    currentPlayer.LastAction = "fold";
                     break;
                 case "call":
                     var callAmount = state.HighestBet - currentPlayer.CurrentBet;
@@ -202,8 +203,11 @@ namespace Application.Services
                     {
                         currentPlayer.IsActive = false;
                     }
+                    currentPlayer.LastAction = "call";
+                    currentPlayer.LastActionAmount = actualCallAmount;
                     break;
                 case "check":
+                    currentPlayer.LastAction = "check";
                     break;
                 case "raise":
                     var safeRaiseAmount = Math.Min(actionRequest.Amount + (state.HighestBet - currentPlayer.CurrentBet) ?? 0, currentPlayer.Chips);
@@ -215,6 +219,9 @@ namespace Application.Services
                         currentPlayer.IsActive = false;
                     foreach (var player in state.Players.Where(p => p.IsActive == true))
                         player.HasActedThisRound = false;
+                    currentPlayer.HasActedThisRound = true;
+                    currentPlayer.LastAction = "raise";
+                    currentPlayer.LastActionAmount = safeRaiseAmount;
                     break;
             }
 
@@ -307,6 +314,8 @@ namespace Application.Services
             {
                 player.CurrentBet = 0;                
                 player.HasActedThisRound = false;
+                player.LastAction = null;
+                player.LastActionAmount = null;
             }
 
             state.CurrentPlayerIndex = state.DealerPosition;
