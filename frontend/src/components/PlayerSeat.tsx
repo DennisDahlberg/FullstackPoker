@@ -47,6 +47,7 @@ export default function PlayerSeat({
             D
           </div>
         )}
+        <span className="absolute -bottom-7 bg-gray-900 w-full rounded text-md text-center">Call $10</span>
       </div>
       )}
     </div>
