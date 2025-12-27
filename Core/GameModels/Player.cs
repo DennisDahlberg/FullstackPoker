@@ -11,5 +11,7 @@
         public bool IsPlayer { get; set; }
         public bool IsDealer { get; set; } = false;
         public bool HasActedThisRound { get; set; } = false;
+        public string? LastAction { get; set; }
+        public int? LastActionAmount { get; set; }
     }
 }

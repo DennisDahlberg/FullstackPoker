@@ -13,6 +13,8 @@ export interface Player {
     isPlayer: boolean;
     isActive: boolean;
     isDealer: boolean;
+    lastAction?: string;
+    lastActionAmount?: number;
 }
 
 export interface GameState {
