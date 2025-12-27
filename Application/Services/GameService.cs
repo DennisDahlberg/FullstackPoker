@@ -56,6 +56,7 @@ namespace Application.Services
                 player.CurrentBet = 0;
                 player.IsFolded = false;
                 player.IsActive = true;
+                player.IsDealer = false;
                 player.HasActedThisRound = false;
                 GetStartingHand(player, gameState.Deck);
             }
