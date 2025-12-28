@@ -25,6 +25,8 @@ export const useGameStore = create<GameStore>((set) => ({
   initGame: async () => {
     set({ loading: true });
 
+    const state = useGameStore.getState();
+
     const data = await api.game.initGame();
 
     console.log("Initialized game:", data);
@@ -33,6 +35,10 @@ export const useGameStore = create<GameStore>((set) => ({
       game: data,
       loading: false
     });
+
+    if (state.game?.players[data.currentPlayerIndex]?.isPlayer === false) {
+      await useGameStore.getState().botAction();
+    }
   },
 
   playerAction: async (action, payload) => {

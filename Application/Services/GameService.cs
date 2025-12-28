@@ -50,6 +50,7 @@ namespace Application.Services
             gameState.HighestBet = 0;
             gameState.CurrentPlayerIndex = (gameState.BigBlindPosition + 1) % gameState.Players.Count;
             gameState.IsGameOver = false;
+            gameState.WinnersPositions.Clear();
             foreach (var player in gameState.Players)
             {
                 player.Hand.Clear();
@@ -325,14 +326,7 @@ namespace Application.Services
         {
             var activePlayers = state.Players
                 .Where(p => p.IsFolded == false)
-                .ToList();
-
-            if (activePlayers.Count == 1)
-            {
-                activePlayers[0].Chips += state.Pot;
-                state.Pot = 0;
-                return;
-            }
+                .ToList();         
 
             var board = state.CommunityCards
                 .Select(ConvertToHoldemPokerCard)
@@ -350,6 +344,11 @@ namespace Application.Services
             var winners = results.Where(r => r.Ranking == bestRanking).ToList();
 
             int winAmount = state.Pot / winners.Count;
+            foreach (var player in activePlayers)
+            {
+                player.Hand[0].IsHidden = false;
+                player.Hand[1].IsHidden = false;
+            }
             foreach (var winner in winners)
             {
                 winner.Player.Chips += winAmount;
