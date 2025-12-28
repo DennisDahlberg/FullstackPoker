@@ -83,17 +83,6 @@ export default function Game() {
 
   if (!game) return <div>Loading...</div>;
 
-  if (game.isGameOver) 
-    return (
-      <div className="fixed inset-0 bg-gray-950 flex flex-col items-center justify-center text-white">
-        <h1 className="text-4xl font-bold mb-6">Game Over!</h1>
-        <div className="bg-gray-900/80 p-6 rounded-lg border border-gray-700">
-          Winners: {game.winnersPositions.map(pos => game.players[pos].name).join(", ")}
-        </div>
-        <Button onClick={startNewRound}>Start New Round</Button>
-      </div>
-    )
-
   return (
     <div className="fixed inset-0 bg-gray-950 flex flex-col">
       {/* Header */}
@@ -159,6 +148,13 @@ export default function Game() {
           ))}
         </div>
       </div>
+
+      {game.isGameOver && (
+        <div className="w-full flex flex-col items-center justify-center">
+          <h1 className="text-4xl font-bold mb-6">Winners: {game.winnersPositions.map(pos => game.players[pos].name).join(", ")}</h1>
+          <Button variant={"outline"} className="mb-2" onClick={startNewRound}>Start New Round</Button>
+        </div>
+      )}
 
       {/* Actions */}
       <div className=" bg-gray-900 border-t border-gray-800 p-6">
