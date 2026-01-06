@@ -21,19 +21,19 @@ export default function PlayerSeat({
     7: 'bottom-13 right-4 md:right-16',                
   };
 
-  const actionMessage: Record<string, (amount?: number) => string> = {
-    fold: () => 'Folded',
-    check: () => 'Checked',
-    call: (amount) => `Called $${amount}`,
-    bet: (amount) => `Bet $${amount}`,
-    raise: (amount) => `Raised $${amount}`,
+  const actionMessage: Record<string, (amount?: number) => {message: string, className: string}> = {
+    fold: () => ({ message: "Folded", className: "text-red-400" }),
+    check: () => ({ message: "Checked", className: "text-blue-400" }),
+    call: (amount) => ({ message: `Called $${amount}`, className: "text-green-400" }),
+    bet: (amount) => ({ message: `Bet $${amount}`, className: "text-yellow-400" }),
+    raise: (amount) => ({ message: `Raised $${amount}`, className: "text-purple-400" }),
   }
 
   const getActionMessage = (action?: string, amount?: number) => {
-    if (!action) return '';
+    if (!action) return { message: "", className: "" };
     const fn = actionMessage[action];
-    return fn ? fn(amount) : action + (amount ? ` ${amount}` : "");
-  }
+    return fn ? fn(amount) : { message: action + (amount ? ` ${amount}` : ""), className: "" };
+  };
 
   const isEmpty = !player;
 
@@ -63,8 +63,8 @@ export default function PlayerSeat({
             D
           </div>
         )}
-        <span className="absolute -bottom-7 bg-gray-900 w-full rounded text-md text-center">
-          {getActionMessage(player.lastAction, player.lastActionAmount)}
+        <span className={`absolute -bottom-7 bg-gray-900 w-full rounded text-md text-center ${getActionMessage(player.lastAction, player.lastActionAmount).className}`}>
+          {getActionMessage(player.lastAction, player.lastActionAmount).message}
         </span>
       </div>
       )}
