@@ -87,7 +87,10 @@ namespace backend
             });
 
             //SignalR
-            builder.Services.AddSignalR();
+            builder.Services.AddSignalR().AddHubOptions<FriendsHub>(options =>
+            {
+                options.EnableDetailedErrors = true;
+            });
 
             //OpenAI
             builder.Services.AddSingleton<ChatClient>(serviceProvider =>
