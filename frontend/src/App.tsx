@@ -7,12 +7,14 @@ import SidebarLayout from "./components/SidebarLayout";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
 import Game from "./pages/Game";
+import FriendInviteListener from "./components/FriendNotifactionTest";
 
 
 function App() {
 
   return (
-    <>    
+    <>
+      <FriendInviteListener />    
       <Routes>
         <Route element={<PrivateRoute><SidebarLayout /></PrivateRoute>}>          
           <Route path="/dashboard" element={<Dashboard />} />
