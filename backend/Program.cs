@@ -1,4 +1,5 @@
 using Application.Services;
+using backend.Hubs;
 using backend.Services;
 using Core.Models;
 using Infrastructure.Data;
@@ -85,6 +86,9 @@ namespace backend
                 };
             });
 
+            //SignalR
+            builder.Services.AddSignalR();
+
             //OpenAI
             builder.Services.AddSingleton<ChatClient>(serviceProvider =>
             {
@@ -120,6 +124,8 @@ namespace backend
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 db.Database.Migrate();
             }
+
+            app.MapHub<FriendsHub>("/hubs/friends");
 
             app.Run();
         }
