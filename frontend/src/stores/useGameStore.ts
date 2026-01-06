@@ -78,10 +78,17 @@ export const useGameStore = create<GameStore>((set) => ({
 
   startNewRound: async () => {
     set({ loading: true });
+
+    const state = useGameStore.getState();
     const data = await api.game.startNewRound();
+
     set({
       game: data,
       loading: false
     });
+
+    if (state.game?.players[data.currentPlayerIndex]?.isPlayer === false) {
+      await useGameStore.getState().botAction();
+    }
   }
 }));

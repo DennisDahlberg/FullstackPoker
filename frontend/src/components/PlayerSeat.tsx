@@ -27,6 +27,8 @@ export default function PlayerSeat({
     call: (amount) => ({ message: `Called $${amount}`, className: "text-green-400" }),
     bet: (amount) => ({ message: `Bet $${amount}`, className: "text-yellow-400" }),
     raise: (amount) => ({ message: `Raised $${amount}`, className: "text-purple-400" }),
+    small: () => ({ message: "Small Blind", className: "text-gray-200" }),
+    big: () => ({ message: "Big Blind", className: "text-gray-200" }),
   }
 
   const getActionMessage = (action?: string, amount?: number) => {

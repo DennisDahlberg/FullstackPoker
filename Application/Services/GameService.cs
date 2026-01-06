@@ -69,11 +69,13 @@ namespace Application.Services
             gameState.Players[gameState.DealerPosition].IsDealer = true;
             gameState.SmallBlindPosition = (gameState.DealerPosition + 1) % gameState.Players.Count;
             gameState.BigBlindPosition = (gameState.DealerPosition + 2) % gameState.Players.Count;
-            gameState.LastAggressorIndex = (gameState.BigBlindPosition + 1) % gameState.Players.Count;
+            gameState.CurrentPlayerIndex = (gameState.BigBlindPosition + 1) % gameState.Players.Count;
             gameState.AvailableActions = GetAvailableActions(gameState);
 
             var smallBlindPlayer = gameState.Players[gameState.SmallBlindPosition];
             var bigBlindPlayer = gameState.Players[gameState.BigBlindPosition];
+            smallBlindPlayer.LastAction = "small";
+            bigBlindPlayer.LastAction = "big";
 
             var smallBlindAmount = Math.Min(gameState.SmallBlind, smallBlindPlayer.Chips);
             smallBlindPlayer.Chips -= smallBlindAmount;
@@ -100,6 +102,8 @@ namespace Application.Services
 
             var smallBlindPlayer = state.Players[state.SmallBlindPosition];
             var bigBlindPlayer = state.Players[state.BigBlindPosition];
+            smallBlindPlayer.LastAction = "small";
+            bigBlindPlayer.LastAction = "big";
 
             state.Players[state.DealerPosition].IsDealer = true;
 
