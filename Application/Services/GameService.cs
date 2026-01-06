@@ -286,9 +286,6 @@ namespace Application.Services
 
         public void HandleEndOfStage(GameState state)
         {
-            if (state.Players.Any(p => p.HasActedThisRound == false))
-                return;
-
             switch (state.Stage)
             {
                 case GameStage.PreFlop:

@@ -21,6 +21,20 @@ export default function PlayerSeat({
     7: 'bottom-13 right-4 md:right-16',                
   };
 
+  const actionMessage: Record<string, (amount?: number) => string> = {
+    fold: () => 'Folded',
+    check: () => 'Checked',
+    call: (amount) => `Called $${amount}`,
+    bet: (amount) => `Bet $${amount}`,
+    raise: (amount) => `Raised $${amount}`,
+  }
+
+  const getActionMessage = (action?: string, amount?: number) => {
+    if (!action) return '';
+    const fn = actionMessage[action];
+    return fn ? fn(amount) : action + (amount ? ` ${amount}` : "");
+  }
+
   const isEmpty = !player;
 
   console.log(player);
@@ -49,7 +63,9 @@ export default function PlayerSeat({
             D
           </div>
         )}
-        <span className="absolute -bottom-7 bg-gray-900 w-full rounded text-md text-center">{player.lastAction ? `${player.lastAction} ${player.lastActionAmount ?? ''}` : ''}</span>
+        <span className="absolute -bottom-7 bg-gray-900 w-full rounded text-md text-center">
+          {getActionMessage(player.lastAction, player.lastActionAmount)}
+        </span>
       </div>
       )}
     </div>
