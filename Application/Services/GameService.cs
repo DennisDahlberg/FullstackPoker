@@ -59,6 +59,8 @@ namespace Application.Services
                 player.IsActive = true;
                 player.IsDealer = false;
                 player.HasActedThisRound = false;
+                player.LastAction = null;
+                player.LastActionAmount = null;
                 GetStartingHand(player, gameState.Deck);
             }
             gameState.Pot = 0;
@@ -172,6 +174,9 @@ namespace Application.Services
             if (player.IsActive == false)
                 return actions;
 
+            if (state.Players[state.CurrentPlayerIndex].IsPlayer == false)
+                return actions;
+
             if (callAmount == 0)
                 actions.Add("check");
             else if (player.Chips >= callAmount)
@@ -203,6 +208,11 @@ namespace Application.Services
                     if (actualCallAmount < callAmount)
                     {
                         currentPlayer.IsActive = false;
+                    }
+                    if (actualCallAmount == 0)
+                    {
+                        currentPlayer.LastAction = "check";
+                        break;
                     }
                     currentPlayer.LastAction = "call";
                     currentPlayer.LastActionAmount = actualCallAmount;
