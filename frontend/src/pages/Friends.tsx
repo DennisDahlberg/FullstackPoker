@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+// import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
-import { Separator } from "@/components/ui/separator";
-import { UserPlus, X, Check, Search, Users } from "lucide-react";
+import { UserPlus, X, MessageSquare, Search, Users } from "lucide-react";
+
+type TabId = "friends" | "requests" | "find";
 
 interface Friend {
   id: string;
@@ -104,230 +105,142 @@ export default function Friends() {
   };
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2">Friends</h1>
-        <p className="text-muted-foreground">
-          Manage your friends and friend requests
-        </p>
+    <div className="max-w-5xl mx-auto space-y-8">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-800 pb-6">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-white flex items-center gap-3">
+            <Users className="text-amber-500 w-8 h-8" />
+            Friends
+          </h1>
+          <p className="text-gray-400 text-sm mt-1">
+            Manage your social circle and game invites
+          </p>
+        </div>
+        
+        {/* Sub-Tabs (Discord Style) */}
+        <div className="flex bg-gray-900 p-1 rounded-lg border border-white/5">
+          {[
+            { id: "friends", label: "All", icon: Users },
+            { id: "requests", label: "Pending", icon: UserPlus, count: mockRequests.length },
+            { id: "find", label: "Add Friend", icon: Search },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as TabId)}
+              className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all
+                ${activeTab === tab.id 
+                  ? "bg-gray-800 text-amber-500 shadow-sm" 
+                  : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"}`}
+            >
+              {tab.label}
+              {tab.count ? <span className="bg-red-500 text-white text-[10px] px-1.5 rounded-full">{tab.count}</span> : null}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-4 mb-6">
-        <Button
-          variant={activeTab === "friends" ? "default" : "outline"}
-          onClick={() => setActiveTab("friends")}
-          className="flex-1"
-        >
-          <Users className="h-4 w-4 mr-2" />
-          Friends ({mockFriends.length})
-        </Button>
-        <Button
-          variant={activeTab === "requests" ? "default" : "outline"}
-          onClick={() => setActiveTab("requests")}
-          className="flex-1"
-        >
-          <UserPlus className="h-4 w-4 mr-2" />
-          Requests ({mockRequests.length})
-        </Button>
-        <Button
-          variant={activeTab === "find" ? "default" : "outline"}
-          onClick={() => setActiveTab("find")}
-          className="flex-1"
-        >
-          <Search className="h-4 w-4 mr-2" />
-          Find Friends
-        </Button>
-      </div>
-      
-      {/* Search Bar */}
-      {(activeTab === "friends" || activeTab === "requests") && (
-        <div className="mb-6">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+      {/* Content Area */}
+      <div className="space-y-6">
+        {/* Global Search (only for existing friends/requests) */}
+        {activeTab !== "find" && (
+          <div className="relative group">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 h-4 w-4 transition-colors" />
             <Input
-              type="text"
-              placeholder="Search users..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-gray-900/50 border-gray-800 focus:border-amber-500/50 transition-all h-10"
             />
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Friends Tab */}
-      {activeTab === "friends" && (
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <p className="text-sm text-muted-foreground">
-              {onlineFriendsCount} online • {mockFriends.length} total
-            </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setShowOnlineOnly(!showOnlineOnly)}
-            >
-              {showOnlineOnly ? "Show All" : "Show Online Only"}
-            </Button>
-          </div>
+        {/* List Logic */}
+        <div className="divide-y divide-gray-800/50">
+          {activeTab === "friends" && (
+            <>
+              <div className="flex justify-between items-center py-2 px-2">
+                <span className="text-[11px] font-bold uppercase tracking-widest text-gray-500">
+                  Online — {onlineFriendsCount}
+                </span>
+                <button 
+                  onClick={() => setShowOnlineOnly(!showOnlineOnly)}
+                  className="text-[11px] font-bold uppercase tracking-widest text-amber-500 hover:underline"
+                >
+                  {showOnlineOnly ? "Show All" : "Filter Online"}
+                </button>
+              </div>
 
-          <div className="space-y-3">
-            {filteredFriends.length === 0 ? (
-              <Card className="p-8 text-center">
-                <p className="text-muted-foreground">No friends found</p>
-              </Card>
-            ) : (
-              filteredFriends.map((friend) => (
-                <Card key={friend.id} className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <Avatar className="h-12 w-12 bg-primary/10 flex items-center justify-center">
-                          <span className="text-lg font-semibold">
-                            {friend.username[0].toUpperCase()}
-                          </span>
-                        </Avatar>
-                        {friend.isOnline && (
-                          <div className="absolute bottom-0 right-0 h-3 w-3 bg-green-500 rounded-full border-2 border-background" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-semibold">{friend.username}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {friend.isOnline ? "Online" : "Offline"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm">
-                        Message
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              ))
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Friend Requests Tab */}
-      {activeTab === "requests" && (
-        <div>
-          <p className="text-sm text-muted-foreground mb-4">
-            {mockRequests.length} pending request{mockRequests.length !== 1 ? "s" : ""}
-          </p>
-
-          <div className="space-y-3">
-            {filteredRequests.length === 0 ? (
-              <Card className="p-8 text-center">
-                <UserPlus className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                <p className="text-muted-foreground">No friend requests</p>
-              </Card>
-            ) : (
-              filteredRequests.map((request) => (
-                <Card key={request.id} className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-12 w-12 bg-primary/10 flex items-center justify-center">
-                        <span className="text-lg font-semibold">
-                          {request.username[0].toUpperCase()}
-                        </span>
+              {filteredFriends.map((friend) => (
+                <div 
+                  key={friend.id} 
+                  className="group flex items-center justify-between p-3 rounded-xl transition-all border-y border-transparent hover:border-t-white/5 hover:border-b-black/20 hover:bg-gray-900/40"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <Avatar className="flex items-center justify-center h-10 w-10 border border-gray-800 group-hover:border-amber-500/30 transition-colors">
+                        <span className="font-bold text-amber-500">{friend.username[0]}</span>
                       </Avatar>
-                      <div>
-                        <p className="font-semibold">{request.username}</p>
-                        <p className="text-sm text-muted-foreground">
-                          Sent {request.sentAt}
-                        </p>
-                      </div>
+                      <div className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-gray-950 ${friend.isOnline ? 'bg-green-500' : 'bg-gray-600'}`} />
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="default" size="sm">
-                        <Check className="h-4 w-4 mr-1" />
-                        Accept
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <X className="h-4 w-4 mr-1" />
-                        Decline
-                      </Button>
+                    <div>
+                      <h4 className="font-bold text-sm text-gray-200 group-hover:text-white">{friend.username}</h4>
+                      <p className="text-xs text-gray-500">{friend.isOnline ? 'Active Now' : 'Offline'}</p>
                     </div>
                   </div>
-                </Card>
-              ))
-            )}
-          </div>
-        </div>
-      )}
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-800 text-gray-400 hover:text-white">
+                      <MessageSquare className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-500/10 text-gray-500 hover:text-red-400">
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </>
+          )}
 
-      {/* Find Friends Tab */}
-      {activeTab === "find" && (
-        <div>
-          <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          {/* Render Requests & Find Tabs with similar "item" styling */}
+          {activeTab === "requests" && filteredRequests.map(request => (
+             <div key={request.id} className="group flex items-center justify-between p-4 border-y border-transparent hover:bg-gray-900/40 hover:border-t-white/5">
+                <div className="flex items-center gap-4">
+                   <Avatar className="flex items-center justify-center h-10 w-10 bg-amber-900/20 text-amber-500 font-bold">{request.username[0]}</Avatar>
+                   <div>
+                      <h4 className="text-sm font-bold">{request.username}</h4>
+                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Incoming Request • {request.sentAt}</p>
+                   </div>
+                </div>
+                <div className="flex gap-2">
+                   <Button variant="amber" size="sm" className="h-8 px-4">Accept</Button>
+                   <Button variant="ghost" size="sm" className="h-8 hover:bg-red-500/10 text-gray-400 hover:text-red-400">Decline</Button>
+                </div>
+             </div>
+          ))}
+
+          {activeTab === "find" && (
+            <div className="space-y-6">
               <Input
-                type="text"
-                placeholder="Search for users by username..."
+                placeholder="Find new players..."
                 value={findSearchQuery}
                 onChange={(e) => setFindSearchQuery(e.target.value)}
-                className="pl-10"
+                className="bg-gray-900 border-gray-800 focus:border-amber-500"
               />
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {findSearchQuery === "" ? (
-              <Card className="p-8 text-center">
-                <Search className="h-12 w-12 mx-auto mb-3 text-muted-foreground" />
-                <p className="text-muted-foreground">
-                  Search for users to add as friends
-                </p>
-              </Card>
-            ) : filteredSearchResults.length === 0 ? (
-              <Card className="p-8 text-center">
-                <p className="text-muted-foreground">No users found</p>
-              </Card>
-            ) : (
-              filteredSearchResults.map((user) => (
-                <Card key={user.id} className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-12 w-12 bg-primary/10 flex items-center justify-center">
-                        <span className="text-lg font-semibold">
-                          {user.username[0].toUpperCase()}
-                        </span>
-                      </Avatar>
-                      <div>
-                        <p className="font-semibold">{user.username}</p>
-                        {user.status === "friend" && (
-                          <p className="text-sm text-muted-foreground">
-                            Already friends
-                          </p>
-                        )}
-                        {user.status === "pending" && (
-                          <p className="text-sm text-muted-foreground">
-                            Request pending
-                          </p>
-                        )}
-                        {user.status === "requested" && (
-                          <p className="text-sm text-muted-foreground">
-                            Sent you a request
-                          </p>
-                        )}
+              <div className="divide-y divide-gray-800/50">
+                {filteredSearchResults.map(user => (
+                   <div key={user.id} className="flex items-center justify-between py-4 group">
+                      <div className="flex items-center gap-4">
+                        <Avatar className="flex items-center justify-center h-10 w-10 bg-gray-800 border border-white/5">{user.username[0]}</Avatar>
+                        <span className="font-bold text-sm text-gray-300 group-hover:text-white">{user.username}</span>
                       </div>
-                    </div>
-                    {getStatusButton(user)}
-                  </div>
-                </Card>
-              ))
-            )}
-          </div>
+                      {getStatusButton(user)}
+                   </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
