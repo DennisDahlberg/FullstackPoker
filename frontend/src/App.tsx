@@ -7,6 +7,7 @@ import SidebarLayout from "./components/SidebarLayout";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
 import Game from "./pages/Game";
+import Friends from "./pages/Friends";
 import FriendInviteListener from "./components/FriendNotifactionTest";
 
 
@@ -16,10 +17,13 @@ function App() {
     <>
       <FriendInviteListener />    
       <Routes>
+        
         <Route element={<PrivateRoute><SidebarLayout /></PrivateRoute>}>          
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/friends" element={<Friends />} />
           <Route path="*" element={<div className="pt-20 text-center text-4xl">404 - Not Found</div>} />
         </Route>
+
         <Route path="/game" element={<PrivateRoute><Game /></PrivateRoute>} />
 
         <Route path="/" element={<Home />} />
