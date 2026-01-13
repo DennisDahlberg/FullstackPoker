@@ -34,7 +34,10 @@ namespace backend
 
             //EF Core
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+                options.UseNpgsql(
+                    builder.Configuration.GetConnectionString("DefaultConnection"),
+                    b => b.MigrationsAssembly("Infrastructure")
+                ));
 
             //Identity
             builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
