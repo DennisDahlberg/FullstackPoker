@@ -53,6 +53,17 @@ public class FriendService
         return Result.Ok(friendRequest.RequesterId);
     }
 
+    public async Task<List<FriendRequestDto>> GetFriendRequestsAsync(string userId)
+    {
+        var requests = await _repository.GetFriendRequestsAsync(userId);
+        var result = requests.Select(r => new FriendRequestDto()
+        {
+            CreatedAt =  r.CreatedAt,
+            Username = r.Requester.UserName,
+        }).ToList();
+        return result;
+    }
+
     public async Task<List<UserSearchResultDto>> FindUsersAsync(string currentUserId, string query)
     {
         var users = _userService.FindUsersAsync(query);
