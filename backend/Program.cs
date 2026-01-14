@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OpenAI.Chat;
 using System.Text;
+using Infrastructure.Repositories;
 
 
 namespace backend
@@ -30,6 +31,8 @@ namespace backend
             builder.Services.AddTransient<GameService>();
             builder.Services.AddTransient<CurrentUserService>();
             builder.Services.AddTransient<BotAiService>();
+            builder.Services.AddTransient<FriendsRepository>();
+            builder.Services.AddTransient<FriendService>();
 
 
             //EF Core
