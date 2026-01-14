@@ -62,4 +62,10 @@ public class FriendsController : Controller
             
         return Ok(new { message = "Friend request sent successfully" });
     }
+
+    [HttpPost("accept/{requestId}")]
+    public async Task<IActionResult> AcceptFriendRequestAsync([FromRoute] int requestId)
+    {
+        
+    }
 }

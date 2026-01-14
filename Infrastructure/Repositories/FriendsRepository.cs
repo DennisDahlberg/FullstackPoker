@@ -19,6 +19,14 @@ public class FriendsRepository
         await _dbContext.SaveChangesAsync();
     }
 
+    public Friend GetFriendById(int id,  string userId)
+    {
+        var friend = _dbContext.Friends
+            .Include(f => f.Addressee)
+            .FirstOrDefault(f => f.Id == id && f.AddresseeId == userId);
+        return friend;
+    }
+
 
     public async Task<bool> IsFriendsAsync(string currentUserId, string targetUserId)
     {

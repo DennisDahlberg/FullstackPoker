@@ -37,6 +37,11 @@ public class FriendService
         return Result.Ok();
     }
 
+    public async Task<Result> AcceptFriendRequestAsync(int requestId, int userId)
+    {
+        
+    }
+
     public async Task<List<UserSearchResultDto>> FindUsersAsync(string currentUserId, string query)
     {
         var users = _userService.FindUsersAsync(query);
