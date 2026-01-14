@@ -51,5 +51,12 @@ namespace Infrastructure.Services
             var user = await _userManager.FindByNameAsync(username);
             return user;
         }
+
+        public List<ApplicationUser> FindUsersAsync(string query)
+        {
+            return _userManager.Users
+                .Where(u => u.UserName.Contains(query))
+                .ToList();
+        }
     }
 }

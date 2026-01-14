@@ -2,6 +2,7 @@ using Core.DTOs.Friend;
 using Core.Models;
 using FluentResults;
 using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Mapster;
 
 namespace Application.Services;
@@ -9,10 +10,12 @@ namespace Application.Services;
 public class FriendService
 {
     private readonly FriendsRepository _repository;
+    private readonly UserService _userService;
 
-    public FriendService(FriendsRepository repository)
+    public FriendService(FriendsRepository repository, UserService userService)
     {
         _repository = repository;
+        _userService = userService;
     }
 
     public async Task<Result> CreateFriendRequest(CreateFriendRequestDTO request)
@@ -28,5 +31,10 @@ public class FriendService
         await _repository.CreateFriendRequestAsync(friend);
         
         return Result.Ok();
+    }
+
+    public async Task FindUsersAsync(string query)
+    {
+        var users = _userService.FindUsersAsync(query);
     }
 }

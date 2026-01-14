@@ -19,6 +19,7 @@ public class FriendsRepository
         await _dbContext.SaveChangesAsync();
     }
 
+
     public async Task<bool> IsFriendsAsync(ApplicationUser currentUser, ApplicationUser targetUser)
     {
         var existingFriendship = await _dbContext.Friends

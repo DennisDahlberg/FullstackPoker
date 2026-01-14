@@ -27,6 +27,18 @@ public class FriendsController : Controller
         _friendService = friendService;
         _hubContext = hubContext;
     }
+
+    [HttpGet("find")]
+    public async Task<IActionResult> SearchUsersAsync([FromQuery] string query)
+    {
+        if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
+            return BadRequest(new { message = "Query must be at least 2 characters" });
+
+        var user = await _userService.GetLoggedInUser(User);
+        
+        
+        return Ok();
+    }
     
     [HttpPost("send")]
     public async Task<IActionResult> SendFriendRequestAsync([FromBody] string username)
