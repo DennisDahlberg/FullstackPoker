@@ -33,9 +33,11 @@ namespace Infrastructure.Services
             return userDTO;
         }
 
-        public string GetLoggedInUserId(ClaimsPrincipal user)
+        public async Task<ApplicationUser> GetLoggedInUser(ClaimsPrincipal user)
         {
-            return _userManager.GetUserId(user);
+            var currentUserId = _userManager.GetUserId(user);
+            var currentUser = await _userManager.FindByIdAsync(currentUserId);
+            return currentUser;
         }
 
         public async Task<ApplicationUser?> GetUserById(string userId)
