@@ -15,7 +15,7 @@ interface Friend {
 }
 
 interface FriendRequest {
-  id: string;
+  id: number;
   username: string;
   sentAt: string;
 }
@@ -50,6 +50,47 @@ export default function Friends() {
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [sendingRequestTo, setSendingRequestTo] = useState<string | null>(null);
+  const [acceptingRequestId, setAcceptingRequestId] = useState<number | null>(null);
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
+  const [isLoadingFriends, setIsLoadingFriends] = useState(true);
+  const [isLoadingRequests, setIsLoadingRequests] = useState(true);
+
+  // Fetch friends on mount
+  useEffect(() => {
+    const fetchFriends = async () => {
+      setIsLoadingFriends(true);
+      try {
+        const data = await api.friends.getFriends();
+        setFriends(data);
+      } catch (error) {
+        toast.error("Failed to load friends", {
+          description: error instanceof Error ? error.message : "Could not fetch friends list",
+        });
+      } finally {
+        setIsLoadingFriends(false);
+      }
+    };
+    fetchFriends();
+  }, []);
+
+  // Fetch friend requests on mount
+  useEffect(() => {
+    const fetchRequests = async () => {
+      setIsLoadingRequests(true);
+      try {
+        const data = await api.friends.getFriendRequests();
+        setFriendRequests(data);
+      } catch (error) {
+        toast.error("Failed to load friend requests", {
+          description: error instanceof Error ? error.message : "Could not fetch friend requests",
+        });
+      } finally {
+        setIsLoadingRequests(false);
+      }
+    };
+    fetchRequests();
+  }, []);
 
   // Debounced search for finding users
   useEffect(() => {
@@ -100,17 +141,41 @@ export default function Friends() {
     }
   };
 
-  const filteredFriends = mockFriends.filter((friend) => {
+  const handleAcceptRequest = async (requestId: number, username: string) => {
+    setAcceptingRequestId(requestId);
+    try {
+      await api.friends.acceptFriendRequest(requestId);
+      
+      // Remove from friend requests
+      setFriendRequests(prev => prev.filter(req => req.id !== requestId));
+      
+      // Optionally refresh friends list to show the new friend
+      const updatedFriends = await api.friends.getFriends();
+      setFriends(updatedFriends);
+      
+      toast.success("Friend request accepted", {
+        description: `You are now friends with ${username}`,
+      });
+    } catch (error) {
+      toast.error("Failed to accept request", {
+        description: error instanceof Error ? error.message : "Something went wrong",
+      });
+    } finally {
+      setAcceptingRequestId(null);
+    }
+  };
+
+  const filteredFriends = friends.filter((friend) => {
     const matchesSearch = friend.username.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesOnline = !showOnlineOnly || friend.isOnline;
     return matchesSearch && matchesOnline;
   });
 
-  const filteredRequests = mockRequests.filter((request) =>
+  const filteredRequests = friendRequests.filter((request) =>
     request.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const onlineFriendsCount = mockFriends.filter((f) => f.isOnline).length;
+  const onlineFriendsCount = friends.filter((f) => f.isOnline).length;
 
   const getStatusButton = (user: User) => {
     const isLoading = sendingRequestTo === user.id;
@@ -176,7 +241,7 @@ export default function Friends() {
         <div className="flex bg-gray-900 p-1 rounded-lg border border-white/5">
           {[
             { id: "friends", label: "All", icon: Users },
-            { id: "requests", label: "Pending", icon: UserPlus, count: mockRequests.length },
+            { id: "requests", label: "Pending", icon: UserPlus, count: friendRequests.length },
             { id: "find", label: "Add Friend", icon: Search },
           ].map((tab) => (
             <button
@@ -225,9 +290,13 @@ export default function Friends() {
                 </button>
               </div>
 
-              {filteredFriends.length === 0 ? (
+              {isLoadingFriends ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+                </div>
+              ) : filteredFriends.length === 0 ? (
                 <p className="text-gray-500 text-sm text-center py-8">
-                  No friends found
+                  {searchQuery ? "No friends found matching your search" : "No friends yet. Add some friends to get started!"}
                 </p>
               ) : (
                 filteredFriends.map((friend) => (
@@ -263,7 +332,11 @@ export default function Friends() {
 
           {activeTab === "requests" && (
             <>
-              {filteredRequests.length === 0 ? (
+              {isLoadingRequests ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+                </div>
+              ) : filteredRequests.length === 0 ? (
                 <p className="text-gray-500 text-sm text-center py-8">
                   No pending requests
                 </p>
@@ -282,7 +355,22 @@ export default function Friends() {
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button variant="default" size="sm" className="h-8 px-4">Accept</Button>
+                      <Button 
+                        variant="default" 
+                        size="sm" 
+                        className="h-8 px-4"
+                        onClick={() => handleAcceptRequest(request.id, request.username)}
+                        disabled={acceptingRequestId === request.id}
+                      >
+                        {acceptingRequestId === request.id ? (
+                          <>
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            Accepting...
+                          </>
+                        ) : (
+                          "Accept"
+                        )}
+                      </Button>
                       <Button variant="ghost" size="sm" className="h-8 hover:bg-red-500/10 text-gray-400 hover:text-red-400">
                         Decline
                       </Button>

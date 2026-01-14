@@ -58,6 +58,7 @@ public class FriendService
         var requests = await _repository.GetFriendRequestsAsync(userId);
         var result = requests.Select(r => new FriendRequestDto()
         {
+            Id = r.Id,
             CreatedAt =  r.CreatedAt,
             Username = r.Requester.UserName,
         }).ToList();

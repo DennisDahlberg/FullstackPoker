@@ -119,6 +119,39 @@ export const api = {
         }
         throw 'An error occurred while sending friend request';
       }
+    },
+    async getFriends() {
+      try {
+        const response = await apiClient.get(`${backendUrl}/friends`);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to fetch friends';
+        }
+        throw 'An error occurred while fetching friends';
+      }
+    },
+    async getFriendRequests() {
+      try {
+        const response = await apiClient.get(`${backendUrl}/friends/requests`);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to fetch friend requests';
+        }
+        throw 'An error occurred while fetching friend requests';
+      }
+    },
+    async acceptFriendRequest(requestId: number) {
+      try {
+        const response = await apiClient.post(`${backendUrl}/friends/accept/${requestId}`);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to accept friend request';
+        }
+        throw 'An error occurred while accepting friend request';
+      }
     }
   },
 
