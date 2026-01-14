@@ -29,15 +29,15 @@ public class FriendsController : Controller
     }
 
     [HttpGet("find")]
-    public async Task<IActionResult> SearchUsersAsync([FromQuery] string query)
+    public async Task<IActionResult> FindUsersAsync([FromQuery] string query)
     {
         if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
             return BadRequest(new { message = "Query must be at least 2 characters" });
 
         var user = await _userService.GetLoggedInUser(User);
+        var result = await _friendService.FindUsersAsync(user.Id, query);
         
-        
-        return Ok();
+        return Ok(result);
     }
     
     [HttpPost("send")]

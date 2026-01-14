@@ -33,12 +33,40 @@ public class FriendService
         return Result.Ok();
     }
 
-    public async Task<List<UserSearchResultDto>> FindUsersAsync(string query)
+    public async Task<List<UserSearchResultDto>> FindUsersAsync(string currentUserId, string query)
     {
         var users = _userService.FindUsersAsync(query);
         if (!users.Any())
             return new List<UserSearchResultDto>();
+        
+        var userIds = users.Select(u => u.Id).ToList();
+        var friendships = await _repository.GetFriendshipsByUserIdsAsync(currentUserId, userIds);
+        
+        var results = users.Select(user =>
+        {
+            var friendship = friendships.FirstOrDefault(f =>
+                (f.RequesterId == currentUserId && f.AddresseeId == user.Id) ||
+                (f.AddresseeId == currentUserId && f.RequesterId == user.Id));
 
-        return new List<UserSearchResultDto>();
+            string status = "none";
+            if (friendship != null)
+            {
+                if (friendship.Status == FriendStatus.Accepted)
+                    status = "friend";
+                else if (friendship.Status == FriendStatus.Pending)
+                {
+                    status = "pedning";
+                }
+            }
+
+            return new UserSearchResultDto
+            {
+                Id = user.Id,
+                Username = user.UserName!,
+                Status = status
+            };
+        }).ToList();
+
+        return results;
     }
 }

@@ -28,4 +28,13 @@ public class FriendsRepository
                 (f.RequesterId == targetUser.Id && f.AddresseeId == currentUser.Id));
         return existingFriendship != null;
     }
+    
+    public async Task<List<Friend>> GetFriendshipsByUserIdsAsync(string currentUserId, List<string> userIds)
+    {
+        return await _dbContext.Friends
+            .Where(f => 
+                (f.RequesterId == currentUserId && userIds.Contains(f.AddresseeId)) ||
+                (f.AddresseeId == currentUserId && userIds.Contains(f.RequesterId)))
+            .ToListAsync();
+    }
 }
