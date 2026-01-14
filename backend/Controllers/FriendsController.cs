@@ -68,7 +68,16 @@ public class FriendsController : Controller
     {
         var userId = _userService.GetLoggedInUserId(User);
         
-        
+        var friendRequests = await _friendService.GetFriendRequestsAsync(userId);
+        return Ok(friendRequests);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetFriendsAsync()
+    {
+        var userId = _userService.GetLoggedInUserId(User);
+        var friends = await _friendService.GetFriendsAsync(userId);
+        return Ok(friends);
     }
 
     [HttpPost("accept/{requestId}")]

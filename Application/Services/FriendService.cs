@@ -64,6 +64,17 @@ public class FriendService
         return result;
     }
 
+    public async Task<List<FriendDto>> GetFriendsAsync(string userId)
+    {
+        var currentUser = await _userService.GetUserById(userId); 
+        var friends =  await _repository.GetFriendsAsync(userId);
+        var result = friends.Select(f => new FriendDto()
+        {
+            Username = f.Addressee.UserName != currentUser.UserName ? f.Addressee.UserName : f.Requester.UserName,
+        }).ToList();
+        return result;
+    }
+
     public async Task<List<UserSearchResultDto>> FindUsersAsync(string currentUserId, string query)
     {
         var users = _userService.FindUsersAsync(query);

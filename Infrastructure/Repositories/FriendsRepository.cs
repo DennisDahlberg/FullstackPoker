@@ -27,15 +27,24 @@ public class FriendsRepository
         return friend;
     }
 
-    public Task<List<Friend>> GetFriendRequestsAsync(string userId)
+    public async Task<List<Friend>> GetFriendRequestsAsync(string userId)
     {
-        var requests = _dbContext.Friends
+        var requests = await _dbContext.Friends
             .Include(f => f.Requester)
             .Where(f => f.AddresseeId == userId && f.Status == FriendStatus.Pending)
             .ToListAsync();
         return  requests;
     }
 
+    public async Task<List<Friend>> GetFriendsAsync(string userId)
+    {
+        var friends = await _dbContext.Friends
+            .Where(f => (f.RequesterId == userId || f.AddresseeId == userId) && f.Status == FriendStatus.Accepted)
+            .Include(f => f.Addressee)
+            .Include(f => f.Requester)
+            .ToListAsync();
+        return friends;
+    }
 
     public async Task<bool> IsFriendsAsync(string currentUserId, string targetUserId)
     {
