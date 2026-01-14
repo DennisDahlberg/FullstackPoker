@@ -1,7 +1,9 @@
-﻿using Core.DTOs;
+﻿using System.Security.Claims;
+using Core.DTOs;
 using Core.Models;
 using FluentResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Infrastructure.Services
 {
@@ -29,6 +31,23 @@ namespace Infrastructure.Services
             };
 
             return userDTO;
+        }
+
+        public string GetLoggedInUserId(ClaimsPrincipal user)
+        {
+            return _userManager.GetUserId(user);
+        }
+
+        public async Task<ApplicationUser?> GetUserById(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            return user;
+        }
+        
+        public async Task<ApplicationUser?> GetUserByUsername(string username)
+        {
+            var user = await _userManager.FindByNameAsync(username);
+            return user;
         }
     }
 }
