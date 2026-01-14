@@ -33,8 +33,12 @@ public class FriendService
         return Result.Ok();
     }
 
-    public async Task FindUsersAsync(string query)
+    public async Task<List<UserSearchResultDto>> FindUsersAsync(string query)
     {
         var users = _userService.FindUsersAsync(query);
+        if (!users.Any())
+            return new List<UserSearchResultDto>();
+
+        return new List<UserSearchResultDto>();
     }
 }
