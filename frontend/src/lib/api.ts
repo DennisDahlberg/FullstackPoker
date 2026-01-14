@@ -88,6 +88,35 @@ export const api = {
     }
   },
 
+  friends: {
+    async findUsers(query: string) {
+      try {
+        const response = await apiClient.get(`${backendUrl}/friends/find`, {
+          params: { query }
+        });
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to search users';
+        }
+        throw 'An error occurred while searching users';
+      }
+    },
+    async sendFriendRequest(username: string) {
+      try {
+        const response = await apiClient.post(`${backendUrl}/friends/send`, {
+          query: username
+        });
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to send friend request';
+        }
+        throw 'An error occurred while sending friend request';
+      }
+    }
+  },
+
   auth: {
     async login(email:string, password:string) {
       try {

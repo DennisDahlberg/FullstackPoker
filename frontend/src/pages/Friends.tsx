@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-// import { Card } from "@/components/ui/card";
+ // import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
 import { UserPlus, X, MessageSquare, Search, Users } from "lucide-react";
 
