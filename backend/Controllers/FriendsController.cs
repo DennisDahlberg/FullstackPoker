@@ -66,6 +66,15 @@ public class FriendsController : Controller
     [HttpPost("accept/{requestId}")]
     public async Task<IActionResult> AcceptFriendRequestAsync([FromRoute] int requestId)
     {
+        var userId = _userService.GetLoggedInUserId(User);
+        var result = await _friendService.AcceptFriendRequestAsync(requestId, userId);
+
+        if (result.IsFailed)
+            return BadRequest(new { message = result.Errors.FirstOrDefault()?.Message ?? "Failed to accept friend request" });
         
+        await _hubContext.Clients.User(result.Value)
+            .SendAsync("FriendRequestAccepted", User.Identity!.Name);
+        
+        return Ok(new { message = "Friend request accepted successfully" });
     }
 }

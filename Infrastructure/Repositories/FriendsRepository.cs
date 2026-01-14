@@ -36,6 +36,11 @@ public class FriendsRepository
                 (f.RequesterId == targetUserId && f.AddresseeId == currentUserId));
         return existingFriendship != null;
     }
+
+    public async Task SaveChangesAsync()
+    {
+        await _dbContext.SaveChangesAsync();
+    }
     
     public async Task<List<Friend>> GetFriendshipsByUserIdsAsync(string currentUserId, List<string> userIds)
     {
