@@ -33,7 +33,10 @@ public class FriendsController : Controller
             return NotFound("User not found");
 
         var friendRequestDto = new CreateFriendRequestDTO { Requester = currentUser, Addressee = targetUser };
-        await _friendService.CreateFriendRequest(friendRequestDto);
+        var result = await _friendService.CreateFriendRequest(friendRequestDto);
+        
+        if (result.IsFailed)
+            return BadRequest(result.Errors);
         
         return Ok();
     }
