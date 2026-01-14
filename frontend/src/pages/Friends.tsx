@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
- // import { Card } from "@/components/ui/card";
 import { Avatar } from "@/components/ui/avatar";
-import { UserPlus, X, MessageSquare, Search, Users } from "lucide-react";
+import { UserPlus, X, MessageSquare, Search, Users, Loader2 } from "lucide-react";
+import { api } from "@/lib/api";
+import { toast } from "sonner";
 
 type TabId = "friends" | "requests" | "find";
 
@@ -25,7 +26,7 @@ interface User {
   status: "none" | "friend" | "pending" | "requested";
 }
 
-// Mock data
+// Mock data (keeping for friends and requests tabs for now)
 const mockFriends: Friend[] = [
   { id: "1", username: "PokerPro123", isOnline: true },
   { id: "2", username: "AllInAnnie", isOnline: true },
@@ -41,22 +42,63 @@ const mockRequests: FriendRequest[] = [
   { id: "3", username: "RoyalFlush", sentAt: "3 days ago" },
 ];
 
-const mockSearchResults: User[] = [
-  { id: "7", username: "AceKingQueen", status: "none" },
-  { id: "8", username: "FullHouseFred", status: "none" },
-  { id: "1", username: "PokerPro123", status: "friend" },
-  { id: "9", username: "CheckRaiseChris", status: "none" },
-  { id: "10", username: "SlowRollSally", status: "pending" },
-  { id: "11", username: "NutFlushNancy", status: "none" },
-  { id: "2", username: "AllInAnnie", status: "friend" },
-  { id: "12", username: "TiltMaster5000", status: "requested" },
-];
-
 export default function Friends() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeTab, setActiveTab] = useState<"friends" | "requests" | "find">("friends");
+  const [activeTab, setActiveTab] = useState<TabId>("friends");
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
   const [findSearchQuery, setFindSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<User[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [sendingRequestTo, setSendingRequestTo] = useState<string | null>(null);
+
+  // Debounced search for finding users
+  useEffect(() => {
+    if (activeTab !== "find" || findSearchQuery.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+
+    const timeoutId = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const results = await api.friends.findUsers(findSearchQuery);
+        setSearchResults(results);
+      } catch (error) {
+        toast.error("Search failed", {
+          description: error instanceof Error ? error.message : "Failed to search users",
+        });
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [findSearchQuery, activeTab]);
+
+  const handleSendFriendRequest = async (username: string, userId: string) => {
+    setSendingRequestTo(userId);
+    try {
+      await api.friends.sendFriendRequest(username);
+      
+      setSearchResults(prev => 
+        prev.map(user => 
+          user.id === userId 
+            ? { ...user, status: "pending" as const }
+            : user
+        )
+      );
+
+      toast.success("Friend request sent", {
+        description: `Request sent to ${username}`,
+      });
+    } catch (error) {
+      toast.error("Failed to send request", {
+        description: error instanceof Error ? error.message : "Something went wrong",
+      });
+    } finally {
+      setSendingRequestTo(null);
+    }
+  };
 
   const filteredFriends = mockFriends.filter((friend) => {
     const matchesSearch = friend.username.toLowerCase().includes(searchQuery.toLowerCase());
@@ -68,23 +110,21 @@ export default function Friends() {
     request.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredSearchResults = mockSearchResults.filter((user) =>
-    user.username.toLowerCase().includes(findSearchQuery.toLowerCase())
-  );
-
   const onlineFriendsCount = mockFriends.filter((f) => f.isOnline).length;
 
   const getStatusButton = (user: User) => {
+    const isLoading = sendingRequestTo === user.id;
+
     switch (user.status) {
       case "friend":
         return (
-          <Button variant="outline" size="sm" disabled>
+          <Button variant="outline" size="sm" disabled className="cursor-not-allowed">
             Already Friends
           </Button>
         );
       case "pending":
         return (
-          <Button variant="outline" size="sm" disabled>
+          <Button variant="outline" size="sm" disabled className="cursor-not-allowed">
             Request Sent
           </Button>
         );
@@ -96,9 +136,23 @@ export default function Friends() {
         );
       default:
         return (
-          <Button variant="default" size="sm">
-            <UserPlus className="h-4 w-4 mr-1" />
-            Add Friend
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={() => handleSendFriendRequest(user.username, user.id)}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                Sending...
+              </>
+            ) : (
+              <>
+                <UserPlus className="h-4 w-4 mr-1" />
+                Add Friend
+              </>
+            )}
           </Button>
         );
     }
@@ -171,70 +225,114 @@ export default function Friends() {
                 </button>
               </div>
 
-              {filteredFriends.map((friend) => (
-                <div 
-                  key={friend.id} 
-                  className="group flex items-center justify-between p-3 rounded-xl transition-all border-y border-transparent hover:border-t-white/5 hover:border-b-black/20 hover:bg-gray-900/40"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <Avatar className="flex items-center justify-center h-10 w-10 border border-gray-800 group-hover:border-amber-500/30 transition-colors">
-                        <span className="font-bold text-amber-500">{friend.username[0]}</span>
-                      </Avatar>
-                      <div className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-gray-950 ${friend.isOnline ? 'bg-green-500' : 'bg-gray-600'}`} />
+              {filteredFriends.length === 0 ? (
+                <p className="text-gray-500 text-sm text-center py-8">
+                  No friends found
+                </p>
+              ) : (
+                filteredFriends.map((friend) => (
+                  <div 
+                    key={friend.id} 
+                    className="group flex items-center justify-between p-3 rounded-xl transition-all border-y border-transparent hover:border-t-white/5 hover:border-b-black/20 hover:bg-gray-900/40"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <Avatar className="flex items-center justify-center h-10 w-10 border border-gray-800 group-hover:border-amber-500/30 transition-colors">
+                          <span className="font-bold text-amber-500">{friend.username[0]}</span>
+                        </Avatar>
+                        <div className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-gray-950 ${friend.isOnline ? 'bg-green-500' : 'bg-gray-600'}`} />
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-sm text-gray-200 group-hover:text-white">{friend.username}</h4>
+                        <p className="text-xs text-gray-500">{friend.isOnline ? 'Active Now' : 'Offline'}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-bold text-sm text-gray-200 group-hover:text-white">{friend.username}</h4>
-                      <p className="text-xs text-gray-500">{friend.isOnline ? 'Active Now' : 'Offline'}</p>
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-800 text-gray-400 hover:text-white">
+                        <MessageSquare className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-500/10 text-gray-500 hover:text-red-400">
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-800 text-gray-400 hover:text-white">
-                      <MessageSquare className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-500/10 text-gray-500 hover:text-red-400">
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
+                ))
+              )}
             </>
           )}
 
-          {/* Render Requests & Find Tabs with similar "item" styling */}
-          {activeTab === "requests" && filteredRequests.map(request => (
-             <div key={request.id} className="group flex items-center justify-between p-4 border-y border-transparent hover:bg-gray-900/40 hover:border-t-white/5">
-                <div className="flex items-center gap-4">
-                   <Avatar className="flex items-center justify-center h-10 w-10 bg-amber-900/20 text-amber-500 font-bold">{request.username[0]}</Avatar>
-                   <div>
-                      <h4 className="text-sm font-bold">{request.username}</h4>
-                      <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">Incoming Request • {request.sentAt}</p>
-                   </div>
-                </div>
-                <div className="flex gap-2">
-                   <Button variant="amber" size="sm" className="h-8 px-4">Accept</Button>
-                   <Button variant="ghost" size="sm" className="h-8 hover:bg-red-500/10 text-gray-400 hover:text-red-400">Decline</Button>
-                </div>
-             </div>
-          ))}
+          {activeTab === "requests" && (
+            <>
+              {filteredRequests.length === 0 ? (
+                <p className="text-gray-500 text-sm text-center py-8">
+                  No pending requests
+                </p>
+              ) : (
+                filteredRequests.map(request => (
+                  <div key={request.id} className="group flex items-center justify-between p-4 border-y border-transparent hover:bg-gray-900/40 hover:border-t-white/5">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="flex items-center justify-center h-10 w-10 bg-amber-900/20 text-amber-500 font-bold">
+                        {request.username[0]}
+                      </Avatar>
+                      <div>
+                        <h4 className="text-sm font-bold">{request.username}</h4>
+                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">
+                          Incoming Request • {request.sentAt}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="default" size="sm" className="h-8 px-4">Accept</Button>
+                      <Button variant="ghost" size="sm" className="h-8 hover:bg-red-500/10 text-gray-400 hover:text-red-400">
+                        Decline
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </>
+          )}
 
           {activeTab === "find" && (
             <div className="space-y-6">
-              <Input
-                placeholder="Find new players..."
-                value={findSearchQuery}
-                onChange={(e) => setFindSearchQuery(e.target.value)}
-                className="bg-gray-900 border-gray-800 focus:border-amber-500"
-              />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4" />
+                <Input
+                  placeholder="Find new players... (min 2 characters)"
+                  value={findSearchQuery}
+                  onChange={(e) => setFindSearchQuery(e.target.value)}
+                  className="pl-10 bg-gray-900 border-gray-800 focus:border-amber-500"
+                />
+                {isSearching && (
+                  <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-amber-500" />
+                )}
+              </div>
+              
+              {findSearchQuery.length > 0 && findSearchQuery.length < 2 && (
+                <p className="text-gray-500 text-sm text-center py-8">
+                  Type at least 2 characters to search
+                </p>
+              )}
+
+              {findSearchQuery.length >= 2 && !isSearching && searchResults.length === 0 && (
+                <p className="text-gray-500 text-sm text-center py-8">
+                  No users found matching "{findSearchQuery}"
+                </p>
+              )}
+
               <div className="divide-y divide-gray-800/50">
-                {filteredSearchResults.map(user => (
-                   <div key={user.id} className="flex items-center justify-between py-4 group">
-                      <div className="flex items-center gap-4">
-                        <Avatar className="flex items-center justify-center h-10 w-10 bg-gray-800 border border-white/5">{user.username[0]}</Avatar>
-                        <span className="font-bold text-sm text-gray-300 group-hover:text-white">{user.username}</span>
-                      </div>
-                      {getStatusButton(user)}
-                   </div>
+                {searchResults.map(user => (
+                  <div key={user.id} className="flex items-center justify-between py-4 group hover:bg-gray-900/40 px-2 rounded-lg transition-colors">
+                    <div className="flex items-center gap-4">
+                      <Avatar className="flex items-center justify-center h-10 w-10 bg-gray-800 border border-white/5">
+                        <span className="font-bold text-amber-500">{user.username[0].toUpperCase()}</span>
+                      </Avatar>
+                      <span className="font-bold text-sm text-gray-300 group-hover:text-white transition-colors">
+                        {user.username}
+                      </span>
+                    </div>
+                    {getStatusButton(user)}
+                  </div>
                 ))}
               </div>
             </div>

@@ -15,17 +15,17 @@ public class FriendsRepository
 
     public async Task CreateFriendRequestAsync(Friend model)
     {
-        await _dbContext.Friends.AddAsync(model);
+        _dbContext.Add(model);
         await _dbContext.SaveChangesAsync();
     }
 
 
-    public async Task<bool> IsFriendsAsync(ApplicationUser currentUser, ApplicationUser targetUser)
+    public async Task<bool> IsFriendsAsync(string currentUserId, string targetUserId)
     {
         var existingFriendship = await _dbContext.Friends
             .FirstOrDefaultAsync(f => 
-                (f.RequesterId == currentUser.Id && f.AddresseeId == targetUser.Id) ||
-                (f.RequesterId == targetUser.Id && f.AddresseeId == currentUser.Id));
+                (f.RequesterId == currentUserId && f.AddresseeId == targetUserId) ||
+                (f.RequesterId == targetUserId && f.AddresseeId == currentUserId));
         return existingFriendship != null;
     }
     

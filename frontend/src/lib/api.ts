@@ -104,9 +104,14 @@ export const api = {
     },
     async sendFriendRequest(username: string) {
       try {
-        const response = await apiClient.post(`${backendUrl}/friends/send`, {
-          query: username
-        });
+        const response = await apiClient.post(`${backendUrl}/friends/send`, 
+          JSON.stringify(username),
+          {
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          }
+        );
         return response.data;
       } catch (err) {
         if (axios.isAxiosError(err)) {

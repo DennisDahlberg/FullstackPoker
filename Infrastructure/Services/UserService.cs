@@ -40,6 +40,11 @@ namespace Infrastructure.Services
             return currentUser;
         }
 
+        public string GetLoggedInUserId(ClaimsPrincipal user)
+        {
+            return  _userManager.GetUserId(user);
+        }
+
         public async Task<ApplicationUser?> GetUserById(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -55,7 +60,7 @@ namespace Infrastructure.Services
         public List<ApplicationUser> FindUsersAsync(string query)
         {
             return _userManager.Users
-                .Where(u => u.UserName.Contains(query))
+                .Where(u => u.UserName.ToLower().Contains(query.ToLower()))
                 .ToList();
         }
     }

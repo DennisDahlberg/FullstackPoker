@@ -8,7 +8,7 @@ public class CreateFriendRequestDTO
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    public ApplicationUser Requester { get; set; } = null!;
+    public string RequesteId { get; set; } = null!;
 
-    public ApplicationUser Addressee { get; set; } = null!;
+    public string AddresseeId { get; set; } = null!;
 }

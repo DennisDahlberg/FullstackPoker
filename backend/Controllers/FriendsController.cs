@@ -46,16 +46,20 @@ public class FriendsController : Controller
         var currentUser = await _userService.GetLoggedInUser(User);
         var targetUser = await _userService.GetUserByUsername(username);
         if (targetUser == null)
-            return NotFound("User not found");
+            return NotFound(new { message = "User not found" });
 
-        var friendRequestDto = new CreateFriendRequestDTO { Requester = currentUser, Addressee = targetUser };
+        if (targetUser.Id == currentUser.Id)
+            return BadRequest(new { message = "Cannot send friend request to yourself" });
+
+        var friendRequestDto = new CreateFriendRequestDTO { RequesteId = currentUser.Id, AddresseeId = targetUser.Id };
         var result = await _friendService.CreateFriendRequest(friendRequestDto);
         
         if (result.IsFailed)
-            return BadRequest(result.Errors);
+            return BadRequest(new { message = result.Errors.FirstOrDefault()?.Message ?? "Failed to send friend request" });
         
         await _hubContext.Clients.User(targetUser.Id)
-            .SendAsync("ReceiveFriendRequest", currentUser.UserName);
-        return Ok();
+            .SendAsync("ReceiveFriendInvite", currentUser.UserName);
+            
+        return Ok(new { message = "Friend request sent successfully" });
     }
 }

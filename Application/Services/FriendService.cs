@@ -21,15 +21,19 @@ public class FriendService
     public async Task<Result> CreateFriendRequest(CreateFriendRequestDTO request)
     {
         var isAlreadyFriends = await _repository
-            .IsFriendsAsync(request.Requester, request.Addressee);
+            .IsFriendsAsync(request.RequesteId, request.AddresseeId);
         if (isAlreadyFriends)
             return Result.Fail("Already Friends");
-
-        request.CreatedAt = DateTime.UtcNow;
-        request.Status = FriendStatus.Pending;
-        var friend = request.Adapt<Friend>();
-        await _repository.CreateFriendRequestAsync(friend);
         
+        var friend = new Friend
+        {
+            AddresseeId =  request.AddresseeId,
+            RequesterId = request.RequesteId,
+            CreatedAt = DateTime.UtcNow,
+            Status =  FriendStatus.Pending
+        };
+        await _repository.CreateFriendRequestAsync(friend);
+
         return Result.Ok();
     }
 
@@ -55,7 +59,7 @@ public class FriendService
                     status = "friend";
                 else if (friendship.Status == FriendStatus.Pending)
                 {
-                    status = "pedning";
+                    status = "pending";
                 }
             }
 
