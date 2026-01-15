@@ -26,22 +26,6 @@ interface User {
   status: "none" | "friend" | "pending" | "requested";
 }
 
-// Mock data (keeping for friends and requests tabs for now)
-const mockFriends: Friend[] = [
-  { id: "1", username: "PokerPro123", isOnline: true },
-  { id: "2", username: "AllInAnnie", isOnline: true },
-  { id: "3", username: "BluffMaster", isOnline: false },
-  { id: "4", username: "ChipLeader", isOnline: true },
-  { id: "5", username: "RiverRat", isOnline: false },
-  { id: "6", username: "FoldOrGold", isOnline: false },
-];
-
-const mockRequests: FriendRequest[] = [
-  { id: "1", username: "NewPlayer99", sentAt: "2 hours ago" },
-  { id: "2", username: "TexasHoldem", sentAt: "1 day ago" },
-  { id: "3", username: "RoyalFlush", sentAt: "3 days ago" },
-];
-
 export default function Friends() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<TabId>("friends");
