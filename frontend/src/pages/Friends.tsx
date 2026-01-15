@@ -6,6 +6,7 @@ import { UserPlus, X, MessageSquare, Search, Users, Loader2 } from "lucide-react
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { useFriendsHub } from "@/context/FriendsHubContext";
+import { formatDistanceToNow } from "date-fns";
 
 type TabId = "friends" | "requests" | "find";
 
@@ -226,7 +227,7 @@ export default function Friends() {
       default:
         return (
           <Button 
-            variant="default" 
+            variant="amberOutline" 
             size="sm"
             onClick={() => handleSendFriendRequest(user.username, user.id)}
             disabled={isLoading}
@@ -374,13 +375,13 @@ export default function Friends() {
                       <div>
                         <h4 className="text-sm font-bold">{request.username}</h4>
                         <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">
-                          Incoming Request • {request.sentAt}
+                          Incoming Request • {formatDistanceToNow(new Date(request.sentAt), { addSuffix: true })}
                         </p>
                       </div>
                     </div>
                     <div className="flex gap-2">
                       <Button 
-                        variant="default" 
+                        variant="amber" 
                         size="sm" 
                         className="h-8 px-4"
                         onClick={() => handleAcceptRequest(request.id, request.username)}

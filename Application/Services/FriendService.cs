@@ -59,7 +59,7 @@ public class FriendService
         var result = requests.Select(r => new FriendRequestDto()
         {
             Id = r.Id,
-            CreatedAt =  r.CreatedAt,
+            SentAt =  r.CreatedAt,
             Username = r.Requester.UserName,
         }).ToList();
         return result;
