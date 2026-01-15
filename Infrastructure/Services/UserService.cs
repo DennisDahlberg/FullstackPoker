@@ -57,10 +57,11 @@ namespace Infrastructure.Services
             return user;
         }
 
-        public List<ApplicationUser> FindUsersAsync(string query)
+        public List<ApplicationUser> FindUsersAsync(string query, string currentUserId)
         {
             return _userManager.Users
-                .Where(u => u.UserName.ToLower().Contains(query.ToLower()))
+                .Where(u => u.UserName.ToLower().Contains(query.ToLower())
+                && u.Id != currentUserId)
                 .ToList();
         }
     }

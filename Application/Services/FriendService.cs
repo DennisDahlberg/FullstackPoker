@@ -78,7 +78,7 @@ public class FriendService
 
     public async Task<List<UserSearchResultDto>> FindUsersAsync(string currentUserId, string query)
     {
-        var users = _userService.FindUsersAsync(query);
+        var users = _userService.FindUsersAsync(query, currentUserId);
         if (!users.Any())
             return new List<UserSearchResultDto>();
         
