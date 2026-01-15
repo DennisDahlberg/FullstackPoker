@@ -15,6 +15,7 @@ namespace backend.Hubs
         private readonly UserService _userService;
         private readonly FriendService _friendService;
         private static readonly Dictionary<string, HashSet<string>> _userConnections = new();
+        private static readonly object _lock = new();
 
         public FriendsHub(UserManager<ApplicationUser> userManager, UserService userService, FriendService friendService)
         {
@@ -27,7 +28,7 @@ namespace backend.Hubs
         {
             var userId = Context.UserIdentifier!;
 
-            lock (_userConnections)
+            lock (_lock)
             {
                 if (!_userConnections.ContainsKey(userId))
                     _userConnections[userId] = new HashSet<string>();
@@ -43,7 +44,7 @@ namespace backend.Hubs
             var userId = Context.UserIdentifier!;
 
             bool isLastConnection = false;
-            lock (_userConnections)
+            lock (_lock)
             {
                 if (_userConnections.ContainsKey(userId))
                 {
@@ -57,7 +58,6 @@ namespace backend.Hubs
             }
 
             if (isLastConnection)
-                if (isLastConnection)
                     await NotifyFriendsOfStatusChange(userId, false);
             
             await base.OnDisconnectedAsync(exception);
@@ -76,7 +76,7 @@ namespace backend.Hubs
         
         public static bool IsUserOnline(string userId)
         {
-            lock (_userConnections)
+            lock (_lock)
             {
                 return _userConnections.ContainsKey(userId);
             }
