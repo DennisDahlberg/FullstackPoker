@@ -72,6 +72,7 @@ public class FriendService
         var result = friends.Select(f => new FriendDto()
         {
             Username = f.Addressee.UserName != currentUser.UserName ? f.Addressee.UserName : f.Requester.UserName,
+            Id = f.AddresseeId != currentUser.Id ? f.AddresseeId : f.RequesterId,
         }).ToList();
         return result;
     }

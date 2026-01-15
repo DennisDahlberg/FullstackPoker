@@ -34,10 +34,11 @@ namespace backend.Hubs
                 _userConnections[userId].Add(Context.ConnectionId);
             }
             
+            await NotifyFriendsOfStatusChange(userId, true);
             await base.OnConnectedAsync();
         }
 
-        public override Task OnDisconnectedAsync(Exception? exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             var userId = Context.UserIdentifier!;
 
@@ -55,16 +56,22 @@ namespace backend.Hubs
                 }
             }
 
-            // if (isLastConnection)
-                
+            if (isLastConnection)
+                if (isLastConnection)
+                    await NotifyFriendsOfStatusChange(userId, false);
             
-            return base.OnDisconnectedAsync(exception);
+            await base.OnDisconnectedAsync(exception);
         }
 
         private async Task NotifyFriendsOfStatusChange(string userId, bool isOnline)
         {
             var friends = await _friendService.GetFriendsAsync(userId);
-            // var friendsUserIds = friends.Select(f => f.)
+            var friendsUserIds = friends.Select(f => f.Id).ToList();
+            
+            foreach (var friendId in friendsUserIds)
+            {
+                await Clients.User(friendId).SendAsync("FriendStatusChanged", userId, isOnline);
+            }
         }
         
         public static bool IsUserOnline(string userId)
