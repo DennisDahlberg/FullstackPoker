@@ -77,6 +77,8 @@ public class FriendsController : Controller
     {
         var userId = _userService.GetLoggedInUserId(User);
         var friends = await _friendService.GetFriendsAsync(userId);
+        foreach (var friend in friends)
+            friend.IsOnline = FriendsHub.IsUserOnline(friend.Id);
         return Ok(friends);
     }
 
