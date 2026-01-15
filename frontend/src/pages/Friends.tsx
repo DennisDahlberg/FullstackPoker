@@ -107,12 +107,24 @@ export default function Friends() {
         .catch(error => console.error("Failed to refresh friends:", error));
     };
 
+    const handleFriendStatusChanged = (friendId: string, isOnline: boolean) => {
+    setFriends(prev => 
+      prev.map(friend => 
+        friend.id === friendId 
+          ? { ...friend, isOnline }
+          : friend
+      )
+    );
+  };
+
     friendsHub.on("ReceiveFriendInvite", handleReceiveFriendInvite);
     friendsHub.on("FriendRequestAccepted", handleFriendRequestAccepted);
+    friendsHub.on("FriendStatusChanged", handleFriendStatusChanged);
 
     return () => {
       friendsHub.off("ReceiveFriendInvite", handleReceiveFriendInvite);
       friendsHub.off("FriendRequestAccepted", handleFriendRequestAccepted);
+      friendsHub.off("FriendStatusChanged", handleFriendStatusChanged);
     };
   }, [friendsHub]);
 
