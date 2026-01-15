@@ -1,25 +1,24 @@
 import { useEffect } from "react";
 import { useFriendsHub } from "../context/FriendsHubContext";
+import { toast } from "sonner";
 
 export default function FriendInviteListener() {
   const connection = useFriendsHub();
 
   useEffect(() => {
     if (!connection) {
-      console.log("No SignalR connection available in FriendInviteListener.");
       return;
     }
 
-    const handler = (fromUsername: string) => {
-      console.log("Received ReceiveFriendInvite event from:", fromUsername);
-      alert(`Friend invite from ${fromUsername}`);
+    const handler = (senderUsername: string) => {
+      toast.info("New friend request", {
+        description: `${senderUsername} sent you a friend request`,
+      });
     };
 
-    console.log("Registering ReceiveFriendInvite handler.");
     connection.on("ReceiveFriendInvite", handler);
 
     return () => {
-      console.log("Unregistering ReceiveFriendInvite handler.");
       connection.off("ReceiveFriendInvite", handler);
     };
   }, [connection]);
