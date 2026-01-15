@@ -41,7 +41,7 @@ export default function Friends() {
   const [isLoadingFriends, setIsLoadingFriends] = useState(true);
   const [isLoadingRequests, setIsLoadingRequests] = useState(true);
 
-  const friendshub = useFriendsHub();
+  const friendsHub = useFriendsHub();
 
   // Fetch friends on mount
   useEffect(() => {
@@ -78,6 +78,43 @@ export default function Friends() {
     };
     fetchRequests();
   }, []);
+
+
+  // SignalR event listeners
+  useEffect(() => {
+    if (!friendsHub) return;
+
+    const handleReceiveFriendInvite = (senderUsername: string) => {
+      toast.info("New friend request", {
+        description: `${senderUsername} sent you a friend request`,
+      });
+      
+      // Refresh friend requests list
+      api.friends.getFriendRequests()
+        .then(data => setFriendRequests(data))
+        .catch(error => console.error("Failed to refresh requests:", error));
+    };
+
+    const handleFriendRequestAccepted = (accepterUsername: string) => {
+      toast.success("Friend request accepted", {
+        description: `${accepterUsername} accepted your friend request`,
+      });
+      
+      // Refresh friends list
+      api.friends.getFriends()
+        .then(data => setFriends(data))
+        .catch(error => console.error("Failed to refresh friends:", error));
+    };
+
+    friendsHub.on("ReceiveFriendInvite", handleReceiveFriendInvite);
+    friendsHub.on("FriendRequestAccepted", handleFriendRequestAccepted);
+
+    return () => {
+      friendsHub.off("ReceiveFriendInvite", handleReceiveFriendInvite);
+      friendsHub.off("FriendRequestAccepted", handleFriendRequestAccepted);
+    };
+  }, [friendsHub]);
+
 
   // Debounced search for finding users
   useEffect(() => {

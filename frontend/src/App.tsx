@@ -8,7 +8,6 @@ import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute";
 import Game from "./pages/Game";
 import Friends from "./pages/Friends";
-import FriendInviteListener from "./components/FriendNotifactionTest";
 import { Toaster } from "sonner";
 
 
@@ -17,7 +16,6 @@ function App() {
   return (
     <>
       <Toaster />
-      <FriendInviteListener />    
       <Routes>
         
         <Route element={<PrivateRoute><SidebarLayout /></PrivateRoute>}>          
