@@ -5,6 +5,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { UserPlus, X, MessageSquare, Search, Users, Loader2 } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
+import { useFriendsHub } from "@/context/FriendsHubContext";
 
 type TabId = "friends" | "requests" | "find";
 
@@ -39,6 +40,8 @@ export default function Friends() {
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [isLoadingFriends, setIsLoadingFriends] = useState(true);
   const [isLoadingRequests, setIsLoadingRequests] = useState(true);
+
+  const friendshub = useFriendsHub();
 
   // Fetch friends on mount
   useEffect(() => {
