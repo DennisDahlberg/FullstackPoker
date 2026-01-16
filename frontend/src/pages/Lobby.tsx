@@ -205,7 +205,7 @@ export default function Lobby() {
               <button
                 onClick={() => setActiveBotTab("standard")}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all",
+                  "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-bold transition-all",
                   activeBotTab === "standard" 
                     ? "bg-gray-800 text-amber-500 shadow-sm" 
                     : "text-gray-400 hover:text-gray-200"
@@ -217,7 +217,7 @@ export default function Lobby() {
               <button
                 onClick={() => setActiveBotTab("custom")}
                 className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-bold transition-all",
+                  "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-bold transition-all",
                   activeBotTab === "custom" 
                     ? "bg-gray-800 text-amber-500 shadow-sm" 
                     : "text-gray-400 hover:text-gray-200"
@@ -229,7 +229,7 @@ export default function Lobby() {
             </div>
 
             <span className={cn(
-              "text-xs font-bold px-3 py-1.5 rounded-full border",
+              "text-sm font-bold px-3 py-1.5 rounded-full border",
               selectedBotIds.length === 7 
                 ? "bg-red-500/10 border-red-500/20 text-red-500" 
                 : "bg-gray-900 border-gray-800 text-gray-400"
@@ -308,10 +308,6 @@ export default function Lobby() {
                         bot.skill === "Elite" && "text-red-500",
                       )}>{bot.skill}</span>
                     </div>
-                 </div>
-
-                 <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {!isSelected && <Users className="w-4 h-4 text-gray-600" />}
                  </div>
                </div>
              );
