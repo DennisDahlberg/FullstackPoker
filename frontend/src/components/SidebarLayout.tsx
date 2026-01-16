@@ -1,9 +1,20 @@
-import { useState } from 'react';
-import { useAuthContext } from '@/context/AuthContext';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Settings, LogOut, Coins, PanelLeft, User, ChevronsUpDown, CirclePlay, UserRound } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Skeleton } from './ui/skeleton';
+import { useState } from "react";
+import { useAuthContext } from "@/context/AuthContext";
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Settings,
+  LogOut,
+  Coins,
+  PanelLeft,
+  User,
+  ChevronsUpDown,
+  CirclePlay,
+  UserRound,
+  UsersRound
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "./ui/skeleton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,12 +22,8 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function SidebarLayout() {
   const [isOpen, setIsOpen] = useState(window.innerWidth >= 768);
@@ -25,42 +32,44 @@ export default function SidebarLayout() {
   const navigate = useNavigate();
 
   const navItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-    { icon: CirclePlay, label: 'Game', href: '/game' },
-    { icon: UserRound, label: 'Friends', href: '/friends' },
-    { icon: Settings, label: 'Settings', href: '/settings' },    
+    { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
+    { icon: CirclePlay, label: "Game", href: "/game" },
+    { icon: UserRound, label: "Friends", href: "/friends" },
+    { icon: Settings, label: "Settings", href: "/settings" },
+    { icon: UsersRound, label: "Lobby", href: "/lobby" },
   ];
 
   function handleLogOut() {
     logout();
-    navigate('/');
+    navigate("/");
   }
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 relative">
-      
       {/* Mobile Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 md:hidden"
           onClick={() => setIsOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`
+      <aside
+        className={`
         fixed inset-y-0 left-0 z-50
         w-64 bg-gray-950 border-r border-gray-800
         transform transition-transform duration-300 ease-in-out
-        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}
         flex flex-col
-      `}>
+      `}
+      >
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-gray-800">
-           <div className="flex items-center gap-2 text-amber-500 font-bold text-xl">
-             <Coins className="w-6 h-6" />
-             <span>PokerAI</span>
-           </div>
+          <div className="flex items-center gap-2 text-amber-500 font-bold text-xl">
+            <Coins className="w-6 h-6" />
+            <span>PokerAI</span>
+          </div>
         </div>
 
         {/* Navigation Links */}
@@ -72,13 +81,15 @@ export default function SidebarLayout() {
                 key={item.href}
                 to={item.href}
                 onClick={() => {
-                    if (window.innerWidth < 768) setIsOpen(false);
+                  if (window.innerWidth < 768) setIsOpen(false);
                 }}
                 className={`
                   flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
-                  ${isActive 
-                    ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' 
-                    : 'hover:bg-gray-900 text-gray-400 hover:text-gray-100'}
+                  ${
+                    isActive
+                      ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
+                      : "hover:bg-gray-900 text-gray-400 hover:text-gray-100"
+                  }
                 `}
               >
                 <item.icon className="w-5 h-5" />
@@ -92,71 +103,82 @@ export default function SidebarLayout() {
         <div className="p-4">
           {loading ? (
             <div className="flex items-center gap-3 px-2 py-2">
-             <Skeleton className="h-8 w-8 rounded-lg bg-gray-800" />
-             <div className="space-y-2">
-               <Skeleton className="h-3 w-24 bg-gray-800" />
-               <Skeleton className="h-2 w-16 bg-gray-800" />
-             </div>
-           </div>
+              <Skeleton className="h-8 w-8 rounded-lg bg-gray-800" />
+              <div className="space-y-2">
+                <Skeleton className="h-3 w-24 bg-gray-800" />
+                <Skeleton className="h-2 w-16 bg-gray-800" />
+              </div>
+            </div>
           ) : (
-             <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button 
-                variant="ghost" 
-                className="w-full h-auto py-3 px-2 flex items-center justify-between hover:bg-gray-900 text-gray-300 hover:text-white"
-              >
-                <div className="flex items-center gap-3 text-left">
-                  <Avatar className="h-8 w-8 rounded-lg border border-gray-700">
-                    <AvatarImage src="" alt="User" />
-                    <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">CN</AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{data?.user?.name || "Player One"}</span>
-                    <span className="truncate text-xs text-gray-500">{data?.user?.rank}</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full h-auto py-3 px-2 flex items-center justify-between hover:bg-gray-900 text-gray-300 hover:text-white"
+                >
+                  <div className="flex items-center gap-3 text-left">
+                    <Avatar className="h-8 w-8 rounded-lg border border-gray-700">
+                      <AvatarImage src="" alt="User" />
+                      <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">
+                        CN
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">
+                        {data?.user?.name || "Player One"}
+                      </span>
+                      <span className="truncate text-xs text-gray-500">
+                        {data?.user?.rank}
+                      </span>
+                    </div>
                   </div>
-                </div>
-                <ChevronsUpDown className="ml-auto size-4 text-gray-500" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              className="w-56 min-w-56 rounded-lg bg-gray-950 border-gray-800 text-gray-200" 
-              side="right" 
-              align="end" 
-              sideOffset={4}
-            >
-              <DropdownMenuLabel className="p-0 font-normal">
-                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                  <Avatar className="h-8 w-8 rounded-lg border border-gray-700">
-                    <AvatarImage src="" alt="User" />
-                    <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">CN</AvatarFallback>
-                  </Avatar>
-                  <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">{data?.user?.name}</span>
-                    <span className="truncate text-xs text-gray-500">{data?.user?.email}</span>
-                  </div>
-                </div>
-              </DropdownMenuLabel>
-              <DropdownMenuSeparator className="bg-gray-800" />
-              <DropdownMenuItem className="focus:bg-gray-900 focus:text-white cursor-pointer">
-                <User className="mr-2 h-4 w-4" />
-                Profile
-              </DropdownMenuItem>
-              <DropdownMenuItem className="focus:bg-gray-900 focus:text-white cursor-pointer">
-                <Settings className="mr-2 h-4 w-4" />
-                Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-gray-800" />
-              <DropdownMenuItem 
-                className="text-red-400 focus:text-red-300 focus:bg-red-900/20 cursor-pointer"
-                onClick={handleLogOut}
+                  <ChevronsUpDown className="ml-auto size-4 text-gray-500" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-56 min-w-56 rounded-lg bg-gray-950 border-gray-800 text-gray-200"
+                side="right"
+                align="end"
+                sideOffset={4}
               >
-                <LogOut className="mr-2 h-4 w-4" />
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+                <DropdownMenuLabel className="p-0 font-normal">
+                  <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                    <Avatar className="h-8 w-8 rounded-lg border border-gray-700">
+                      <AvatarImage src="" alt="User" />
+                      <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">
+                        CN
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="grid flex-1 text-left text-sm leading-tight">
+                      <span className="truncate font-semibold">
+                        {data?.user?.name}
+                      </span>
+                      <span className="truncate text-xs text-gray-500">
+                        {data?.user?.email}
+                      </span>
+                    </div>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator className="bg-gray-800" />
+                <DropdownMenuItem className="focus:bg-gray-900 focus:text-white cursor-pointer">
+                  <User className="mr-2 h-4 w-4" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuItem className="focus:bg-gray-900 focus:text-white cursor-pointer">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Settings
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-gray-800" />
+                <DropdownMenuItem
+                  className="text-red-400 focus:text-red-300 focus:bg-red-900/20 cursor-pointer"
+                  onClick={handleLogOut}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Log out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
-         
         </div>
       </aside>
 
@@ -168,7 +190,7 @@ export default function SidebarLayout() {
             bg-gray-950 text-gray-400 hover:text-white hover:bg-gray-900
             rounded-md shadow-md
             transition-all duration-300 ease-in-out
-            ${isOpen ? 'left-[264px]' : 'left-4'}
+            ${isOpen ? "left-[264px]" : "left-4"}
         `}
         title="Toggle Sidebar"
       >
@@ -176,11 +198,13 @@ export default function SidebarLayout() {
       </button>
 
       {/* Main Content Area */}
-      <div className={`
+      <div
+        className={`
         flex-1 flex flex-col min-w-0 min-h-screen
         transition-all duration-300 ease-in-out
-        ${isOpen ? 'md:ml-64' : 'ml-0'}
-      `}>
+        ${isOpen ? "md:ml-64" : "ml-0"}
+      `}
+      >
         <main className="flex-1 p-4 md:p-8 overflow-auto">
           <Outlet />
         </main>
