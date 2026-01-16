@@ -72,6 +72,7 @@ export default function Lobby() {
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const [selectedBotIds, setSelectedBotIds] = useState<string[]>([]);
   const [activeBotTab, setActiveBotTab] = useState<"standard" | "custom">("standard");
+  const [skillFilter, setSkillFilter] = useState<"All" | "Beginner" | "Intermediate" | "Pro" | "Elite">("All");
 
   const toggleBot = (botId: string) => {
     setSelectedBotIds(prev => {
@@ -238,8 +239,28 @@ export default function Lobby() {
           </div>
         </div>
 
+        {/* Skill Filter */}
+        <div className="flex flex-wrap gap-2">
+          {(["All", "Beginner", "Intermediate", "Pro", "Elite"] as const).map((skill) => (
+            <button
+               key={skill}
+               onClick={() => setSkillFilter(skill)}
+               className={cn(
+                 "text-xs px-3 py-1.5 rounded-full border transition-all font-medium",
+                 skillFilter === skill 
+                   ? "bg-amber-500/10 border-amber-500 text-amber-500" 
+                   : "bg-gray-900/50 border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-300"
+               )}
+            >
+              {skill}
+            </button>
+          ))}
+        </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {(activeBotTab === "standard" ? BOTS : USER_BOTS).map((bot) => {
+          {(activeBotTab === "standard" ? BOTS : USER_BOTS)
+            .filter(bot => skillFilter === "All" || bot.skill === skillFilter)
+            .map((bot) => {
              const isSelected = selectedBotIds.includes(bot.id);
              return (
                <div
@@ -278,6 +299,14 @@ export default function Lobby() {
                     </h4>
                     <div className="flex items-center gap-2 text-xs">
                       <span className="text-gray-500">{bot.style}</span>
+                      <span className="text-gray-800">•</span>
+                      <span className={cn(
+                        "font-bold",
+                        bot.skill === "Beginner" && "text-green-500",
+                        bot.skill === "Intermediate" && "text-blue-500",
+                        bot.skill === "Pro" && "text-amber-500",
+                        bot.skill === "Elite" && "text-red-500",
+                      )}>{bot.skill}</span>
                     </div>
                  </div>
 
