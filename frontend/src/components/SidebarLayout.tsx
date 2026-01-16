@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 export default function SidebarLayout() {
   const [isOpen, setIsOpen] = useState(window.innerWidth >= 768);
@@ -127,9 +128,13 @@ export default function SidebarLayout() {
                       <span className="truncate font-semibold">
                         {data?.user?.name || "Player One"}
                       </span>
-                      <span className="truncate text-xs text-gray-500">
-                        {data?.user?.rank}
-                      </span>
+                      <span className={cn(
+                        "truncate text-xs text-gray-500",
+                        data?.user?.rank === "Beginner" && "text-green-500",
+                        data?.user?.rank === "Intermediate" && "text-blue-500",
+                        data?.user?.rank === "Pro" && "text-amber-500",
+                        data?.user?.rank === "Elite" && "text-red-500",
+                      )}>{data?.user?.rank}</span>
                     </div>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4 text-gray-500" />
