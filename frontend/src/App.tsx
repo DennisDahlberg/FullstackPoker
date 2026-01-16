@@ -10,6 +10,7 @@ import Game from "./pages/Game";
 import Friends from "./pages/Friends";
 import { Toaster } from "sonner";
 import FriendInviteListener from "./components/FriendNotification";
+import Lobby from "./pages/Lobby";
 
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
         <Route element={<PrivateRoute><SidebarLayout /></PrivateRoute>}>          
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/friends" element={<Friends />} />
+          <Route path="/lobby" element={<Lobby />} />
           <Route path="*" element={<div className="pt-20 text-center text-4xl">404 - Not Found</div>} />
         </Route>
 
