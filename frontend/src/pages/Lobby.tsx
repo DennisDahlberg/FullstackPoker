@@ -316,6 +316,11 @@ export default function Lobby() {
                </div>
              );
           })}
+          {activeBotTab === "custom" && USER_BOTS.length === 0 && (
+            <p className="text-gray-500 text-md col-span-full text-center border border-dashed border-gray-700 rounded-lg p-6">
+              You have no custom bots. Create one in the Bots page.
+            </p>
+          )}
         </div>
       </div>
 
