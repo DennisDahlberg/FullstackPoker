@@ -17,7 +17,7 @@ namespace backend
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +35,7 @@ namespace backend
             builder.Services.AddTransient<FriendService>();
             builder.Services.AddTransient<BotService>();
             builder.Services.AddTransient<BotRepository>();
+            builder.Services.AddTransient<DataInitializer>();
 
 
             //EF Core
@@ -147,7 +148,13 @@ namespace backend
             using (var scope = app.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-                db.Database.Migrate();
+                await db.Database.MigrateAsync();
+            }
+            
+            using (var scope = app.Services.CreateScope())
+            {
+                var dataInitializer = scope.ServiceProvider.GetRequiredService<DataInitializer>();
+                await dataInitializer.SeedData();
             }
 
             app.MapHub<FriendsHub>("/hubs/friends");

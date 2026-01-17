@@ -34,4 +34,6 @@ public class Bot
     public SkillLevel SkillLevel { get; set; }
 
     public string? ProfileImageUrl { get; set; }
+    
+    public bool IsUserCreated { get; set; }
 }
