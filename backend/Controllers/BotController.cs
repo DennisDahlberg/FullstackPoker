@@ -9,9 +9,9 @@ namespace backend.Controllers;
 [Route("[Controller]")]
 public class BotController
 {
-    [HttpGet]
-    public async Task<IActionResult> GetAllBotsAsync()
-    {
-        return Ok();
-    }
+    // [HttpGet]
+    // public async Task<IActionResult> GetAllBotsAsync()
+    // {
+    //     return Ok();
+    // }
 }
