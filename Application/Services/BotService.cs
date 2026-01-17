@@ -19,6 +19,7 @@ public class BotService
         var result = await _botRepository.GetAllBotsAsync();
         var bots = result.Select(b => new BotDto
         {
+            Id = b.Id,
             Username =  b.Username,
             Description =  b.Description,
             IsUserCreated =  b.IsUserCreated,

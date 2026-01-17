@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { 
@@ -17,26 +18,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { BotProfile, TableConfig } from "@/types/Lobby";
 
-const BOTS: BotProfile[] = [
-  { id: "bot1", name: "Poker Pro", style: "Aggressive", skill: "Pro" },
-  { id: "bot2", name: "Lucky Luke", style: "Loose Passive", skill: "Beginner" },
-  { id: "bot3", name: "Bluff Master", style: "Deceptive", skill: "Intermediate" },
-  { id: "bot4", name: "Check Raiser", style: "Tight Aggressive", skill: "Elite" },
-  { id: "bot5", name: "Tight Passive", style: "Conservative", skill: "Beginner" },
-  { id: "bot6", name: "Maniac Mark", style: "Wild", skill: "Intermediate" },
-  { id: "bot7", name: "Fishy Fred", style: "Calling Station", skill: "Beginner" },
-  { id: "bot8", name: "Math Whiz", style: "Analytical", skill: "Elite" },
-  { id: "bot9", name: "Tilt Tom", style: "Emotional", skill: "Intermediate" },
-  { id: "bot10", name: "Slow Play", style: "Tricky", skill: "Pro" },
-];
 
-const USER_BOTS: BotProfile[] = [
-  { id: "userbot1", name: "My First Bot", style: "Balanced", skill: "Beginner" },
-  { id: "userbot2", name: "Aggro Trainer", style: "Hyper Aggressive", skill: "Intermediate" },
-  { id: "userbot3", name: "Nit Bot", style: "Rock", skill: "Pro" },
-  { id: "userbot4", name: "GTO Widget", style: "Optimal", skill: "Elite" },
-  { id: "userbot5", name: "Randomizer", style: "Unpredictable", skill: "Beginner" },
-];
 
 const TABLES: TableConfig[] = [
   {
@@ -73,6 +55,31 @@ export default function Lobby() {
   const [selectedBotIds, setSelectedBotIds] = useState<string[]>([]);
   const [activeBotTab, setActiveBotTab] = useState<"standard" | "custom">("standard");
   const [skillFilter, setSkillFilter] = useState<"All" | "Beginner" | "Intermediate" | "Pro" | "Elite">("All");
+  const [bots, setBots] = useState<BotProfile[]>([]);
+
+  const standardBots = bots.filter(b => !b.isUserCreated);
+  const userBots = bots.filter(b => b.isUserCreated);
+
+  useEffect(() => {
+    const fetchBots = async () => {
+      try {
+        const data = await api.bots.getBotProfiles();
+        const mappedBots = data.map((b: any) => ({
+          id: b.id,
+          name: b.username,
+          style: b.playStyle,
+          skill: b.skillLevel || "Beginner",
+          image: b.profileImageUrl,
+          isUserCreated: b.isUserCreated
+        }));
+        setBots(mappedBots);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch bots");
+      }
+    };
+    fetchBots();
+  }, []);
 
   const getAllowedSkills = (tableId: string | null) => {
     switch (tableId) {
@@ -91,9 +98,8 @@ export default function Lobby() {
     const validSkills = getAllowedSkills(selectedTableId);
     
     setSelectedBotIds(prev => {
-      const allBots = [...BOTS, ...USER_BOTS];
       return prev.filter(botId => {
-        const bot = allBots.find(b => b.id === botId);
+        const bot = bots.find(b => b.id === botId);
         return bot && validSkills.includes(bot.skill);
       });
     });
@@ -101,7 +107,7 @@ export default function Lobby() {
     if (skillFilter !== "All" && !validSkills.includes(skillFilter)) {
       setSkillFilter("All");
     }
-  }, [selectedTableId]);
+  }, [selectedTableId, bots]);
 
   const toggleBot = (botId: string) => {
     setSelectedBotIds(prev => {
@@ -292,7 +298,7 @@ export default function Lobby() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {(activeBotTab === "standard" ? BOTS : USER_BOTS)
+          {(activeBotTab === "standard" ? standardBots : userBots)
             .filter(bot => {
               const isAllowedByTable = allowedSkills.includes(bot.skill);
               const matchesFilter = skillFilter === "All" || bot.skill === skillFilter;
@@ -350,7 +356,7 @@ export default function Lobby() {
                </div>
              );
           })}
-          {activeBotTab === "custom" && USER_BOTS.length === 0 && (
+          {activeBotTab === "custom" && userBots.length === 0 && (
             <p className="text-gray-500 text-md col-span-full text-center border border-dashed border-gray-700 rounded-lg p-6">
               You have no custom bots. Create one in the Bots page.
             </p>

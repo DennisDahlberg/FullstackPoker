@@ -4,6 +4,7 @@ export interface BotProfile {
   style: string;
   skill: "Beginner" | "Intermediate" | "Pro" | "Elite";
   image?: string;
+  isUserCreated?: boolean;
 }
 
 export interface TableConfig {
