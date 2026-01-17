@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
 import { 
@@ -73,6 +73,35 @@ export default function Lobby() {
   const [selectedBotIds, setSelectedBotIds] = useState<string[]>([]);
   const [activeBotTab, setActiveBotTab] = useState<"standard" | "custom">("standard");
   const [skillFilter, setSkillFilter] = useState<"All" | "Beginner" | "Intermediate" | "Pro" | "Elite">("All");
+
+  const getAllowedSkills = (tableId: string | null) => {
+    switch (tableId) {
+      case "table3":
+        return ["Pro", "Elite"];
+      case "table2": 
+        return ["Intermediate", "Pro", "Elite"];
+      default: 
+        return ["Beginner", "Intermediate", "Pro", "Elite"];
+    }
+  };
+
+  const allowedSkills = getAllowedSkills(selectedTableId);
+
+  useEffect(() => {
+    const validSkills = getAllowedSkills(selectedTableId);
+    
+    setSelectedBotIds(prev => {
+      const allBots = [...BOTS, ...USER_BOTS];
+      return prev.filter(botId => {
+        const bot = allBots.find(b => b.id === botId);
+        return bot && validSkills.includes(bot.skill);
+      });
+    });
+
+    if (skillFilter !== "All" && !validSkills.includes(skillFilter)) {
+      setSkillFilter("All");
+    }
+  }, [selectedTableId]);
 
   const toggleBot = (botId: string) => {
     setSelectedBotIds(prev => {
@@ -241,25 +270,34 @@ export default function Lobby() {
 
         {/* Skill Filter */}
         <div className="flex flex-wrap gap-2">
-          {(["All", "Beginner", "Intermediate", "Pro", "Elite"] as const).map((skill) => (
-            <button
-               key={skill}
-               onClick={() => setSkillFilter(skill)}
-               className={cn(
-                 "text-xs px-3 py-1.5 rounded-full border transition-all font-medium",
-                 skillFilter === skill 
-                   ? "bg-amber-500/10 border-amber-500 text-amber-500" 
-                   : "bg-gray-900/50 border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-300"
-               )}
-            >
-              {skill}
-            </button>
-          ))}
+          {(["All", "Beginner", "Intermediate", "Pro", "Elite"] as const).map((skill) => {
+            const isAllowed = skill === "All" || allowedSkills.includes(skill);
+            return (
+              <button
+                key={skill}
+                onClick={() => setSkillFilter(skill)}
+                disabled={!isAllowed}
+                className={cn(
+                  "text-xs px-3 py-1.5 rounded-full border transition-all font-medium",
+                  !isAllowed && "opacity-30 cursor-not-allowed",
+                  skillFilter === skill 
+                    ? "bg-amber-500/10 border-amber-500 text-amber-500" 
+                    : "bg-gray-900/50 border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-300"
+                )}
+              >
+                {skill}
+              </button>
+            );
+          })}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
           {(activeBotTab === "standard" ? BOTS : USER_BOTS)
-            .filter(bot => skillFilter === "All" || bot.skill === skillFilter)
+            .filter(bot => {
+              const isAllowedByTable = allowedSkills.includes(bot.skill);
+              const matchesFilter = skillFilter === "All" || bot.skill === skillFilter;
+              return isAllowedByTable && matchesFilter;
+            })
             .map((bot) => {
              const isSelected = selectedBotIds.includes(bot.id);
              return (
