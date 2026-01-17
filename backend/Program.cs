@@ -33,6 +33,8 @@ namespace backend
             builder.Services.AddTransient<BotAiService>();
             builder.Services.AddTransient<FriendsRepository>();
             builder.Services.AddTransient<FriendService>();
+            builder.Services.AddTransient<BotService>();
+            builder.Services.AddTransient<BotRepository>();
 
 
             //EF Core
