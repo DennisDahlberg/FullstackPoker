@@ -155,6 +155,20 @@ export const api = {
     }
   },
 
+  bots: {
+    async getBotProfiles() {
+      try {
+        const response = await apiClient.get(`${backendUrl}/bot`);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to fetch bot profiles';
+        }
+        throw 'An error occurred while fetching bot profiles';
+      }
+    }
+  },
+
   auth: {
     async login(email:string, password:string) {
       try {
