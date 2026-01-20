@@ -18,39 +18,14 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { BotProfile, TableConfig } from "@/types/Lobby";
 
-
-
-const TABLES: TableConfig[] = [
-  {
-    id: "table1",
-    name: "Low Stakes",
-    description: "Perfect for learning and casual play",
-    buyIn: 100,
-    smallBlind: 1,
-    bigBlind: 2,
-    difficulty: "Casual"
-  },
-  {
-    id: "table2",
-    name: "Mid Stakes",
-    description: "Standard competitive play for grinders",
-    buyIn: 250,
-    smallBlind: 2,
-    bigBlind: 5,
-    difficulty: "Standard"
-  },
-  {
-    id: "table3",
-    name: "High Stakes",
-    description: "High risk, high reward for experts",
-    buyIn: 500,
-    smallBlind: 5,
-    bigBlind: 10,
-    difficulty: "Hardcore"
-  }
-];
+const difficultyStyle: Record<string, { icon: typeof ShieldCheck; color: string }> = {
+  Casual: { icon: ShieldCheck, color: "text-green-500" },
+  Standard: { icon: Zap, color: "text-amber-500" },
+  Hardcore: { icon: Trophy, color: "text-red-500" },
+};
 
 export default function Lobby() {
+  const [tables, setTables] = useState<TableConfig[]>([]);
   const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
   const [selectedBotIds, setSelectedBotIds] = useState<string[]>([]);
   const [activeBotTab, setActiveBotTab] = useState<"standard" | "custom">("standard");
@@ -59,6 +34,28 @@ export default function Lobby() {
 
   const standardBots = bots.filter(b => !b.isUserCreated);
   const userBots = bots.filter(b => b.isUserCreated);
+
+  useEffect(() => {
+    const fetchTables = async () => {
+      try {
+        const data = await api.tableConfigs.getTableConfigs();
+        const mappedTables: TableConfig[] = data.map((t: any) => ({
+          id: String(t.id),
+          name: t.name,
+          description: t.description,
+          buyIn: t.buyIn,
+          smallBlind: t.smallBlind,
+          bigBlind: t.bigBlind,
+          difficulty: t.difficulty
+        }));
+        setTables(mappedTables);
+      } catch (err) {
+        console.error(err);
+        toast.error("Failed to fetch table configurations");
+      }
+    };
+    fetchTables();
+  }, []);
 
   useEffect(() => {
     const fetchBots = async () => {
@@ -82,10 +79,13 @@ export default function Lobby() {
   }, []);
 
   const getAllowedSkills = (tableId: string | null) => {
-    switch (tableId) {
-      case "table3":
+    const table = tables.find(t => t.id === tableId);
+    if (!table) return ["Beginner", "Intermediate", "Pro", "Elite"];
+    
+    switch (table.difficulty) {
+      case "Hardcore":
         return ["Pro", "Elite"];
-      case "table2": 
+      case "Standard": 
         return ["Intermediate", "Pro", "Elite"];
       default: 
         return ["Beginner", "Intermediate", "Pro", "Elite"];
@@ -140,7 +140,7 @@ export default function Lobby() {
     }
 
     toast.success("Starting Game", {
-      description: `Table: ${TABLES.find(t => t.id === selectedTableId)?.name} • Opponents: ${selectedBotIds.length}`
+      description: `Table: ${tables.find(t => t.id === selectedTableId)?.name} • Opponents: ${selectedBotIds.length}`
     });
   };
 
@@ -164,8 +164,10 @@ export default function Lobby() {
           Select Stakes
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TABLES.map((table) => {
+          {tables.map((table) => {
             const isSelected = selectedTableId === table.id;
+            const style = difficultyStyle[table.difficulty] ?? difficultyStyle["Standard"];
+            const IconComponent = style.icon;
             return (
               <div
                 key={table.id}
@@ -191,13 +193,10 @@ export default function Lobby() {
                 <div className="space-y-4">
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                       {table.difficulty === "Casual" && <ShieldCheck className="w-4 h-4 text-green-500" />}
-                       {table.difficulty === "Standard" && <Zap className="w-4 h-4 text-amber-500" />}
-                       {table.difficulty === "Hardcore" && <Trophy className="w-4 h-4 text-red-500" />}
+                       <IconComponent className={cn("w-4 h-4", style.color)} />
                        <span className={cn(
                          "text-xs font-bold uppercase tracking-wider",
-                         table.difficulty === "Casual" ? "text-green-500" : 
-                         table.difficulty === "Standard" ? "text-amber-500" : "text-red-500"
+                         style.color
                        )}>
                          {table.difficulty}
                        </span>
