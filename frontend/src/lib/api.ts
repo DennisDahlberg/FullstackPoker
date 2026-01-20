@@ -169,6 +169,20 @@ export const api = {
     }
   },
 
+  tableConfigs: {
+    async getTableConfigs() {
+      try {
+        const response = await apiClient.get(`${backendUrl}/table`);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to fetch table configurations';
+        }
+        throw 'An error occurred while fetching table configurations';
+      }
+    }
+  },
+
   auth: {
     async login(email:string, password:string) {
       try {
