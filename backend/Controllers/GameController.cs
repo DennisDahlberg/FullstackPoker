@@ -16,13 +16,15 @@ namespace backend.Controllers
     {
         private readonly GameService _gameService;
         private readonly CurrentUserService _currentUserService;
+        private readonly BotService _botService;
         private readonly ITableService _tableService;
 
-        public GameController(GameService gameService, CurrentUserService currentUserService, ITableService tableService)
+        public GameController(GameService gameService, CurrentUserService currentUserService, ITableService tableService, BotService botService)
         {
             _gameService = gameService;
             _currentUserService = currentUserService;
             _tableService = tableService;
+            _botService = botService;
         }
 
         [HttpPost("start")]
@@ -32,6 +34,13 @@ namespace backend.Controllers
             if (table.IsFailed)
                 return BadRequest(new {message = table.Errors.FirstOrDefault()?.Message 
                                                  ?? "Failed to find table by given id"});
+
+            var bots = await _botService
+                .GetBotsForGameAsync(request.BotIds);
+            if (bots.IsFailed)
+                return BadRequest(new { message = bots.Errors.FirstOrDefault()?.Message
+                                                  ?? "Failed to find bots for game" });
+            
             return Ok();
         }
         

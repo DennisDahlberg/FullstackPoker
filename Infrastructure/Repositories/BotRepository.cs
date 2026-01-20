@@ -18,4 +18,10 @@ public class BotRepository
         var bots = await _context.Bots.ToListAsync();
         return bots;
     }
+
+    public async Task<Bot?> GetBotByIdAsync(int botId)
+    {
+        var bot = await _context.Bots.FirstOrDefaultAsync(b => b.Id == botId);
+        return bot;
+    }
 }

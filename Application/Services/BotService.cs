@@ -1,4 +1,5 @@
 using Core.DTOs.Bot;
+using FluentResults;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
 using Mapster;
@@ -28,5 +29,21 @@ public class BotService
             SkillLevel = b.SkillLevel.ToString()
         }).ToList();
         return bots;
+    }
+
+    public async Task<Result<List<BotDto>>> GetBotsForGameAsync(List<int> botIds)
+    {
+        var bots = new List<BotDto>();
+        foreach (var id in botIds)
+        {
+            var bot = await _botRepository.GetBotByIdAsync(id);
+            if (bot != null)
+                bots.Add(bot.Adapt<BotDto>());
+        }
+
+        if (bots.Count == 0)
+            return Result.Fail("No bots were found");
+        
+        return Result.Ok(bots);
     }
 }
