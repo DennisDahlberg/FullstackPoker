@@ -20,9 +20,9 @@
         public List<string> AvailableActions { get; set; } = [];
         public int BigBlind { get; set; }
         public int SmallBlind { get; set; }
-        public int DealerPosition { get; set; } = 3;
-        public int SmallBlindPosition { get; set; } = 4;
-        public int BigBlindPosition { get; set; } = 5;
+        public int DealerPosition { get; set; } = 0;
+        public int SmallBlindPosition { get; set; } = 1;
+        public int BigBlindPosition { get; set; } = 2;
         public int LastAggressorIndex { get; set; }
         public int CurrentPlayerPosition { get; set; } = 0;
         public int HighestBet { get; set; } = 0;
