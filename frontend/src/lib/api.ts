@@ -67,6 +67,20 @@ export const api = {
   client: apiClient,
 
   game: {
+    async initializeGame(tableId:number, botIds:number[]) {
+      try {
+        const response = await apiClient.post(`${backendUrl}/game/start`, {
+          tableId,
+          botIds
+        });
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to initialize game';
+        }
+        throw 'An error occurred while initializing game';
+      }
+    },
     async initGame() {
       const response = await apiClient.get(`${backendUrl}/game/start`);
       return response.data;

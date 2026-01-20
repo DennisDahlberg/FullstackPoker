@@ -125,7 +125,7 @@ export default function Lobby() {
     });
   };
 
-  const handleStartGame = () => {
+  const handleStartGame = async () => {
     if (!selectedTableId) {
       toast.error("No Table Selected", {
         description: "Please choose a table to start playing."
@@ -142,6 +142,13 @@ export default function Lobby() {
     toast.success("Starting Game", {
       description: `Table: ${tables.find(t => t.id === selectedTableId)?.name} • Opponents: ${selectedBotIds.length}`
     });
+
+    try {
+      await api.game.initializeGame(Number(selectedTableId), selectedBotIds.map(id => Number(id)));
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to start game");
+    }
   };
 
   return (
