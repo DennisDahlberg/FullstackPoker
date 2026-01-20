@@ -15,6 +15,46 @@ public class DataInitializer
     public async Task SeedData()
     {
         await SeedBots();
+        await SeedTables();
+    }
+
+    private async Task SeedTables()
+    {
+        if (_context.Tables.Any())
+            return;
+
+        _context.Tables.AddRange(new List<Table>
+        {
+            new Table
+            {
+                Name = "Low Stakes",
+                Description = "Perfect for learning and casual play",
+                Difficulty = "Casual",
+                BuyIn = 100,
+                SmallBlind = 1,
+                BigBlind = 2
+            },
+            new Table
+            {
+                Name = "Mid Stakes",
+                Description = "Standard competitive play for grinders",
+                Difficulty = "Standard",
+                BuyIn = 250,
+                SmallBlind = 2,
+                BigBlind = 5
+            },
+            new Table
+            {
+                Name = "High Stakes",
+                Description = "High risk, high reward for experts",
+                Difficulty = "Hardcore",
+                BuyIn = 500,
+                SmallBlind = 5,
+                BigBlind = 10
+            },
+        });
+
+        await _context.SaveChangesAsync();
     }
 
     private async Task SeedBots()
