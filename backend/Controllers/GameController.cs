@@ -3,6 +3,7 @@ using backend.Services;
 using Core.GameModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using Core.DTOs.Game;
 using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers
@@ -21,6 +22,12 @@ namespace backend.Controllers
             _currentUserService = currentUserService;
         }
 
+        [HttpPost("start")]
+        public IActionResult InitializeGame([FromBody] StartGameRequest request)
+        {
+            return Ok();
+        }
+        
         [HttpGet("start")]
         public IActionResult Start()
         {
