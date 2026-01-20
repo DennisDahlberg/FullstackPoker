@@ -3,9 +3,11 @@ using backend.Services;
 using Core.GameModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("[Controller]")]
     public class GameController : Controller
