@@ -59,7 +59,9 @@ namespace backend.Controllers
                     message = user.Errors.FirstOrDefault()?.Message 
                     ?? "Failed to find user"
                 });
-            
+
+            var gameState = _gameService.InitializeGame(user.Value, table.Value, bots.Value);
+            HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(gameState));
             
             return Ok();
         }
@@ -68,17 +70,17 @@ namespace backend.Controllers
         public IActionResult Start()
         {
             var json = HttpContext.Session.GetString("GameState");
-            if (json is not null)
-            {
-                var gameState = JsonSerializer.Deserialize<GameState>(json);
-                return Ok(gameState);
-            }
+            if (json is null) return NotFound(new { message = "No active game found" });
+            
+            var gameState = JsonSerializer.Deserialize<GameState>(json);
+            return Ok(gameState);
 
-            var playerInfo = _currentUserService.GetPlayerInfo();
-            var newGameState = _gameService.InitializeGame(playerInfo);
+            // var playerInfo = _currentUserService.GetPlayerInfo();
+            // var newGameState = _gameService.InitializeGame(playerInfo);
+            //
+            // HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(newGameState));
+            // return Ok(newGameState);
 
-            HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(newGameState));
-            return Ok(newGameState);
         }
 
         [HttpPost("action")]

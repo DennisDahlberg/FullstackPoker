@@ -1,5 +1,7 @@
 ﻿using System.Text.Json;
 using Core.DTOs;
+using Core.DTOs.Bot;
+using Core.DTOs.Table;
 using Core.GameModels;
 using Core.Models;
 using Microsoft.AspNetCore.Identity;
@@ -20,18 +22,17 @@ namespace Application.Services
             _userManager = userManager;
         }
 
-        public GameState InitializeGame(PlayerInfoDTO playerInfo)
+        public GameState InitializeGame(UserDTO playerInfo, TableDto table, List<BotDto> bots)
         {
             var gameState = new GameState();
 
-            gameState.Players.Add(new Player { Name = playerInfo.Name, Chips = 1000, IsPlayer = true });
-            gameState.Players.Add(new Player { Name = "Albert", Chips = 1000 });
-            gameState.Players.Add(new Player { Name = "Otto", Chips = 1000 });
-            gameState.Players.Add(new Player { Name = "Corre", Chips = 1000 });
-            gameState.Players.Add(new Player { Name = "Calle", Chips = 1000 });
-            gameState.Players.Add(new Player { Name = "Lotta", Chips = 1000 });
+            gameState.Players.Add(new Player { Name = playerInfo.Username, Chips = table.BuyIn, IsPlayer = true });
+            foreach (var bot in bots)  
+            {
+                gameState.Players.Add(new Player { Name = bot.Username, Chips = table.BuyIn, IsPlayer = false });
+            }
 
-            SetupBlinds(gameState);
+            SetupBlinds(gameState, table);
 
             gameState.Deck = InitializeDeck();
             foreach (var player in gameState.Players)
@@ -91,9 +92,11 @@ namespace Application.Services
             return gameState;
         }
 
-        public void SetupBlinds(GameState state)
+        public void SetupBlinds(GameState state, TableDto table)
         {
             var playerCount = state.Players.Count;
+            state.SmallBlind = table.SmallBlind;
+            state.BigBlind = table.BigBlind;
 
             foreach (var player in state.Players)
             {
