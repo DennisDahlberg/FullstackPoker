@@ -10,7 +10,8 @@ namespace Infrastructure.Data
         }
 
         public DbSet<Friend> Friends { get; set; }
-        public DbSet<Bot> Bots { get; set; } 
+        public DbSet<Bot> Bots { get; set; }
+        public DbSet<Table> Tables { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
