@@ -1,3 +1,4 @@
+using Core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
@@ -5,7 +6,7 @@ using Table = Core.Models.Table;
 
 namespace Infrastructure.Repositories;
 
-public class TableRepository
+public class TableRepository : ITableRepository
 {
     private readonly ApplicationDbContext _context;
 

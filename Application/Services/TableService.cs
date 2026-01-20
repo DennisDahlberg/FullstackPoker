@@ -1,6 +1,15 @@
+using Core.Interfaces;
+
 namespace Application.Services;
 
-public class TableService
+public class TableService : ITableService
 {
+    private readonly ITableRepository _repository;
+
+    public TableService(ITableRepository repository)
+    {
+        _repository = repository;
+    }
+    
     
 }
