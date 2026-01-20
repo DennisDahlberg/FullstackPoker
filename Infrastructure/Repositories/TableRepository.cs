@@ -20,5 +20,12 @@ public class TableRepository : ITableRepository
         var tables = await _context.Tables.ToListAsync();
         return tables;
     }
+
+    public async Task<Table?> GetTableByIdAsync(int id)
+    {
+        var table = await _context.Tables
+            .FirstOrDefaultAsync(t => t.Id == id);
+        return table;
+    }
     
 }

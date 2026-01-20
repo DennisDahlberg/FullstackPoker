@@ -10,4 +10,10 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.11" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Reference Include="FluentResults">
+      <HintPath>..\..\..\.nuget\packages\fluentresults\4.0.0\lib\net9.0\FluentResults.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

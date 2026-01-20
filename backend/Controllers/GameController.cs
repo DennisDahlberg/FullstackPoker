@@ -4,6 +4,7 @@ using Core.GameModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 using Core.DTOs.Game;
+using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers
@@ -15,16 +16,22 @@ namespace backend.Controllers
     {
         private readonly GameService _gameService;
         private readonly CurrentUserService _currentUserService;
+        private readonly ITableService _tableService;
 
-        public GameController(GameService gameService, CurrentUserService currentUserService)
+        public GameController(GameService gameService, CurrentUserService currentUserService, ITableService tableService)
         {
             _gameService = gameService;
             _currentUserService = currentUserService;
+            _tableService = tableService;
         }
 
         [HttpPost("start")]
-        public IActionResult InitializeGame([FromBody] StartGameRequest request)
+        public async Task<IActionResult> InitializeGame([FromBody] StartGameRequest request)
         {
+            var table = await _tableService.GetTableByIdAsync(request.TableId);
+            if (table.IsFailed)
+                return BadRequest(new {message = table.Errors.FirstOrDefault()?.Message 
+                                                 ?? "Failed to find table by given id"});
             return Ok();
         }
         
