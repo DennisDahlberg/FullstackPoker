@@ -3,8 +3,11 @@ using backend.Services;
 using Core.GameModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using Core.DTOs;
 using Core.DTOs.Game;
 using Core.Interfaces;
+using Infrastructure.Services;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 
 namespace backend.Controllers
@@ -18,13 +21,15 @@ namespace backend.Controllers
         private readonly CurrentUserService _currentUserService;
         private readonly BotService _botService;
         private readonly ITableService _tableService;
+        private readonly UserService _userService;
 
-        public GameController(GameService gameService, CurrentUserService currentUserService, ITableService tableService, BotService botService)
+        public GameController(GameService gameService, CurrentUserService currentUserService, ITableService tableService, BotService botService, UserService userService)
         {
             _gameService = gameService;
             _currentUserService = currentUserService;
             _tableService = tableService;
             _botService = botService;
+            _userService = userService;
         }
 
         [HttpPost("start")]
@@ -32,14 +37,29 @@ namespace backend.Controllers
         {
             var table = await _tableService.GetTableByIdAsync(request.TableId);
             if (table.IsFailed)
-                return BadRequest(new {message = table.Errors.FirstOrDefault()?.Message 
-                                                 ?? "Failed to find table by given id"});
+                return BadRequest(new 
+                {
+                    message = table.Errors.FirstOrDefault()?.Message 
+                    ?? "Failed to find table by given id"
+                });
 
             var bots = await _botService
                 .GetBotsForGameAsync(request.BotIds);
             if (bots.IsFailed)
-                return BadRequest(new { message = bots.Errors.FirstOrDefault()?.Message
-                                                  ?? "Failed to find bots for game" });
+                return BadRequest(new 
+                { 
+                    message = bots.Errors.FirstOrDefault()?.Message
+                    ?? "Failed to find bots for game" 
+                });
+            var userId = _userService.GetLoggedInUserId(User);
+            var user = await _userService.GetUserDataAsync(userId);
+            if (user.IsFailed)
+                return BadRequest(new
+                {
+                    message = user.Errors.FirstOrDefault()?.Message 
+                    ?? "Failed to find user"
+                });
+            
             
             return Ok();
         }
