@@ -13,7 +13,8 @@ import {
   Cpu,
   ShieldCheck,
   Swords,
-  AlertCircle
+  AlertCircle,
+  Loader2
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ export default function Lobby() {
   const [activeBotTab, setActiveBotTab] = useState<"standard" | "custom">("standard");
   const [skillFilter, setSkillFilter] = useState<"All" | "Beginner" | "Intermediate" | "Pro" | "Elite">("All");
   const [bots, setBots] = useState<BotProfile[]>([]);
+  const [isLoadingTables, setIsLoadingTables] = useState(true);
 
   const navigate = useNavigate();
 
@@ -41,6 +43,7 @@ export default function Lobby() {
   useEffect(() => {
     const fetchTables = async () => {
       try {
+        setIsLoadingTables(true);
         const data = await api.tableConfigs.getTableConfigs();
         const mappedTables: TableConfig[] = data.map((t: any) => ({
           id: String(t.id),
@@ -52,6 +55,7 @@ export default function Lobby() {
           difficulty: t.difficulty
         }));
         setTables(mappedTables);
+        setIsLoadingTables(false);
       } catch (err) {
         console.error(err);
         toast.error("Failed to fetch table configurations");
@@ -173,7 +177,12 @@ export default function Lobby() {
           <Coins className="text-amber-500 w-5 h-5" />
           Select Stakes
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {isLoadingTables ? (
+          <div className="flex justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {tables.map((table) => {
             const isSelected = selectedTableId === table.id;
             const style = difficultyStyle[table.difficulty] ?? difficultyStyle["Standard"];
@@ -234,6 +243,9 @@ export default function Lobby() {
             );
           })}
         </div>
+        )}
+
+        
       </div>
 
       {/* Opponent Selection */}
