@@ -12,7 +12,7 @@
     public class GameState
     {
         public List<Player> Players { get; set; } = [];
-        public int CurrentPlayerIndex { get; set; } = 0;
+        public int CurrentPlayerIndex { get; set; }
         public List<PlayerCard> CommunityCards { get; set; } = [];
         public List<PlayerCard> Deck { get; set; } = [];
         public int Pot { get; set; }
@@ -20,13 +20,12 @@
         public List<string> AvailableActions { get; set; } = [];
         public int BigBlind { get; set; }
         public int SmallBlind { get; set; }
-        public int DealerPosition { get; set; } = 0;
-        public int SmallBlindPosition { get; set; } = 1;
-        public int BigBlindPosition { get; set; } = 2;
-        public int LastAggressorIndex { get; set; }
-        public int CurrentPlayerPosition { get; set; } = 0;
+        public int DealerPosition { get; set; }
+        public int SmallBlindPosition { get; set; }
+        public int BigBlindPosition { get; set; }
         public int HighestBet { get; set; } = 0;
         public bool IsGameOver { get; set; }
+        public bool IsFirstRound { get; set; } = true;
         public List<int> WinnersPositions { get; set; } = [];
     }
 }

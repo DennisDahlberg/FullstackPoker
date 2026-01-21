@@ -98,6 +98,24 @@ namespace Application.Services
             state.SmallBlind = table.SmallBlind;
             state.BigBlind = table.BigBlind;
 
+            if (state.IsFirstRound)
+                state.DealerPosition = _random.Next(0, playerCount);
+            else
+                state.DealerPosition = (state.DealerPosition + 1)  % playerCount;
+
+            if (playerCount <= 2)
+            {
+                state.SmallBlindPosition = state.DealerPosition;
+                state.CurrentPlayerIndex = state.DealerPosition;
+            }
+            else
+            {
+                state.SmallBlindPosition = (state.SmallBlindPosition + 2)  % playerCount;
+                state.CurrentPlayerIndex = (state.BigBlindPosition + 1)  % playerCount;
+            }
+            
+            state.BigBlindPosition = (state.SmallBlindPosition + 1)  % playerCount;
+            
             foreach (var player in state.Players)
             {
                 player.IsDealer = false;
@@ -120,8 +138,7 @@ namespace Application.Services
             bigBlindPlayer.CurrentBet = bigBlindAmount;
             state.Pot += bigBlindAmount;
             state.HighestBet = bigBlindAmount;
-
-            state.LastAggressorIndex = (state.BigBlindPosition + 1) % state.Players.Count;
+            state.IsFirstRound = false;
         }
 
         public void GetStartingHand(Player player, List<PlayerCard> deck)
