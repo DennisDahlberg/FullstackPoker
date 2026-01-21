@@ -110,8 +110,8 @@ namespace Application.Services
             }
             else
             {
-                state.SmallBlindPosition = (state.SmallBlindPosition + 2)  % playerCount;
-                state.CurrentPlayerIndex = (state.BigBlindPosition + 1)  % playerCount;
+                state.SmallBlindPosition = (state.DealerPosition + 1)  % playerCount;
+                state.CurrentPlayerIndex = (state.SmallBlindPosition + 2)  % playerCount;
             }
             
             state.BigBlindPosition = (state.SmallBlindPosition + 1)  % playerCount;

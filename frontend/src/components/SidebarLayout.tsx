@@ -34,10 +34,10 @@ export default function SidebarLayout() {
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-    { icon: CirclePlay, label: "Game", href: "/game" },
+    { icon: CirclePlay, label: "Game", href: "/lobby" },
     { icon: UserRound, label: "Friends", href: "/friends" },
     { icon: Settings, label: "Settings", href: "/settings" },
-    { icon: UsersRound, label: "Lobby", href: "/lobby" },
+    // { icon: UsersRound, label: "Lobby", href: "/lobby" },
   ];
 
   function handleLogOut() {
