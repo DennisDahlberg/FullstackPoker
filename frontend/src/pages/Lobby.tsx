@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
@@ -31,6 +32,8 @@ export default function Lobby() {
   const [activeBotTab, setActiveBotTab] = useState<"standard" | "custom">("standard");
   const [skillFilter, setSkillFilter] = useState<"All" | "Beginner" | "Intermediate" | "Pro" | "Elite">("All");
   const [bots, setBots] = useState<BotProfile[]>([]);
+
+  const navigate = useNavigate();
 
   const standardBots = bots.filter(b => !b.isUserCreated);
   const userBots = bots.filter(b => b.isUserCreated);
@@ -137,14 +140,14 @@ export default function Lobby() {
         description: "Please select at least one opponent."
       });
       return;
-    }
-
-    toast.success("Starting Game", {
-      description: `Table: ${tables.find(t => t.id === selectedTableId)?.name} • Opponents: ${selectedBotIds.length}`
-    });
+    }    
 
     try {
       await api.game.initializeGame(Number(selectedTableId), selectedBotIds.map(id => Number(id)));
+      toast.success("Starting Game", {
+        description: `Table: ${tables.find(t => t.id === selectedTableId)?.name} • Opponents: ${selectedBotIds.length}`
+      });
+      navigate("/game");
     } catch (err) {
       console.error(err);
       toast.error("Failed to start game");
