@@ -154,7 +154,7 @@ export default function Lobby() {
       navigate("/game");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to start game");
+      toast.error(String(err) || "Failed to start game");
     }
   };
 

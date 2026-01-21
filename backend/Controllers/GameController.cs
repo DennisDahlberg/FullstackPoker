@@ -53,6 +53,8 @@ namespace backend.Controllers
                 });
             var userId = _userService.GetLoggedInUserId(User);
             var user = await _userService.GetUserDataAsync(userId);
+            if (user.Value.Balance < table.Value.BuyIn)
+                return BadRequest(new {message = "You do not have enough funds to buy in"});
             if (user.IsFailed)
                 return BadRequest(new
                 {

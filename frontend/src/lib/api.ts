@@ -76,7 +76,7 @@ export const api = {
         return response.data;
       } catch (err) {
         if (axios.isAxiosError(err)) {
-          throw err.response?.data || 'Failed to initialize game';
+          throw err.response?.data.message || 'Failed to initialize game';
         }
         throw 'An error occurred while initializing game';
       }
