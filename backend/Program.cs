@@ -39,7 +39,7 @@ namespace backend
             builder.Services.AddTransient<DataInitializer>();
             builder.Services.AddTransient<ITableService, TableService>();
             builder.Services.AddTransient<ITableRepository, TableRepository>();
-
+            builder.Services.AddTransient<IGameHistoryService, GameHistoryService>();
 
             //EF Core
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
