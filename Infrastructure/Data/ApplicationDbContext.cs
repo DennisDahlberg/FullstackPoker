@@ -1,4 +1,5 @@
 ﻿using Core.Models;
+using Core.Models.Games;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Data
@@ -12,6 +13,8 @@ namespace Infrastructure.Data
         public DbSet<Friend> Friends { get; set; }
         public DbSet<Bot> Bots { get; set; }
         public DbSet<Table> Tables { get; set; }
+        public DbSet<Game> Games { get; set; }
+        public DbSet<PlayerGameStat> PlayerGameStats { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

@@ -10,4 +10,5 @@ public class PlayerGameStat
     public int ChipsEnd { get; set; }
     public int Profit { get; set; }
     public int HandsWon { get; set; }
+    public DateTimeOffset CreatedAt { get; set; }
 }
