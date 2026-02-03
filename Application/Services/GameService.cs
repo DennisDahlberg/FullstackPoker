@@ -31,6 +31,8 @@ namespace Application.Services
             {
                 gameState.Players.Add(new Player { Name = bot.Username, Chips = table.BuyIn, IsPlayer = false });
             }
+            
+            gameState.TableId =  table.Id;
 
             SetupBlinds(gameState, table);
 
@@ -386,6 +388,7 @@ namespace Application.Services
                 state.WinnersPositions.Add(state.Players.IndexOf(winner.Player));
             }
             state.IsGameOver = true;
+            
         }
 
         public Card ConvertToHoldemPokerCard(PlayerCard card)

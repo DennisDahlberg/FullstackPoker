@@ -27,5 +27,6 @@
         public bool IsGameOver { get; set; }
         public bool IsFirstRound { get; set; } = true;
         public List<int> WinnersPositions { get; set; } = [];
+        public int TableId { get; set; }
     }
 }
