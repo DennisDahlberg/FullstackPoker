@@ -6,12 +6,27 @@ namespace Application.Services;
 
 public class GameHistoryService : IGameHistoryService
 {
-    public void SaveGameAsync(GameState gameState)
+    private readonly IGameRepository _gameRepository;
+
+    public GameHistoryService(IGameRepository gamerepository)
     {
+        _gameRepository = gamerepository;
+    }
+
+    public async Task SaveGameAsync(GameState gameState)
+    {
+        var winnerIds =  new List<string>();
+        foreach (var winner in gameState.WinnersPositions)
+            winnerIds.Add(gameState.Players[winner].UserId);
+        
         var game = new Game
         {
-            FinishedAt =  DateTime.Now,
+            FinishedAt =  DateTimeOffset.UtcNow,
             TableId = gameState.TableId,
+            StartedAt = gameState.StartedAt,
+            WinnerIds = winnerIds,
         };
+        
+        await _gameRepository.SaveGameAsync(game);
     }
 }

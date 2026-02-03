@@ -86,7 +86,7 @@ namespace backend.Controllers
         }
 
         [HttpPost("action")]
-        public IActionResult PlayerAction([FromBody] PlayerActionRequest playerAction)
+        public async Task<IActionResult> PlayerAction([FromBody] PlayerActionRequest playerAction)
         {
             var json = HttpContext.Session.GetString("GameState");
             if (json is null)
@@ -94,7 +94,7 @@ namespace backend.Controllers
 
             var gameState = JsonSerializer.Deserialize<GameState>(json);
 
-            _gameService.HandlePlayerAction(playerAction, gameState!);
+            await _gameService.HandlePlayerAction(playerAction, gameState!);
 
             HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(gameState));
             return Ok(gameState);

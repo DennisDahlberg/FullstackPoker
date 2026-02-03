@@ -28,5 +28,6 @@
         public bool IsFirstRound { get; set; } = true;
         public List<int> WinnersPositions { get; set; } = [];
         public int TableId { get; set; }
+        public DateTimeOffset StartedAt { get; set; }
     }
 }

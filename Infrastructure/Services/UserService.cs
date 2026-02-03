@@ -24,6 +24,7 @@ namespace Infrastructure.Services
 
             var userDTO = new UserDTO()
             {
+                Id = user.Id,
                 Email = user.Email!,
                 Balance = user.Balance,
                 Rank = user.Rank,

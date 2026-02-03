@@ -3,6 +3,7 @@ using Core.DTOs;
 using Core.DTOs.Bot;
 using Core.DTOs.Table;
 using Core.GameModels;
+using Core.Interfaces;
 using Core.Models;
 using Microsoft.AspNetCore.Identity;
 using HoldemPoker.Cards;
@@ -13,26 +14,29 @@ namespace Application.Services
     public class GameService
     {
         private readonly BotAiService _botAiService;
+        private readonly IGameHistoryService _gameHistoryService;
         private readonly UserManager<ApplicationUser> _userManager;
         private static readonly Random _random = new Random();
 
-        public GameService(BotAiService botAiService, UserManager<ApplicationUser> userManager)
+        public GameService(BotAiService botAiService, UserManager<ApplicationUser> userManager, IGameHistoryService gameHistoryService)
         {
             _botAiService = botAiService;
             _userManager = userManager;
+            _gameHistoryService = gameHistoryService;
         }
 
         public GameState InitializeGame(UserDTO playerInfo, TableDto table, List<BotDto> bots)
         {
             var gameState = new GameState();
 
-            gameState.Players.Add(new Player { Name = playerInfo.Username, Chips = table.BuyIn, IsPlayer = true });
+            gameState.Players.Add(new Player { Name = playerInfo.Username, Chips = table.BuyIn, IsPlayer = true, UserId = playerInfo.Id});
             foreach (var bot in bots)  
             {
                 gameState.Players.Add(new Player { Name = bot.Username, Chips = table.BuyIn, IsPlayer = false });
             }
             
             gameState.TableId =  table.Id;
+            gameState.StartedAt = DateTimeOffset.UtcNow;
 
             SetupBlinds(gameState, table);
 
@@ -180,7 +184,7 @@ namespace Application.Services
             return cards;
         }
 
-        public PlayerCard DrawCard(List<PlayerCard> deck)
+        private PlayerCard DrawCard(List<PlayerCard> deck)
         {
             var index = _random.Next(deck.Count);
             var card = deck[index];
@@ -188,7 +192,7 @@ namespace Application.Services
             return card;
         }
 
-        public List<string> GetAvailableActions(GameState state)
+        private List<string> GetAvailableActions(GameState state)
         {
             var actions = new List<string>();
 
@@ -215,7 +219,7 @@ namespace Application.Services
             return actions;
         }
 
-        public void HandlePlayerAction(PlayerActionRequest actionRequest, GameState state)
+        public async Task HandlePlayerAction(PlayerActionRequest actionRequest, GameState state)
         {
             var currentPlayer = state.Players[state.CurrentPlayerIndex];
             switch (actionRequest.Action)
@@ -266,14 +270,14 @@ namespace Application.Services
 
             if (state.Players.Count(p => p.IsActive) == 1)
             {
-                HandleEndOfRound(state);
+                await HandleEndOfRound(state);
                 state.AvailableActions = GetAvailableActions(state);
                 return;
             }
 
             if (state.Players.Where(p => p.IsActive == true).All(p => p.HasActedThisRound == true))
             {
-                HandleEndOfStage(state);
+                await HandleEndOfStage(state);
                 state.AvailableActions = GetAvailableActions(state);
                 return;
             }
@@ -307,7 +311,7 @@ namespace Application.Services
 
             if (botAction is null)
             {
-                HandlePlayerAction(new PlayerActionRequest { Action = "call" }, gameState);
+                await HandlePlayerAction(new PlayerActionRequest { Action = "call" }, gameState);
                 return;
             }
 
@@ -317,10 +321,10 @@ namespace Application.Services
                 Amount = botAction.Amount
             };           
 
-            HandlePlayerAction(actionRequest, gameState);
+            await HandlePlayerAction(actionRequest, gameState);
         }
 
-        public void HandleEndOfStage(GameState state)
+        private async Task HandleEndOfStage(GameState state)
         {
             switch (state.Stage)
             {
@@ -340,7 +344,7 @@ namespace Application.Services
                     break;
                 case GameStage.River:
                     state.Stage = GameStage.Showdown;
-                    HandleEndOfRound(state);
+                    await HandleEndOfRound(state);
                     break;
             }
 
@@ -355,7 +359,7 @@ namespace Application.Services
             HandleNextPlayer(state);
         }
 
-        public void HandleEndOfRound(GameState state)
+        private async Task HandleEndOfRound(GameState state)
         {
             var activePlayers = state.Players
                 .Where(p => p.IsFolded == false)
@@ -389,9 +393,10 @@ namespace Application.Services
             }
             state.IsGameOver = true;
             
+            await _gameHistoryService.SaveGameAsync(state);
         }
 
-        public Card ConvertToHoldemPokerCard(PlayerCard card)
+        private Card ConvertToHoldemPokerCard(PlayerCard card)
         {
             string rank = card.Rank == "10" ? "T" : card.Rank;
             string suit = card.Suit.ToLower();
