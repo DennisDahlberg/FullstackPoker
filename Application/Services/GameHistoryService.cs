@@ -9,10 +9,12 @@ namespace Application.Services;
 public class GameHistoryService : IGameHistoryService
 {
     private readonly IGameRepository _gameRepository;
+    private readonly UserService _userService;
 
-    public GameHistoryService(IGameRepository gamerepository)
+    public GameHistoryService(IGameRepository gamerepository, UserService userService)
     {
         _gameRepository = gamerepository;
+        _userService = userService;
     }
 
     public async Task SaveGameAsync(GameState gameState)
@@ -32,6 +34,19 @@ public class GameHistoryService : IGameHistoryService
         var playerStats = GetPlayerStatsFromGame(gameState);
         
         await _gameRepository.SaveGameAsync(game,  playerStats);
+    }
+
+    public async Task UpdatePlayerBalanceFromGame(GameState gameState)
+    {
+        foreach (var player in gameState.Players)
+        {
+            if (player.IsPlayer == false || string.IsNullOrWhiteSpace(player.UserId))
+                continue;
+
+            decimal balanceChange = !gameState.IsGameOver ? gameState.EarlyLeavePayout : player.Chips;
+            
+            await _userService.UpdateUserBalanceAsync(player.UserId, balanceChange);
+        }
     }
 
     private IEnumerable<PlayerGameStat> GetPlayerStatsFromGame(GameState gameState)

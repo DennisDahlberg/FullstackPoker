@@ -18,18 +18,20 @@ namespace backend.Controllers
     public class GameController : Controller
     {
         private readonly GameService _gameService;
+        private readonly IGameHistoryService _gameHistoryService;
         private readonly CurrentUserService _currentUserService;
         private readonly BotService _botService;
         private readonly ITableService _tableService;
         private readonly UserService _userService;
 
-        public GameController(GameService gameService, CurrentUserService currentUserService, ITableService tableService, BotService botService, UserService userService)
+        public GameController(GameService gameService, CurrentUserService currentUserService, ITableService tableService, BotService botService, UserService userService, IGameHistoryService gameHistoryService)
         {
             _gameService = gameService;
             _currentUserService = currentUserService;
             _tableService = tableService;
             _botService = botService;
             _userService = userService;
+            _gameHistoryService = gameHistoryService;
         }
 
         [HttpPost("start")]
@@ -123,6 +125,18 @@ namespace backend.Controllers
 
             HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(newGameState));
             return Ok(newGameState);
+        }
+
+        [HttpPost("leave")]
+        public async Task<IActionResult> Leave()
+        {
+            var json = HttpContext.Session.GetString("GameState");
+            if (json is null)
+                return RedirectToAction(nameof(Start));
+            var gameState = JsonSerializer.Deserialize<GameState>(json);
+            await _gameHistoryService.UpdatePlayerBalanceFromGame(gameState);
+            
+            return Ok();
         }
     }
 }
