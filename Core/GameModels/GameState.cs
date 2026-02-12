@@ -29,6 +29,7 @@
         public List<int> WinnersPositions { get; set; } = [];
         public int TableId { get; set; }
         public DateTimeOffset StartedAt { get; set; }
+        public int PenaltyAmount { get; set; }
         public int EarlyLeavePayout { get; set; }
     }
 }

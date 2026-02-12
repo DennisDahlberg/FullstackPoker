@@ -42,19 +42,6 @@ export default function Game() {
     initGame();
   }, [initGame]);
 
-  const calculateLeavePenalty = () => {
-    if (!game) return { currentChips: 0, penalty: 0, willReceive: 0 };
-
-    const player = game.players.find((p) => p.isPlayer);
-    if (!player) return { currentChips: 0, penalty: 0, willReceive: 0 };
-
-    const currentChips = player.chips;
-    const penalty = Math.round(currentChips * 0.1);
-    const willReceive = currentChips - penalty;
-
-    return { currentChips, penalty, willReceive };
-  };
-
   const handleLeaveClick = () => {
     if (game && !game.isGameOver) {
       setIsLeaveWarningOpen(true);
@@ -119,7 +106,7 @@ export default function Game() {
 
   if (!game) return <div>Loading...</div>;
 
-  const { currentChips, penalty, willReceive } = calculateLeavePenalty();
+  const player = game.players.find((p) => p.isPlayer);
 
   return (
     <div className="fixed inset-0 bg-gray-950 flex flex-col">
@@ -321,17 +308,17 @@ export default function Game() {
                 <div className="flex justify-between">
                   <span>Current chips:</span>
                   <span className="font-bold text-green-400">
-                    ${currentChips}
+                    ${player?.chips}
                   </span>
                 </div>
                 <div className="flex justify-between text-red-400">
                   <span>Early leave penalty (10%):</span>
-                  <span className="font-bold">-${penalty}</span>
+                  <span className="font-bold">-${game.penaltyAmount}</span>
                 </div>
                 <div className="border-t border-gray-700 pt-2 mt-2 flex justify-between text-lg">
                   <span>You will receive:</span>
                   <span className="font-bold text-amber-400">
-                    ${willReceive}
+                    ${game.earlyLeavePayout}
                   </span>
                 </div>
               </div>

@@ -410,8 +410,8 @@ namespace Application.Services
             var player = state.Players.FirstOrDefault(p => p.IsPlayer);
             if (player != null)
             {
-                var penalty = (int)(player.Chips * 0.1);
-                state.EarlyLeavePayout = player.Chips -  penalty;
+                state.PenaltyAmount = (int)(player.Chips * 0.1);
+                state.EarlyLeavePayout = player.Chips -  state.PenaltyAmount;
             }
         }
     }

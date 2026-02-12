@@ -33,6 +33,8 @@ export interface GameState {
     highestBet: number;
     isGameOver: boolean;
     winnersPositions: number[];
+    penaltyAmount: number;
+    earlyLeavePayout: number;
 }
 
 export type GameActionPayload = 
