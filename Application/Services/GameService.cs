@@ -29,7 +29,7 @@ namespace Application.Services
         {
             var gameState = new GameState();
 
-            gameState.Players.Add(new Player { Name = playerInfo.Username, Chips = table.BuyIn, StartingChips = table.BuyIn, IsPlayer = true, UserId = playerInfo.Id});
+            gameState.Players.Add(new Player { Name = playerInfo.Username, Chips = table.BuyIn, RoundStartingChips = table.BuyIn, GameStartingChips = table.BuyIn, IsPlayer = true, UserId = playerInfo.Id});
             foreach (var bot in bots)  
             {
                 gameState.Players.Add(new Player { Name = bot.Username, Chips = table.BuyIn, IsPlayer = false });
@@ -69,7 +69,7 @@ namespace Application.Services
                 player.LastAction = null;
                 player.LastActionAmount = null;
                 GetStartingHand(player, gameState.Deck);
-                player.StartingChips = player.Chips;
+                player.RoundStartingChips = player.Chips;
             }
             gameState.Pot = 0;
             gameState.Stage = GameStage.PreFlop;

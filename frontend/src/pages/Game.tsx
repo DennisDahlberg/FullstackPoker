@@ -14,23 +14,59 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Game() {
   const navigate = useNavigate();
   const game = useGameStore((s) => s.game);
   // const loading = useGameStore((s) => s.loading);
   const initGame = useGameStore((s) => s.initGame);
-  const playerAction = useGameStore((s) => s.playerAction);  
+  const playerAction = useGameStore((s) => s.playerAction);
   const startNewRound = useGameStore((s) => s.startNewRound);
 
   const [raiseValue, setRaiseValue] = useState(0);
   const [isRaiseModalOpen, setIsRaiseModalOpen] = useState(false);
+  const [isLeaveWarningOpen, setIsLeaveWarningOpen] = useState(false);
   const minRaise = game ? game.smallBlind : 0;
 
   useEffect(() => {
     initGame();
   }, [initGame]);
 
+  const calculateLeavePenalty = () => {
+    if (!game) return { currentChips: 0, penalty: 0, willReceive: 0 };
+
+    const player = game.players.find((p) => p.isPlayer);
+    if (!player) return { currentChips: 0, penalty: 0, willReceive: 0 };
+
+    const currentChips = player.chips;
+    const penalty = Math.round(currentChips * 0.1);
+    const willReceive = currentChips - penalty;
+
+    return { currentChips, penalty, willReceive };
+  };
+
+  const handleLeaveClick = () => {
+    if (game && !game.isGameOver) {
+      setIsLeaveWarningOpen(true);
+    } else {
+      navigate("/dashboard");
+    }
+  };
+
+  const confirmLeave = () => {
+    setIsLeaveWarningOpen(false);
+    navigate("/dashboard");
+  };
 
   const getCallAmount = () => {
     if (!game) return 0;
@@ -66,8 +102,8 @@ export default function Game() {
           label: "Raise",
           className:
             "w-24 h-12 bg-green-800/30 border-green-700 text-green-400 hover:bg-green-800/50 hover:text-green-300",
-          onClick: () => {    
-            setRaiseValue(minRaise);        
+          onClick: () => {
+            setRaiseValue(minRaise);
             setIsRaiseModalOpen(true);
           },
         };
@@ -82,6 +118,8 @@ export default function Game() {
   };
 
   if (!game) return <div>Loading...</div>;
+
+  const { currentChips, penalty, willReceive } = calculateLeavePenalty();
 
   return (
     <div className="fixed inset-0 bg-gray-950 flex flex-col">
@@ -99,7 +137,7 @@ export default function Game() {
             variant="ghost"
             size="icon"
             className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
-            onClick={() => navigate("/dashboard")}
+            onClick={handleLeaveClick}
           >
             <LogOut className="w-5 h-5" />
           </Button>
@@ -151,8 +189,15 @@ export default function Game() {
 
       {game.isGameOver && (
         <div className="w-full flex flex-col items-center justify-center">
-          <h1 className="text-4xl font-bold mb-6">Winners: {game.winnersPositions.map(pos => game.players[pos].name).join(", ")}</h1>
-          <Button variant={"outline"} className="mb-2" onClick={startNewRound}>Start New Round</Button>
+          <h1 className="text-4xl font-bold mb-6">
+            Winners:{" "}
+            {game.winnersPositions
+              .map((pos) => game.players[pos].name)
+              .join(", ")}
+          </h1>
+          <Button variant={"outline"} className="mb-2" onClick={startNewRound}>
+            Start New Round
+          </Button>
         </div>
       )}
 
@@ -228,7 +273,7 @@ export default function Game() {
                 variant="outline"
                 onClick={() =>
                   setRaiseValue(
-                    (game.players[game.currentPlayerIndex].chips * 3) / 4
+                    (game.players[game.currentPlayerIndex].chips * 3) / 4,
                   )
                 }
               >
@@ -259,6 +304,56 @@ export default function Game() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog
+        open={isLeaveWarningOpen}
+        onOpenChange={setIsLeaveWarningOpen}
+      >
+        <AlertDialogContent className="bg-gray-900 text-white border-gray-700">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl text-red-400">
+              Leave Game Early?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-300 space-y-3">
+              <p>You are about to leave the game before it has finished.</p>
+
+              <div className="bg-black/30 p-4 rounded-lg space-y-2 my-4">
+                <div className="flex justify-between">
+                  <span>Current chips:</span>
+                  <span className="font-bold text-green-400">
+                    ${currentChips}
+                  </span>
+                </div>
+                <div className="flex justify-between text-red-400">
+                  <span>Early leave penalty (10%):</span>
+                  <span className="font-bold">-${penalty}</span>
+                </div>
+                <div className="border-t border-gray-700 pt-2 mt-2 flex justify-between text-lg">
+                  <span>You will receive:</span>
+                  <span className="font-bold text-amber-400">
+                    ${willReceive}
+                  </span>
+                </div>
+              </div>
+
+              <p className="text-sm text-gray-400">
+                Are you sure you want to leave? This action cannot be undone.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-gray-800 hover:bg-gray-700">
+              Stay in Game
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmLeave}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Leave Game
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

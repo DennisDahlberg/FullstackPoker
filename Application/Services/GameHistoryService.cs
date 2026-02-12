@@ -45,12 +45,12 @@ public class GameHistoryService : IGameHistoryService
 
             var playerStat = new PlayerGameStat
             {
-                ChipsStart = player.StartingChips,
+                ChipsStart = player.RoundStartingChips,
                 ChipsEnd = player.Chips,
                 CreatedAt =  DateTimeOffset.UtcNow,
                 IsWinner = IsPlayerWinner(gameState, player),
                 UserId = player.UserId,
-                Profit = player.Chips - player.StartingChips,
+                Profit = player.Chips - player.RoundStartingChips,
             };
             stats.Add(playerStat);
         }
