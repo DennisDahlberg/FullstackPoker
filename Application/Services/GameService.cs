@@ -286,6 +286,7 @@ namespace Application.Services
             HandleNextPlayer(state);
 
             state.AvailableActions = GetAvailableActions(state);
+            CalculateLeavePenalty(state);
         }
 
         public void HandleNextPlayer(GameState state)
@@ -402,6 +403,16 @@ namespace Application.Services
             string rank = card.Rank == "10" ? "T" : card.Rank;
             string suit = card.Suit.ToLower();
             return Card.Parse($"{rank}{suit}");
+        }
+
+        private void CalculateLeavePenalty(GameState state)
+        {
+            var player = state.Players.FirstOrDefault(p => p.IsPlayer);
+            if (player != null)
+            {
+                var penalty = (int)(player.Chips * 0.1);
+                state.EarlyLeavePayout = player.Chips -  penalty;
+            }
         }
     }
 }
