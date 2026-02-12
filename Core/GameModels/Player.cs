@@ -4,6 +4,7 @@
     {
         public string Name { get; set; } = null!;
         public List<PlayerCard> Hand { get; set; } = [];
+        public int StartingChips { get; set; }
         public int Chips { get; set; }
         public int CurrentBet { get; set; }
         public bool IsFolded { get; set; }

@@ -29,7 +29,7 @@ namespace Application.Services
         {
             var gameState = new GameState();
 
-            gameState.Players.Add(new Player { Name = playerInfo.Username, Chips = table.BuyIn, IsPlayer = true, UserId = playerInfo.Id});
+            gameState.Players.Add(new Player { Name = playerInfo.Username, Chips = table.BuyIn, StartingChips = table.BuyIn, IsPlayer = true, UserId = playerInfo.Id});
             foreach (var bot in bots)  
             {
                 gameState.Players.Add(new Player { Name = bot.Username, Chips = table.BuyIn, IsPlayer = false });

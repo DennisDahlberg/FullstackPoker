@@ -28,14 +28,42 @@ public class GameHistoryService : IGameHistoryService
             WinnerIds = winnerIds,
         };
         
-        await _gameRepository.SaveGameAsync(game);
+        var playerStats = GetPlayerStatsFromGame(gameState);
+        
+        await _gameRepository.SaveGameAsync(game,  playerStats);
     }
 
-    public async Task SavePlayerGameStatsAsync(GameState gameState)
+    private IEnumerable<PlayerGameStat> GetPlayerStatsFromGame(GameState gameState)
     {
-        var player = gameState.Players
-            .FirstOrDefault(p => p.IsPlayer == true);
-        
-        
+        var stats = new List<PlayerGameStat>();
+
+        foreach (var player in gameState.Players)
+        {
+            if (player.IsPlayer == false)
+                continue;
+
+            var playerStat = new PlayerGameStat
+            {
+                ChipsStart = player.StartingChips,
+                ChipsEnd = player.Chips,
+                CreatedAt =  DateTimeOffset.UtcNow,
+                IsWinner = IsPlayerWinner(gameState, player),
+                UserId = player.UserId,
+                Profit = player.StartingChips - player.Chips,
+            };
+            stats.Add(playerStat);
+        }
+        return stats;
+    }
+
+    private bool IsPlayerWinner(GameState state, Player player)
+    {
+        foreach (var winnerPos in state.WinnersPositions)
+        {
+            var winner = state.Players[winnerPos];
+            if (winner == player)
+                return true;
+        }
+        return false;
     }
 }
