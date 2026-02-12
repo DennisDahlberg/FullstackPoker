@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices.ComTypes;
 using Core.Interfaces;
 using Core.Models.Games;
 using Infrastructure.Data;
@@ -13,9 +14,26 @@ public class GameRepository : IGameRepository
         _dbContext = dbContext;
     }
 
-    public async Task SaveGameAsync(Game game)
+    public async Task SaveGameAsync(Game game, IEnumerable<PlayerGameStat> playerStats)
     {
-        _dbContext.Games.Add(game);
-        await _dbContext.SaveChangesAsync();
+        await using var tx = await _dbContext.Database.BeginTransactionAsync();
+        
+        try
+        {
+            _dbContext.Games.Add(game);
+            await _dbContext.SaveChangesAsync();
+
+            foreach (var stats in playerStats)
+                stats.GameId = game.Id;
+
+            _dbContext.PlayerGameStats.AddRange(playerStats);
+            await _dbContext.SaveChangesAsync();
+
+            await tx.CommitAsync();
+        }
+        catch
+        {
+            await tx.RollbackAsync();
+        }
     }
 }

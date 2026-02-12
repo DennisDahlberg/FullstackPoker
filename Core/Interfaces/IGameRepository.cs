@@ -4,5 +4,5 @@ namespace Core.Interfaces;
 
 public interface IGameRepository
 {
-    Task SaveGameAsync(Game game);
+    Task SaveGameAsync(Game game, IEnumerable<PlayerGameStat> playerStats);
 }

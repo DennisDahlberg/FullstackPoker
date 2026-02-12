@@ -1,3 +1,4 @@
+
 using Core.GameModels;
 using Core.Interfaces;
 using Core.Models.Games;
@@ -28,5 +29,13 @@ public class GameHistoryService : IGameHistoryService
         };
         
         await _gameRepository.SaveGameAsync(game);
+    }
+
+    public async Task SavePlayerGameStatsAsync(GameState gameState)
+    {
+        var player = gameState.Players
+            .FirstOrDefault(p => p.IsPlayer == true);
+        
+        
     }
 }
