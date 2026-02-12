@@ -49,7 +49,7 @@ public class GameHistoryService : IGameHistoryService
                 CreatedAt =  DateTimeOffset.UtcNow,
                 IsWinner = IsPlayerWinner(gameState, player),
                 UserId = player.UserId,
-                Profit = player.StartingChips - player.Chips,
+                Profit = player.Chips - player.StartingChips,
             };
             stats.Add(playerStat);
         }

@@ -52,14 +52,21 @@ namespace backend.Controllers
                     ?? "Failed to find bots for game" 
                 });
             var userId = _userService.GetLoggedInUserId(User);
+            
+            var userBalanceChangeResult = await _userService.UpdateUserBalanceAsync(userId, -table.Value.BuyIn); 
+            if (userBalanceChangeResult.IsFailed)
+                return BadRequest(new
+                {
+                    message = userBalanceChangeResult.Errors.FirstOrDefault()?.Message
+                    ?? "Failed to update balance"
+                });
+            
             var user = await _userService.GetUserDataAsync(userId);
-            if (user.Value.Balance < table.Value.BuyIn)
-                return BadRequest(new {message = "You do not have enough funds to buy in"});
             if (user.IsFailed)
                 return BadRequest(new
                 {
                     message = user.Errors.FirstOrDefault()?.Message 
-                    ?? "Failed to find user"
+                              ?? "Failed to find user"
                 });
 
             var gameState = _gameService.InitializeGame(user.Value, table.Value, bots.Value);

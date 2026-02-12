@@ -65,5 +65,25 @@ namespace Infrastructure.Services
                 && u.Id != currentUserId)
                 .ToList();
         }
+
+        public async Task<Result> UpdateUserBalanceAsync(string userId, decimal balance)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return Result.Fail("User not found");
+            
+            user.Balance += balance;
+            if (user.Balance < 0)
+            {
+                user.Balance += balance;
+                return Result.Fail("Insufficient balance");
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+                return Result.Fail("Update failed");
+            
+            return Result.Ok();
+        }
     }
 }
