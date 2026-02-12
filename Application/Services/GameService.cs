@@ -45,6 +45,7 @@ namespace Application.Services
                 GetStartingHand(player, gameState.Deck);
             GetCommunityCards(gameState);
             gameState.AvailableActions = GetAvailableActions(gameState);
+            CalculateLeavePenalty(gameState);
 
             return gameState;
         }
