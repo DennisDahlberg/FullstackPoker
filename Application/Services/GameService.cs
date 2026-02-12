@@ -395,6 +395,7 @@ namespace Application.Services
                 state.WinnersPositions.Add(state.Players.IndexOf(winner.Player));
             }
             state.IsGameOver = true;
+            state.PenaltyAmount = 0;
             
             await _gameHistoryService.SaveGameAsync(state);
         }

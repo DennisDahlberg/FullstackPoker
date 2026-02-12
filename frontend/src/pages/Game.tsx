@@ -43,11 +43,7 @@ export default function Game() {
   }, [initGame]);
 
   const handleLeaveClick = () => {
-    if (game && !game.isGameOver) {
-      setIsLeaveWarningOpen(true);
-    } else {
-      navigate("/dashboard");
-    }
+    setIsLeaveWarningOpen(true);
   };
 
   const confirmLeave = () => {
@@ -107,6 +103,7 @@ export default function Game() {
   if (!game) return <div>Loading...</div>;
 
   const player = game.players.find((p) => p.isPlayer);
+  const hasPenalty = !game.isGameOver && game.penaltyAmount > 0;
 
   return (
     <div className="fixed inset-0 bg-gray-950 flex flex-col">
@@ -298,43 +295,64 @@ export default function Game() {
       >
         <AlertDialogContent className="bg-gray-900 text-white border-gray-700">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl text-red-400">
-              Leave Game Early?
+            <AlertDialogTitle className={`text-xl ${hasPenalty ? 'text-red-400' : 'text-yellow-400'}`}>
+              {hasPenalty ? 'Leave Game Early?' : 'Leave Game?'}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-gray-300 space-y-3">
-              <p>You are about to leave the game before it has finished.</p>
+              {hasPenalty ? (
+                <>
+                  <p>You are about to leave the game before it has finished.</p>
 
-              <div className="bg-black/30 p-4 rounded-lg space-y-2 my-4">
-                <div className="flex justify-between">
-                  <span>Current chips:</span>
-                  <span className="font-bold text-green-400">
-                    ${player?.chips}
-                  </span>
-                </div>
-                <div className="flex justify-between text-red-400">
-                  <span>Early leave penalty (10%):</span>
-                  <span className="font-bold">-${game.penaltyAmount}</span>
-                </div>
-                <div className="border-t border-gray-700 pt-2 mt-2 flex justify-between text-lg">
-                  <span>You will receive:</span>
-                  <span className="font-bold text-amber-400">
-                    ${game.earlyLeavePayout}
-                  </span>
-                </div>
-              </div>
+                  <div className="bg-black/30 p-4 rounded-lg space-y-2 my-4">
+                    <div className="flex justify-between">
+                      <span>Current chips:</span>
+                      <span className="font-bold text-green-400">
+                        ${player?.chips}
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-red-400">
+                      <span>Early leave penalty (10%):</span>
+                      <span className="font-bold">-${game.penaltyAmount}</span>
+                    </div>
+                    <div className="border-t border-gray-700 pt-2 mt-2 flex justify-between text-lg">
+                      <span>You will receive:</span>
+                      <span className="font-bold text-amber-400">
+                        ${game.earlyLeavePayout}
+                      </span>
+                    </div>
+                  </div>
 
-              <p className="text-sm text-gray-400">
-                Are you sure you want to leave? This action cannot be undone.
-              </p>
+                  <p className="text-sm text-gray-400">
+                    Are you sure you want to leave? This action cannot be undone.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p>The current round has ended. You can leave without penalty.</p>
+
+                  <div className="bg-black/30 p-4 rounded-lg space-y-2 my-4">
+                    <div className="flex justify-between text-lg">
+                      <span>You will receive:</span>
+                      <span className="font-bold text-green-400">
+                        ${player?.chips}
+                      </span>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-gray-400">
+                    Your chips will be added to your balance.
+                  </p>
+                </>
+              )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-gray-800 hover:bg-gray-700">
-              Stay in Game
+              {hasPenalty ? 'Stay in Game' : 'Cancel'}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmLeave}
-              className="bg-red-600 hover:bg-red-700"
+              className={hasPenalty ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}
             >
               Leave Game
             </AlertDialogAction>
