@@ -69,6 +69,7 @@ namespace Application.Services
                 player.LastAction = null;
                 player.LastActionAmount = null;
                 GetStartingHand(player, gameState.Deck);
+                player.StartingChips = player.Chips;
             }
             gameState.Pot = 0;
             gameState.Stage = GameStage.PreFlop;
