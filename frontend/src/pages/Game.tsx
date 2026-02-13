@@ -188,8 +188,8 @@ export default function Game() {
       )}
 
       {/* Actions */}
-      <div className=" bg-gray-900 border-t border-gray-800 p-6">
-        <div className="max-w-2xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4">
+      <div className="h-24 bg-gray-900 border-t border-gray-800 p-6">
+        <div className="max-w-2xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 h-full">
           <div className="flex items-center gap-3">
             {game.availableActions.map((action) => {
               const buttonConfig = getButtonConfig(action);
