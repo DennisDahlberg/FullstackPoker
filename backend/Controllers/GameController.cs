@@ -33,6 +33,16 @@ namespace backend.Controllers
             _userService = userService;
             _gameHistoryService = gameHistoryService;
         }
+        
+        [HttpGet]
+        public IActionResult GetGame()
+        {
+            var json = HttpContext.Session.GetString("GameState");
+            if (json is null) return NotFound(new { message = "No active game found" });
+            
+            var gameState = JsonSerializer.Deserialize<GameState>(json);
+            return Ok(gameState);
+        }
 
         [HttpPost("start")]
         public async Task<IActionResult> InitializeGame([FromBody] StartGameRequest request)
@@ -76,23 +86,13 @@ namespace backend.Controllers
             
             return Ok();
         }
-        
-        [HttpGet("start")]
-        public IActionResult Start()
-        {
-            var json = HttpContext.Session.GetString("GameState");
-            if (json is null) return NotFound(new { message = "No active game found" });
-            
-            var gameState = JsonSerializer.Deserialize<GameState>(json);
-            return Ok(gameState);
-        }
 
         [HttpPost("action")]
         public async Task<IActionResult> PlayerAction([FromBody] PlayerActionRequest playerAction)
         {
             var json = HttpContext.Session.GetString("GameState");
             if (json is null)
-                return RedirectToAction(nameof(Start));
+                return RedirectToAction(nameof(GetGame));
 
             var gameState = JsonSerializer.Deserialize<GameState>(json);
 
@@ -107,7 +107,7 @@ namespace backend.Controllers
         {
             var json = HttpContext.Session.GetString("GameState");
             if (json is null)
-                return RedirectToAction(nameof(Start));
+                return RedirectToAction(nameof(GetGame));
             var gameState = JsonSerializer.Deserialize<GameState>(json);
             await _gameService.HandleBotAction(gameState!);
             HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(gameState));
@@ -119,7 +119,7 @@ namespace backend.Controllers
         {
             var json = HttpContext.Session.GetString("GameState");
             if (json is null)
-                return RedirectToAction(nameof(Start));
+                return RedirectToAction(nameof(GetGame));
             var gameState = JsonSerializer.Deserialize<GameState>(json);
             var newGameState = _gameService.NewRound(gameState!);
 
@@ -132,7 +132,7 @@ namespace backend.Controllers
         {
             var json = HttpContext.Session.GetString("GameState");
             if (json is null)
-                return RedirectToAction(nameof(Start));
+                return RedirectToAction(nameof(GetGame));
             var gameState = JsonSerializer.Deserialize<GameState>(json);
             await _gameHistoryService.UpdatePlayerBalanceFromGame(gameState);
             

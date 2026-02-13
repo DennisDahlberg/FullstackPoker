@@ -7,7 +7,7 @@ interface GameStore {
   game: GameState | null;
   loading: boolean;
 
-  initGame: () => Promise<void>;
+  getGame: () => Promise<void>;
   animating: boolean;
   setAnimating: (v: boolean) => void;
   playerAction: (action: string, payload?: GameActionPayload) => Promise<void>;
@@ -23,19 +23,15 @@ export const useGameStore = create<GameStore>((set) => ({
   animating: false,
   setAnimating: (v) => set({ animating: v }),
 
-  initGame: async () => {
+  getGame: async () => {
     set({ loading: true });
 
-    const data = await api.game.initGame();
-
-    console.log("Initialized game:", data);
+    const data = await api.game.getGameData();
 
     set({
       game: data,
       loading: false
     });
-
-    console.log(data);
 
     if (data?.players[data.currentPlayerIndex]?.isPlayer === false) {
       await useGameStore.getState().botAction();

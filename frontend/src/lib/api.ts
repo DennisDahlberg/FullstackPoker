@@ -81,8 +81,8 @@ export const api = {
         throw 'An error occurred while initializing game';
       }
     },
-    async initGame() {
-      const response = await apiClient.get(`${backendUrl}/game/start`);
+    async getGameData() {
+      const response = await apiClient.get(`${backendUrl}/game`);
       return response.data;
     },
     async playerAction(action:string, payload?:GameActionPayload) {

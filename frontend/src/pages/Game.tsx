@@ -29,7 +29,7 @@ export default function Game() {
   const navigate = useNavigate();
   const game = useGameStore((s) => s.game);
   // const loading = useGameStore((s) => s.loading);
-  const initGame = useGameStore((s) => s.initGame);
+  const getGame = useGameStore((s) => s.getGame);
   const playerAction = useGameStore((s) => s.playerAction);
   const startNewRound = useGameStore((s) => s.startNewRound);
   const leaveGame = useGameStore((s) => s.leaveGame);
@@ -40,8 +40,8 @@ export default function Game() {
   const minRaise = game ? game.smallBlind : 0;
 
   useEffect(() => {
-    initGame();
-  }, [initGame]);
+    getGame();
+  }, [getGame]);
 
   const handleLeaveClick = () => {
     setIsLeaveWarningOpen(true);
