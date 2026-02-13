@@ -99,6 +99,10 @@ export const api = {
     async startNewRound() {
       const response = await apiClient.post(`${backendUrl}/game/new-round`);
       return response.data;
+    },
+    async leaveGame() {
+      const response = await apiClient.post(`${backendUrl}/game/leave`);
+      return response.data;
     }
   },
 

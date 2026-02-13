@@ -13,6 +13,7 @@ interface GameStore {
   playerAction: (action: string, payload?: GameActionPayload) => Promise<void>;
   botAction: () => Promise<void>;
   startNewRound: () => Promise<void>;
+  leaveGame: () => Promise<void>;
 }
 
 export const useGameStore = create<GameStore>((set) => ({
@@ -90,5 +91,16 @@ export const useGameStore = create<GameStore>((set) => ({
     if (state.game?.players[data.currentPlayerIndex]?.isPlayer === false) {
       await useGameStore.getState().botAction();
     }
+  },
+  
+  leaveGame: async () => {
+    set({ loading: true });
+
+    await api.game.leaveGame();
+
+    set({
+      game: null,
+      loading: false
+    });
   }
 }));

@@ -32,6 +32,7 @@ export default function Game() {
   const initGame = useGameStore((s) => s.initGame);
   const playerAction = useGameStore((s) => s.playerAction);
   const startNewRound = useGameStore((s) => s.startNewRound);
+  const leaveGame = useGameStore((s) => s.leaveGame);
 
   const [raiseValue, setRaiseValue] = useState(0);
   const [isRaiseModalOpen, setIsRaiseModalOpen] = useState(false);
@@ -46,8 +47,9 @@ export default function Game() {
     setIsLeaveWarningOpen(true);
   };
 
-  const confirmLeave = () => {
+  const confirmLeave = async () => {
     setIsLeaveWarningOpen(false);
+    await leaveGame();
     navigate("/dashboard");
   };
 
