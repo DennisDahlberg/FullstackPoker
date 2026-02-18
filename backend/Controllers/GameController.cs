@@ -101,51 +101,84 @@ namespace backend.Controllers
         [HttpPost("action")]
         public async Task<IActionResult> PlayerAction([FromBody] PlayerActionRequest playerAction)
         {
-            var json = HttpContext.Session.GetString("GameState");
-            if (json is null)
-                return RedirectToAction(nameof(GetGame));
+            var user = await _userService.GetLoggedInUser(User);
+            if (user is null)
+                return Unauthorized();
+            
+            var gameId = await _gameStateManager.GetUserCurrentGameAsync(user.Id);
+            if (gameId is null)
+                return NotFound(new { message = "No active game found" });
 
-            var gameState = JsonSerializer.Deserialize<GameState>(json);
+            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+            if (gameState is null)
+                return NotFound(new { message = "Game not found" });
 
             await _gameService.HandlePlayerAction(playerAction, gameState!);
-
-            HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(gameState));
+            await _gameStateManager.SaveGameStateAsync(gameState.GameId, gameState);
+            
             return Ok(gameState);
         }
 
         [HttpPost("bot-action")]
         public async Task<IActionResult> BotAction()
         {
-            var json = HttpContext.Session.GetString("GameState");
-            if (json is null)
-                return RedirectToAction(nameof(GetGame));
-            var gameState = JsonSerializer.Deserialize<GameState>(json);
+            var user = await _userService.GetLoggedInUser(User);
+            if (user is null)
+                return Unauthorized();
+            
+            var gameId = await _gameStateManager.GetUserCurrentGameAsync(user.Id);
+            if (gameId is null)
+                return NotFound(new { message = "No active game found" });
+
+            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+            if (gameState is null)
+                return NotFound(new { message = "Game not found" });
+            
             await _gameService.HandleBotAction(gameState!);
-            HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(gameState));
+            await _gameStateManager.SaveGameStateAsync(gameState.GameId, gameState);
+            
             return Ok(gameState);
         }
 
         [HttpPost("new-round")]
-        public IActionResult NewRound()
+        public async Task<IActionResult> NewRound()
         {
-            var json = HttpContext.Session.GetString("GameState");
-            if (json is null)
-                return RedirectToAction(nameof(GetGame));
-            var gameState = JsonSerializer.Deserialize<GameState>(json);
-            var newGameState = _gameService.NewRound(gameState!);
+            var user = await _userService.GetLoggedInUser(User);
+            if (user is null)
+                return Unauthorized();
+            
+            var gameId = await _gameStateManager.GetUserCurrentGameAsync(user.Id);
+            if (gameId is null)
+                return NotFound(new { message = "No active game found" });
 
-            HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(newGameState));
+            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+            if (gameState is null)
+                return NotFound(new { message = "Game not found" });
+            
+            var newGameState = _gameService.NewRound(gameState!);
+            await _gameStateManager.SaveGameStateAsync(newGameState.GameId, newGameState);
+            
             return Ok(newGameState);
         }
 
         [HttpPost("leave")]
         public async Task<IActionResult> Leave()
         {
-            var json = HttpContext.Session.GetString("GameState");
-            if (json is null)
-                return RedirectToAction(nameof(GetGame));
-            var gameState = JsonSerializer.Deserialize<GameState>(json);
+            var user = await _userService.GetLoggedInUser(User);
+            if (user is null)
+                return Unauthorized();
+            
+            var gameId = await _gameStateManager.GetUserCurrentGameAsync(user.Id);
+            if (gameId is null)
+                return NotFound(new { message = "No active game found" });
+
+            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+            if (gameState is null)
+                return NotFound(new { message = "Game not found" });
+            
             await _gameHistoryService.UpdatePlayerBalanceFromGame(gameState);
+            await _gameStateManager.DeleteGameStateAsync(gameState.GameId);
+            await _gameStateManager.DeleteUserCurrentGameAsync(user.Id);
             
             return Ok();
         }

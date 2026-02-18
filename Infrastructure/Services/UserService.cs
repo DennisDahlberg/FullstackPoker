@@ -34,7 +34,7 @@ namespace Infrastructure.Services
             return userDTO;
         }
 
-        public async Task<ApplicationUser> GetLoggedInUser(ClaimsPrincipal user)
+        public async Task<ApplicationUser?> GetLoggedInUser(ClaimsPrincipal user)
         {
             var currentUserId = _userManager.GetUserId(user);
             var currentUser = await _userManager.FindByIdAsync(currentUserId);
