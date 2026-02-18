@@ -11,6 +11,7 @@
 
     public class GameState
     {
+        public string GameId { get; set; } = Guid.NewGuid().ToString();
         public List<Player> Players { get; set; } = [];
         public int CurrentPlayerIndex { get; set; }
         public List<PlayerCard> CommunityCards { get; set; } = [];

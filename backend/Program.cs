@@ -12,6 +12,7 @@ using OpenAI.Chat;
 using System.Text;
 using Core.Interfaces;
 using Infrastructure.Repositories;
+using StackExchange.Redis;
 
 
 namespace backend
@@ -41,6 +42,7 @@ namespace backend
             builder.Services.AddTransient<ITableRepository, TableRepository>();
             builder.Services.AddTransient<IGameHistoryService, GameHistoryService>();
             builder.Services.AddTransient<IGameRepository, GameRepository>();
+            builder.Services.AddTransient<IGameStateManager, GameStateManager>();
 
             //EF Core
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -125,6 +127,14 @@ namespace backend
                 var apiKey = builder.Configuration["OpenAI:APIKey"];
                 var model = builder.Configuration["OpenAI:Model"];
                 return new ChatClient(model, apiKey);
+            });
+            
+            //Redis
+            builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+            {
+                var configuration = sp.GetRequiredService<IConfiguration>();
+                var connectionString = configuration["Redis:ConnectionString"];
+                return ConnectionMultiplexer.Connect(connectionString!);
             });
 
             builder.Services.AddAuthentication();

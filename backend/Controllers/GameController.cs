@@ -23,8 +23,9 @@ namespace backend.Controllers
         private readonly BotService _botService;
         private readonly ITableService _tableService;
         private readonly UserService _userService;
+        private readonly IGameStateManager _gameStateManager;
 
-        public GameController(GameService gameService, CurrentUserService currentUserService, ITableService tableService, BotService botService, UserService userService, IGameHistoryService gameHistoryService)
+        public GameController(GameService gameService, CurrentUserService currentUserService, ITableService tableService, BotService botService, UserService userService, IGameHistoryService gameHistoryService, IGameStateManager gameStateManager)
         {
             _gameService = gameService;
             _currentUserService = currentUserService;
@@ -32,15 +33,24 @@ namespace backend.Controllers
             _botService = botService;
             _userService = userService;
             _gameHistoryService = gameHistoryService;
+            _gameStateManager = gameStateManager;
         }
         
         [HttpGet]
-        public IActionResult GetGame()
+        public async Task<IActionResult> GetGame()
         {
-            var json = HttpContext.Session.GetString("GameState");
-            if (json is null) return NotFound(new { message = "No active game found" });
+            var user = await _userService.GetLoggedInUser(User);
+            if (user is null)
+                return Unauthorized();
             
-            var gameState = JsonSerializer.Deserialize<GameState>(json);
+            var gameId = await _gameStateManager.GetUserCurrentGameAsync(user.Id);
+            if (gameId is null)
+                return NotFound(new { message = "No active game found" });
+
+            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+            if (gameState is null)
+                return NotFound(new { message = "Game not found" });
+            
             return Ok(gameState);
         }
 
@@ -82,7 +92,8 @@ namespace backend.Controllers
                 });
 
             var gameState = _gameService.InitializeGame(user.Value, table.Value, bots.Value);
-            HttpContext.Session.SetString("GameState", JsonSerializer.Serialize(gameState));
+            await _gameStateManager.SaveGameStateAsync(gameState.GameId, gameState);
+            await _gameStateManager.SaveUserCurrentGameAsync(userId, gameState.GameId);
             
             return Ok();
         }
