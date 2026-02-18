@@ -37,4 +37,11 @@ public class GameStateManager
         var json = JsonSerializer.Serialize(state);
         await db.StringSetAsync(key, json, TimeSpan.FromHours(3));
     }
+
+    public async Task DeleteGameStateAsync(string gameId)
+    {
+        var db = _redis.GetDatabase();
+        var key = GetKey(gameId);
+        await db.KeyDeleteAsync(key);
+    }
 }
