@@ -1,6 +1,5 @@
 using Application.Services;
 using backend.Hubs;
-using backend.Services;
 using Core.Models;
 using Infrastructure.Data;
 using Infrastructure.Services;
@@ -31,7 +30,6 @@ namespace backend
             builder.Services.AddTransient<JwtTokenService>();
             builder.Services.AddTransient<UserService>();
             builder.Services.AddTransient<GameService>();
-            builder.Services.AddTransient<CurrentUserService>();
             builder.Services.AddTransient<BotAiService>();
             builder.Services.AddTransient<FriendsRepository>();
             builder.Services.AddTransient<FriendService>();

@@ -1,5 +1,4 @@
 ﻿using Application.Services;
-using backend.Services;
 using Core.GameModels;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
@@ -19,16 +18,14 @@ namespace backend.Controllers
     {
         private readonly GameService _gameService;
         private readonly IGameHistoryService _gameHistoryService;
-        private readonly CurrentUserService _currentUserService;
         private readonly BotService _botService;
         private readonly ITableService _tableService;
         private readonly UserService _userService;
         private readonly IGameStateManager _gameStateManager;
 
-        public GameController(GameService gameService, CurrentUserService currentUserService, ITableService tableService, BotService botService, UserService userService, IGameHistoryService gameHistoryService, IGameStateManager gameStateManager)
+        public GameController(GameService gameService, ITableService tableService, BotService botService, UserService userService, IGameHistoryService gameHistoryService, IGameStateManager gameStateManager)
         {
             _gameService = gameService;
-            _currentUserService = currentUserService;
             _tableService = tableService;
             _botService = botService;
             _userService = userService;
