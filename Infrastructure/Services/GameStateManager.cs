@@ -44,4 +44,11 @@ public class GameStateManager
         var key = GetKey(gameId);
         await db.KeyDeleteAsync(key);
     }
+
+    public async Task<bool> GameExistsAsync(string gameId)
+    {
+        var db = _redis.GetDatabase();
+        var key = GetKey(gameId);
+        return await db.KeyExistsAsync(key);
+    }
 }
