@@ -17,6 +17,7 @@ public class GameStateManager
     }
 
     private string GetKey(string gameId) => $"{_instanceName}game:{gameId}";
+    private string GetUserGameKey(string userId) => $"{_instanceName}user:{userId}:currentGame";
 
     public async Task<GameState?> GetGameStateAsync(string gameId)
     {
@@ -50,5 +51,27 @@ public class GameStateManager
         var db = _redis.GetDatabase();
         var key = GetKey(gameId);
         return await db.KeyExistsAsync(key);
+    }
+
+    public async Task<string?> GetUserCurrentGameAsync(string userId)
+    {
+        var db = _redis.GetDatabase();
+        var key = GetUserGameKey(userId);
+        var gameId = await db.StringGetAsync(key);
+        return gameId.HasValue ? gameId.ToString() : null;
+    }
+    
+    public async Task SaveUserCurrentGameAsync(string userId, string gameId)
+    {
+        var db = _redis.GetDatabase();
+        var key = GetUserGameKey(userId);
+        await db.StringSetAsync(key, gameId, TimeSpan.FromHours(3));
+    }
+
+    public async Task DeleteUserCurrentGameAsync(string userId)
+    {
+        var db = _redis.GetDatabase();
+        var key = GetUserGameKey(userId);
+        await db.KeyDeleteAsync(key);
     }
 }
