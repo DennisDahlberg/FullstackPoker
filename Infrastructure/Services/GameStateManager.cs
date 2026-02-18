@@ -1,11 +1,12 @@
 using System.Text.Json;
 using Core.GameModels;
+using Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services;
 
-public class GameStateManager
+public class GameStateManager : IGameStateManager
 {
     private readonly IConnectionMultiplexer _redis;
     private readonly string _instanceName;
