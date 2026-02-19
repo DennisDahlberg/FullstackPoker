@@ -18,6 +18,7 @@ interface LobbyStore {
   clearGameStarted: () => void;
   leaveLobby: () => Promise<void>;
   startGame: () => Promise<void>;
+  invitePlayer: (friendId: string) => Promise<void>;
 }
 
 export const useLobbyStore = create<LobbyStore>((set, get) => ({
@@ -83,6 +84,14 @@ export const useLobbyStore = create<LobbyStore>((set, get) => ({
 
       connection.on("PlayerLeft", (username: string) => {
         toast.info(`${username} left the lobby`);
+      });
+
+      connection.on("PlayerJoined", (username: string) => {
+        toast.success(`${username} joined the lobby`);
+      });
+
+      connection.on("InviteSent", (username: string) => {
+        toast.success(`Invite sent to ${username}`);
       });
 
       connection.on("Error", (message: string) => {
@@ -188,6 +197,20 @@ export const useLobbyStore = create<LobbyStore>((set, get) => ({
       console.error("Failed to start game:", err);
       toast.error(err.message || "Failed to start game");
       set({ loading: false });
+    }
+  },
+
+  invitePlayer: async (friendId: string) => {
+    const { connection } = get();
+    if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+      toast.error("Not connected to lobby");
+      return;
+    }
+    try {
+      await connection.invoke("InvitePlayer", friendId);
+    } catch (err) {
+      console.error("Failed to invite player:", err);
+      toast.error("Failed to send invite");
     }
   },
 }));

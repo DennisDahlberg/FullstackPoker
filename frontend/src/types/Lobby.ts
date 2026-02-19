@@ -32,3 +32,11 @@ export interface LobbyState {
   players: LobbyPlayer[];
   botIds: number[];
 }
+
+export interface LobbyInvite {
+  inviteId: string;
+  lobbyId: string;
+  hostUsername: string;
+  tableId: number;
+  sentAt: string;
+}

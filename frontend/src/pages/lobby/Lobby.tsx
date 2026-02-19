@@ -12,6 +12,8 @@ import {
   X,
   ArrowLeft,
   Play,
+  UserPlus,
+  Send,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -33,12 +35,19 @@ export default function Lobby() {
     removeBot,
     startGame,
     clearGameStarted,
+    invitePlayer,
   } = useLobbyStore();
 
   const [bots, setBots] = useState<BotProfile[]>([]);
   const [loadingBots, setLoadingBots] = useState(true);
   const [activeBotTab, setActiveBotTab] = useState<"standard" | "custom">("standard");
   const [skillFilter, setSkillFilter] = useState<"All" | "Beginner" | "Intermediate" | "Pro" | "Elite">("All");
+
+  const [friends, setFriends] = useState<{ id: string; username: string; isOnline: boolean }[]>([]);
+  const [loadingFriends, setLoadingFriends] = useState(true);
+  const [showInvitePanel, setShowInvitePanel] = useState(false);
+  const [invitingId, setInvitingId] = useState<string | null>(null);
+  const [invitedIds, setInvitedIds] = useState<Set<string>>(new Set());
 
   const standardBots = bots.filter(b => !b.isUserCreated);
   const userBots = bots.filter(b => b.isUserCreated);
@@ -93,6 +102,36 @@ export default function Lobby() {
     };
     fetchBots();
   }, []);
+
+  // Fetch friends for invite panel
+  useEffect(() => {
+    const fetchFriends = async () => {
+      try {
+        setLoadingFriends(true);
+        const data = await api.friends.getFriends();
+        setFriends(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingFriends(false);
+      }
+    };
+    fetchFriends();
+  }, []);
+
+  const handleInviteFriend = async (friendId: string) => {
+    setInvitingId(friendId);
+    try {
+      await invitePlayer(friendId);
+      setInvitedIds((prev) => new Set(prev).add(friendId));
+    } finally {
+      setInvitingId(null);
+    }
+  };
+
+  const isPlayerInLobby = (friendId: string) => {
+    return lobby?.players.some((p) => p.userId === friendId) ?? false;
+  };
 
   const isBotInLobby = (botId: string) => {
     return lobby?.botIds.includes(Number(botId)) ?? false;
@@ -165,12 +204,122 @@ export default function Lobby() {
           )}>
             {totalCount} / 8 seats
           </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowInvitePanel(!showInvitePanel)}
+            className={cn(
+              showInvitePanel && "border-amber-500/50 text-amber-500"
+            )}
+          >
+            <UserPlus className="w-4 h-4 mr-1" />
+            Invite
+          </Button>
           <Button variant="outline" size="sm" onClick={handleLeaveLobby}>
             <ArrowLeft className="w-4 h-4 mr-1" />
             Leave
           </Button>
         </div>
       </div>
+
+      {/* Invite Friends Panel */}
+      {showInvitePanel && (
+        <div className="space-y-3 bg-gray-900/40 border border-gray-800 rounded-xl p-5">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <UserPlus className="text-amber-500 w-5 h-5" />
+            Invite Friends
+          </h2>
+          {loadingFriends ? (
+            <div className="flex justify-center py-6">
+              <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
+            </div>
+          ) : friends.length === 0 ? (
+            <p className="text-gray-500 text-sm text-center py-6">
+              No friends to invite. Add friends first!
+            </p>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {friends.map((friend) => {
+                const inLobby = isPlayerInLobby(friend.id);
+                const invited = invitedIds.has(friend.id);
+                const isInviting = invitingId === friend.id;
+
+                return (
+                  <div
+                    key={friend.id}
+                    className={cn(
+                      "flex items-center justify-between gap-3 p-3 rounded-lg border transition-all",
+                      inLobby
+                        ? "bg-green-500/5 border-green-500/20"
+                        : "bg-gray-900/60 border-gray-800"
+                    )}
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="relative">
+                        <Avatar className="h-9 w-9 border border-gray-700">
+                          <div className="flex h-full w-full items-center justify-center bg-gray-800 text-sm font-bold text-amber-500">
+                            {friend.username[0]}
+                          </div>
+                        </Avatar>
+                        <div
+                          className={cn(
+                            "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-gray-950",
+                            friend.isOnline ? "bg-green-500" : "bg-gray-600"
+                          )}
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-sm text-gray-200 truncate">
+                          {friend.username}
+                        </p>
+                        <p className="text-[10px] text-gray-500">
+                          {inLobby
+                            ? "In lobby"
+                            : friend.isOnline
+                            ? "Online"
+                            : "Offline"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {inLobby ? (
+                      <span className="text-xs text-green-500 font-bold flex items-center gap-1 shrink-0">
+                        <Check className="w-3 h-3" />
+                        Joined
+                      </span>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={invited || isInviting || !friend.isOnline}
+                        onClick={() => handleInviteFriend(friend.id)}
+                        className={cn(
+                          "h-8 text-xs shrink-0",
+                          invited && "border-amber-500/30 text-amber-500"
+                        )}
+                      >
+                        {isInviting ? (
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                        ) : invited ? (
+                          <>
+                            <Check className="w-3 h-3 mr-1" />
+                            Sent
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-3 h-3 mr-1" />
+                            Invite
+                          </>
+                        )}
+                      </Button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Current Lobby Members */}
       <div className="space-y-3">
