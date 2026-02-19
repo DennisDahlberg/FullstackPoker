@@ -32,24 +32,6 @@ namespace backend.Controllers
             _gameHistoryService = gameHistoryService;
             _gameStateManager = gameStateManager;
         }
-        
-        [HttpGet]
-        public async Task<IActionResult> GetGame()
-        {
-            var user = await _userService.GetLoggedInUser(User);
-            if (user is null)
-                return Unauthorized();
-            
-            var gameId = await _gameStateManager.GetUserCurrentGameAsync(user.Id);
-            if (gameId is null)
-                return NotFound(new { message = "No active game found" });
-
-            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
-            if (gameState is null)
-                return NotFound(new { message = "Game not found" });
-            
-            return Ok(gameState);
-        }
 
         [HttpPost("start")]
         public async Task<IActionResult> InitializeGame([FromBody] StartGameRequest request)
@@ -94,49 +76,7 @@ namespace backend.Controllers
             
             return Ok();
         }
-
-        [HttpPost("action")]
-        public async Task<IActionResult> PlayerAction([FromBody] PlayerActionRequest playerAction)
-        {
-            var user = await _userService.GetLoggedInUser(User);
-            if (user is null)
-                return Unauthorized();
-            
-            var gameId = await _gameStateManager.GetUserCurrentGameAsync(user.Id);
-            if (gameId is null)
-                return NotFound(new { message = "No active game found" });
-
-            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
-            if (gameState is null)
-                return NotFound(new { message = "Game not found" });
-
-            await _gameService.HandlePlayerAction(playerAction, gameState!);
-            await _gameStateManager.SaveGameStateAsync(gameState.GameId, gameState);
-            
-            return Ok(gameState);
-        }
-
-        [HttpPost("bot-action")]
-        public async Task<IActionResult> BotAction()
-        {
-            var user = await _userService.GetLoggedInUser(User);
-            if (user is null)
-                return Unauthorized();
-            
-            var gameId = await _gameStateManager.GetUserCurrentGameAsync(user.Id);
-            if (gameId is null)
-                return NotFound(new { message = "No active game found" });
-
-            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
-            if (gameState is null)
-                return NotFound(new { message = "Game not found" });
-            
-            await _gameService.HandleBotAction(gameState!);
-            await _gameStateManager.SaveGameStateAsync(gameState.GameId, gameState);
-            
-            return Ok(gameState);
-        }
-
+        
         [HttpPost("new-round")]
         public async Task<IActionResult> NewRound()
         {
