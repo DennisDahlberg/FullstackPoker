@@ -138,23 +138,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   playerAction: async (action: string, payload?: GameActionPayload) => {
     set({ loading: true });
-    const {connection} = get();
-    if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+    const { connection } = get();
+    if (
+      !connection ||
+      connection.state !== signalR.HubConnectionState.Connected
+    ) {
       toast.error("Not connected to game");
       return;
     }
 
-    const state = useGameStore.getState();
-
-    const data = await api.game.playerAction(action, payload);
-
-    set({
-      game: data,
-      loading: false,
-    });
-
-    if (state.game?.players[data.currentPlayerIndex]?.isPlayer === false) {
-      await useGameStore.getState().botAction();
+    try {
+      await connection.invoke("PlayerAction", action, payload ?? null);
+    } catch (error: any) {
+      console.error("Failed to send action:", error);
+      toast.error(error.message || "Failed to perform action");
+      set({ animating: false });
     }
   },
 
