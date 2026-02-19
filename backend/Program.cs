@@ -29,7 +29,7 @@ namespace backend
 
             builder.Services.AddTransient<JwtTokenService>();
             builder.Services.AddTransient<UserService>();
-            builder.Services.AddTransient<GameService>();
+            builder.Services.AddTransient<IGameService, GameService>();
             builder.Services.AddTransient<BotAiService>();
             builder.Services.AddTransient<FriendsRepository>();
             builder.Services.AddTransient<FriendService>();
