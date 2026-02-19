@@ -438,6 +438,35 @@ public class LobbyHub : Hub
         await _lobbyStateManager.DeleteInviteAsync(inviteId);
         await _lobbyStateManager.RemoveUserInviteAsync(userId, inviteId);
     }
+    
+    public async Task GetPendingInvites()
+    {
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+        var inviteIds = await _lobbyStateManager.GetUserInviteIdsAsync(userId);
+
+        var invites = new List<object>();
+        foreach (var inviteId in inviteIds)
+        {
+            var invite = await _lobbyStateManager.GetInviteAsync(inviteId);
+            if (invite is not null)
+            {
+                invites.Add(new
+                {
+                    invite.InviteId,
+                    invite.LobbyId,
+                    invite.HostUsername,
+                    invite.TableId,
+                    invite.SentAt
+                });
+            }
+            else
+            {
+                await _lobbyStateManager.RemoveUserInviteAsync(userId, inviteId);
+            }
+        }
+
+        await Clients.Caller.SendAsync("PendingInvites", invites);
+    }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
