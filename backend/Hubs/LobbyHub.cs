@@ -238,4 +238,60 @@ public class LobbyHub : Hub
         await Clients.Group($"lobby_{lobbyId}").SendAsync("GameStarted", gameState.GameId);
     }
     
+    public async Task LeaveLobby()
+    {
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+        var lobbyId = await _lobbyStateManager.GetUserCurrentLobbyAsync(userId);
+
+        if (lobbyId is null) return;
+
+        var lobby = await _lobbyStateManager.GetLobbyStateAsync(lobbyId);
+        if (lobby is null)
+        {
+            await _lobbyStateManager.RemoveUserCurrentLobbyAsync(userId);
+            return;
+        }
+
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"lobby_{lobbyId}");
+        await _lobbyStateManager.RemoveUserCurrentLobbyAsync(userId);
+        
+        if (lobby.HostUserId == userId)
+        {
+            foreach (var player in lobby.Players)
+            {
+                await _lobbyStateManager.RemoveUserCurrentLobbyAsync(player.UserId);
+            }
+
+            await _lobbyStateManager.DeleteLobbyStateAsync(lobbyId);
+            await Clients.Group($"lobby_{lobbyId}").SendAsync("LobbyClosed", "Host left the lobby");
+        }
+        else
+        {
+            lobby.Players.RemoveAll(p => p.UserId == userId);
+            await _lobbyStateManager.SaveLobbyStateAsync(lobbyId, lobby);
+
+            var user = await _userService.GetUserById(userId);
+            await Clients.Group($"lobby_{lobbyId}").SendAsync("LobbyUpdated", lobby);
+            await Clients.Group($"lobby_{lobbyId}").SendAsync("PlayerLeft", user?.UserName ?? "Unknown");
+        }
+    }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        try
+        {
+            var userId = _userService.GetLoggedInUserId(Context.User!);
+            if (!string.IsNullOrEmpty(userId))
+            {
+                await LeaveLobby();
+            }
+        }
+        catch
+        {
+            
+        }
+
+        await base.OnDisconnectedAsync(exception);
+    }
+    
 }
