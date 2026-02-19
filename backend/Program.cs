@@ -171,6 +171,7 @@ namespace backend
 
             app.MapHub<FriendsHub>("/hubs/friends");
             app.MapHub<GameHub>("/hubs/game");
+            app.MapHub<LobbyHub>("/hubs/lobby");
 
             app.Run();
         }

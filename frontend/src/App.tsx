@@ -10,7 +10,8 @@ import Game from "./pages/Game";
 import Friends from "./pages/Friends";
 import { Toaster } from "sonner";
 import FriendInviteListener from "./components/FriendNotification";
-import Lobby from "./pages/Lobby";
+import Lobby from "./pages/lobby/Lobby";
+import WaitingRoom from "./pages/lobby/WaitingRoom";
 
 
 function App() {
@@ -26,6 +27,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/friends" element={<Friends />} />
           <Route path="/lobby" element={<Lobby />} />
+          <Route path="/lobby/waiting" element={<WaitingRoom />} />
           <Route path="*" element={<div className="pt-20 text-center text-4xl">404 - Not Found</div>} />
         </Route>
 

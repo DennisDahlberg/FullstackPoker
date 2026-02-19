@@ -1,5 +1,4 @@
 import axios from "axios";
-import type { GameActionPayload } from "@/types/GameState";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 

@@ -2,7 +2,6 @@ import { create } from "zustand";
 import * as signalR from "@microsoft/signalr";
 import type { GameState } from "@/types/GameState";
 import type { GameActionPayload } from "@/types/GameState";
-import { api } from "@/lib/api";
 import { toast } from "sonner";
 
 interface GameStore {
