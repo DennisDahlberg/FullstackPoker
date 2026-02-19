@@ -32,7 +32,6 @@ export default function Game() {
   const error = useGameStore((s) => s.error);
   const connectToGame = useGameStore((s) => s.connectToGame);
   const disconnectFromGame = useGameStore((s) => s.disconnectFromGame);
-  const getGame = useGameStore((s) => s.getGame);
   const playerAction = useGameStore((s) => s.playerAction);
   const startNewRound = useGameStore((s) => s.startNewRound);
   const leaveGame = useGameStore((s) => s.leaveGame);

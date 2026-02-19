@@ -15,10 +15,8 @@ interface GameStore {
   connectToGame: () => Promise<void>;
   disconnectFromGame: () => Promise<void>;
 
-  getGame: () => Promise<void>;
   setAnimating: (v: boolean) => void;
   playerAction: (action: string, payload?: GameActionPayload) => Promise<void>;
-  botAction: () => Promise<void>;
   startNewRound: () => Promise<void>;
   leaveGame: () => Promise<void>;
 
@@ -121,21 +119,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  getGame: async () => {
-    set({ loading: true });
-
-    const data = await api.game.getGameData();
-
-    set({
-      game: data,
-      loading: false,
-    });
-
-    if (data?.players[data.currentPlayerIndex]?.isPlayer === false) {
-      await useGameStore.getState().botAction();
-    }
-  },
-
   playerAction: async (action: string, payload?: GameActionPayload) => {
     set({ loading: true });
     const { connection } = get();
@@ -156,24 +139,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
   },
 
-  botAction: async () => {
-    let state = useGameStore.getState();
-
-    while (
-      state.game &&
-      !state.game.isGameOver &&
-      state.game?.players[state.game.currentPlayerIndex]?.isPlayer === false
-    ) {
-      set({ loading: true });
-
-      const data = await api.game.botAction();
-      set({ game: data, loading: false });
-
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      state = useGameStore.getState();
-    }
-  },
-
   startNewRound: async () => {
     set({ loading: true });
 
@@ -185,9 +150,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       loading: false,
     });
 
-    if (state.game?.players[data.currentPlayerIndex]?.isPlayer === false) {
-      await useGameStore.getState().botAction();
-    }
   },
 
   leaveGame: async () => {
