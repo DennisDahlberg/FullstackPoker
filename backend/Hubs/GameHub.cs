@@ -105,4 +105,37 @@ public class GameHub : Hub
             await Clients.Group($"game_{gameId}").SendAsync("GameStateUpdated", gameState);
         }
     }
+
+    public async Task StartNewRound()
+    {
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+        var gameId = await _gameStateManager.GetUserCurrentGameAsync(userId);
+        if (gameId is null)
+        {
+            await Clients.Caller.SendAsync("Error", "No active game found");
+            return;
+        }
+
+        var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+        if (gameState == null)
+        {
+            await Clients.Caller.SendAsync("Error", "Game not found");
+            return;
+        }
+
+        try
+        {
+            var newGameState = _gameService.NewRound(gameState);
+            await _gameStateManager.SaveGameStateAsync(gameId, newGameState);
+            await Clients.Group($"game_{gameId}").SendAsync("GameStateUpdated", newGameState);
+            
+            await ProcessBotTurns(gameId, newGameState);
+        }
+        catch (Exception ex)
+        {
+            await Clients.Caller.SendAsync("Error", ex.Message);
+        }
+    }
+    
+    
 }
