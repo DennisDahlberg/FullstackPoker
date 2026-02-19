@@ -64,6 +64,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({ error: message, loading: false, animating: false });
       });
 
+      connection.on("GameLeft", (data: any) => {
+        toast.success(data.message);
+        set({ game: null, connection: null });
+      });
+
       connection.onreconnecting((error) => {
         console.warn("Reconnecting...", error);
         toast.warning("Connection lost. Reconnecting...");
@@ -92,7 +97,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       });
 
       await connection.start();
-      console.log("✅ SignalR connected");
+      console.log("SignalR connected");
       await connection.invoke("JoinGame");
       set({ connection, loading: false });
     } catch (err) {
@@ -140,26 +145,34 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   startNewRound: async () => {
-    set({ loading: true });
+    const {connection} = get();
+    if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+      toast.error("Not connected to game");
+      return;
+    }
 
-    const state = useGameStore.getState();
-    const data = await api.game.startNewRound();
-
-    set({
-      game: data,
-      loading: false,
-    });
-
+    try {
+      await connection.invoke("StartNewRound");
+    } catch (error: any) {
+      console.error("Failed to start new round:", error);
+      toast.error(error.message || "Failed to start new round");
+    }
   },
 
   leaveGame: async () => {
-    set({ loading: true });
+    const { connection } = get();
+    
+    if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+      set({ game: null });
+      return;
+    }
 
-    await api.game.leaveGame();
-
-    set({
-      game: null,
-      loading: false,
-    });
+    try {
+      await connection.invoke("LeaveGame");
+    } catch (error: any) {
+      console.error("Failed to leave game:", error);
+      await connection.stop();
+      set({ connection: null, game: null });
+    }
   },
 }));

@@ -80,14 +80,6 @@ export const api = {
         }
         throw 'An error occurred while initializing game';
       }
-    },
-    async startNewRound() {
-      const response = await apiClient.post(`${backendUrl}/game/new-round`);
-      return response.data;
-    },
-    async leaveGame() {
-      const response = await apiClient.post(`${backendUrl}/game/leave`);
-      return response.data;
     }
   },
 
