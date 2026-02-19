@@ -342,6 +342,90 @@ public class LobbyHub : Hub
 
         await Clients.Caller.SendAsync("InviteSent", invitedUser.UserName);
     }
+    
+    public async Task AcceptInvite(string inviteId)
+    {
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+        var user = await _userService.GetUserById(userId);
+
+        if (user is null)
+        {
+            await Clients.Caller.SendAsync("Error", "User not found");
+            return;
+        }
+
+        var invite = await _lobbyStateManager.GetInviteAsync(inviteId);
+        if (invite is null)
+        {
+            await Clients.Caller.SendAsync("Error", "Invite not found or expired");
+            return;
+        }
+
+        if (invite.InvitedUserId != userId)
+        {
+            await Clients.Caller.SendAsync("Error", "This invite is not for you");
+            return;
+        }
+
+        var lobby = await _lobbyStateManager.GetLobbyStateAsync(invite.LobbyId);
+        if (lobby is null)
+        {
+            await _lobbyStateManager.DeleteInviteAsync(inviteId);
+            await _lobbyStateManager.RemoveUserInviteAsync(userId, inviteId);
+            await Clients.Caller.SendAsync("Error", "Lobby no longer exists");
+            return;
+        }
+
+        var existingLobbyId = await _lobbyStateManager.GetUserCurrentLobbyAsync(userId);
+        if (existingLobbyId is not null)
+        {
+            await Clients.Caller.SendAsync("Error", "You are already in a lobby. Leave it first.");
+            return;
+        }
+
+        var totalPlayers = lobby.Players.Count + lobby.BotIds.Count;
+        if (totalPlayers >= 8)
+        {
+            await Clients.Caller.SendAsync("Error", "Lobby is full");
+            return;
+        }
+
+        // Check balance
+        var tableResult = await _tableService.GetTableByIdAsync(lobby.TableId);
+        if (tableResult.IsFailed)
+        {
+            await Clients.Caller.SendAsync("Error", "Table configuration not found");
+            return;
+        }
+
+        if (user.Balance < tableResult.Value.BuyIn)
+        {
+            await Clients.Caller.SendAsync("Error", $"Insufficient balance. Need ${tableResult.Value.BuyIn}");
+            return;
+        }
+
+        lobby.Players.Add(new LobbyPlayer
+        {
+            UserId = user.Id,
+            Username = user.UserName,
+            IsHost = false,
+            IsReady = false
+        });
+
+        await _lobbyStateManager.SaveLobbyStateAsync(invite.LobbyId, lobby);
+        await _lobbyStateManager.SetUserCurrentLobbyAsync(userId, invite.LobbyId);
+
+        await _lobbyStateManager.DeleteInviteAsync(inviteId);
+        await _lobbyStateManager.RemoveUserInviteAsync(userId, inviteId);
+
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"lobby_{invite.LobbyId}");
+
+        await Clients.Group($"lobby_{invite.LobbyId}").SendAsync("LobbyUpdated", lobby);
+        await Clients.Group($"lobby_{invite.LobbyId}").SendAsync("PlayerJoined", user.UserName);
+
+        await Clients.Caller.SendAsync("JoinedLobby", lobby);
+    }
+
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
