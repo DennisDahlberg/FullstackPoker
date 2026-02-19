@@ -1,3 +1,4 @@
+using Core.GameModels;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
@@ -45,6 +46,63 @@ public class GameHub : Hub
         if (user is not null)
         {
             await Clients.OthersInGroup($"game_{gameId}").SendAsync("PlayerConnected", user.UserName);
+        }
+        
+        await ProcessBotTurns(gameId, gameState);
+    }
+
+    public async Task PlayerAction(string action, int? amount)
+    {
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+        var gameId = await _gameStateManager.GetUserCurrentGameAsync(userId);
+        if (gameId is null)
+        {
+            await Clients.Caller.SendAsync("Error", "No active game found");
+            return;
+        }
+
+        var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+        if (gameState == null)
+        {
+            await Clients.Caller.SendAsync("Error", "Game not found");
+            return;
+        }
+
+        var currentPlayer = gameState.Players[gameState.CurrentPlayerIndex];
+        if (currentPlayer.UserId != userId)
+        {
+            await Clients.Caller.SendAsync("Error", "Not your turn");
+            return;
+        }
+
+        try
+        {
+            var request = new PlayerActionRequest
+            {
+                Action = action,
+                Amount = amount ?? 0,
+            };
+
+            await _gameService.HandlePlayerAction(request, gameState);
+            await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+            await Clients.Group($"game_{gameId}").SendAsync("GameStateUpdated", gameState);
+            
+            await ProcessBotTurns(gameId, gameState);
+        }
+        catch (Exception ex)
+        {
+            await Clients.Caller.SendAsync("Error", ex.Message);
+        }
+    }
+
+    private async Task ProcessBotTurns(string gameId, GameState gameState)
+    {
+        while (!gameState.IsGameOver &&
+               !gameState.Players[gameState.CurrentPlayerIndex].IsPlayer)
+        {
+            await _gameService.HandleBotAction(gameState);
+            await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+            await Clients.Group($"game_{gameId}").SendAsync("GameStateUpdated", gameState);
         }
     }
 }
