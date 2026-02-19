@@ -32,7 +32,7 @@ public class LobbyStateManager : ILobbyStateManager
         return JsonSerializer.Deserialize<LobbyState>(json!);
     }
     
-    public async Task SaveLobbyStateAsync(string lobbyId, GameState lobbyState)
+    public async Task SaveLobbyStateAsync(string lobbyId, LobbyState lobbyState)
     {
         var db = _redis.GetDatabase();
         var key = GetKey(lobbyId);
