@@ -426,6 +426,18 @@ public class LobbyHub : Hub
         await Clients.Caller.SendAsync("JoinedLobby", lobby);
     }
 
+    public async Task DeclineInvite(string inviteId)
+    {
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+
+        var invite = await _lobbyStateManager.GetInviteAsync(inviteId);
+        if (invite is null) return;
+
+        if (invite.InvitedUserId != userId) return;
+
+        await _lobbyStateManager.DeleteInviteAsync(inviteId);
+        await _lobbyStateManager.RemoveUserInviteAsync(userId, inviteId);
+    }
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
