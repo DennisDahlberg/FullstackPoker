@@ -11,6 +11,7 @@ import {
   Loader2,
   X,
   ArrowLeft,
+  Play,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,18 @@ export default function Lobby() {
   const navigate = useNavigate();
   const tableId = searchParams.get("tableId");
 
-  const { lobby, loading, error, connectAndCreate, disconnect, addBot, removeBot } = useLobbyStore();
+  const {
+    lobby,
+    loading,
+    error,
+    gameStartedId,
+    connectAndCreate,
+    leaveLobby,
+    addBot,
+    removeBot,
+    startGame,
+    clearGameStarted,
+  } = useLobbyStore();
 
   const [bots, setBots] = useState<BotProfile[]>([]);
   const [loadingBots, setLoadingBots] = useState(true);
@@ -30,6 +42,14 @@ export default function Lobby() {
 
   const standardBots = bots.filter(b => !b.isUserCreated);
   const userBots = bots.filter(b => b.isUserCreated);
+
+  // Navigate to game when it starts
+  useEffect(() => {
+    if (gameStartedId) {
+      clearGameStarted();
+      navigate("/game");
+    }
+  }, [gameStartedId]);
 
   // Connect to lobby hub on mount
   useEffect(() => {
@@ -41,7 +61,11 @@ export default function Lobby() {
     connectAndCreate(Number(tableId));
 
     return () => {
-      disconnect();
+      // Only leave if game hasn't started
+      const { gameStartedId } = useLobbyStore.getState();
+      if (!gameStartedId) {
+        leaveLobby();
+      }
     };
   }, [tableId]);
 
@@ -83,9 +107,11 @@ export default function Lobby() {
   };
 
   const handleLeaveLobby = async () => {
-    await disconnect();
+    await leaveLobby();
     navigate("/lobby/create");
   };
+
+  const canStartGame = lobby && (lobby.players.length + lobby.botIds.length) >= 2;
 
   // Loading state
   if (loading && !lobby) {
@@ -320,6 +346,28 @@ export default function Lobby() {
             )}
           </div>
         )}
+      </div>
+
+      {/* Start Game Button */}
+      <div className="fixed bottom-8 right-8 z-50 animate-in fade-in slide-in-from-bottom-4">
+        <Button
+          size="lg"
+          onClick={startGame}
+          disabled={!canStartGame || loading}
+          className={cn(
+            "h-14 px-8 rounded-full text-lg font-bold shadow-2xl transition-all",
+            canStartGame && !loading
+              ? "bg-amber-500 hover:bg-amber-400 text-black hover:scale-105 shadow-amber-900/50"
+              : "bg-gray-800 text-gray-500 cursor-not-allowed"
+          )}
+        >
+          {loading ? (
+            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+          ) : (
+            <Play className="w-5 h-5 mr-2" />
+          )}
+          Start Game
+        </Button>
       </div>
     </div>
   );

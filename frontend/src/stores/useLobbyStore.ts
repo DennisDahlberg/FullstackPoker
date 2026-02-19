@@ -8,12 +8,14 @@ interface LobbyStore {
   connection: signalR.HubConnection | null;
   loading: boolean;
   error: string | null;
+  gameStartedId: string | null;
 
   connectAndCreate: (tableId: number) => Promise<void>;
   disconnect: () => Promise<void>;
   addBot: (botId: number) => Promise<void>;
   removeBot: (botId: number) => Promise<void>;
   clearError: () => void;
+  clearGameStarted: () => void;
   leaveLobby: () => Promise<void>;
   startGame: () => Promise<void>;
 }
@@ -23,8 +25,10 @@ export const useLobbyStore = create<LobbyStore>((set, get) => ({
   connection: null,
   loading: false,
   error: null,
+  gameStartedId: null,
 
   clearError: () => set({ error: null }),
+  clearGameStarted: () => set({ gameStartedId: null }),
 
   connectAndCreate: async (tableId: number) => {
     const existing = get().connection;
@@ -65,6 +69,20 @@ export const useLobbyStore = create<LobbyStore>((set, get) => ({
 
       connection.on("BotRemoved", (_botId: number) => {
         toast.info("Bot removed from lobby");
+      });
+
+      connection.on("GameStarted", (gameId: string) => {
+        toast.success("Game starting!");
+        set({ gameStartedId: gameId, loading: false });
+      });
+
+      connection.on("LobbyClosed", (message: string) => {
+        toast.error(message);
+        set({ lobby: null, connection: null, loading: false });
+      });
+
+      connection.on("PlayerLeft", (username: string) => {
+        toast.info(`${username} left the lobby`);
       });
 
       connection.on("Error", (message: string) => {
