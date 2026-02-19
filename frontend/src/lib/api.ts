@@ -149,6 +149,42 @@ export const api = {
     }
   },
 
+  lobby: {
+    async getPendingInvites() {
+      try {
+        const response = await apiClient.get(`${backendUrl}/lobby/invites`);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to fetch game invites';
+        }
+        throw 'An error occurred while fetching game invites';
+      }
+    },
+    async acceptInvite(inviteId: string) {
+      try {
+        const response = await apiClient.post(`${backendUrl}/lobby/invites/${inviteId}/accept`);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to accept invite';
+        }
+        throw 'An error occurred while accepting invite';
+      }
+    },
+    async declineInvite(inviteId: string) {
+      try {
+        const response = await apiClient.post(`${backendUrl}/lobby/invites/${inviteId}/decline`);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to decline invite';
+        }
+        throw 'An error occurred while declining invite';
+      }
+    },
+  },
+
   bots: {
     async getBotProfiles() {
       try {

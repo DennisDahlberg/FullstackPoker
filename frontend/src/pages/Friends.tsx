@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar } from "@/components/ui/avatar";
-import { UserPlus, X, MessageSquare, Search, Users, Loader2 } from "lucide-react";
+import { UserPlus, X, MessageSquare, Search, Users, Loader2, Gamepad2, Check } from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { useFriendsHub } from "@/context/FriendsHubContext";
 import { formatDistanceToNow } from "date-fns";
+import type { LobbyInvite } from "@/types/Lobby";
 
-type TabId = "friends" | "requests" | "find";
+type TabId = "friends" | "requests" | "find" | "invites";
 
 interface Friend {
   id: string;
@@ -29,6 +31,7 @@ interface User {
 }
 
 export default function Friends() {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<TabId>("friends");
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
@@ -41,6 +44,12 @@ export default function Friends() {
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [isLoadingFriends, setIsLoadingFriends] = useState(true);
   const [isLoadingRequests, setIsLoadingRequests] = useState(true);
+
+  // Game invites state
+  const [gameInvites, setGameInvites] = useState<LobbyInvite[]>([]);
+  const [isLoadingInvites, setIsLoadingInvites] = useState(true);
+  const [acceptingInviteId, setAcceptingInviteId] = useState<string | null>(null);
+  const [decliningInviteId, setDecliningInviteId] = useState<string | null>(null);
 
   const friendsHub = useFriendsHub();
 
@@ -80,6 +89,22 @@ export default function Friends() {
     fetchRequests();
   }, []);
 
+  // Fetch game invites on mount
+  useEffect(() => {
+    const fetchInvites = async () => {
+      setIsLoadingInvites(true);
+      try {
+        const data = await api.lobby.getPendingInvites();
+        setGameInvites(data);
+      } catch (error) {
+        console.error("Failed to load game invites:", error);
+      } finally {
+        setIsLoadingInvites(false);
+      }
+    };
+    fetchInvites();
+  }, []);
+
 
   // SignalR event listeners
   useEffect(() => {
@@ -117,14 +142,23 @@ export default function Friends() {
     );
   };
 
+    const handleLobbyInviteReceived = (invite: LobbyInvite) => {
+      setGameInvites(prev => [invite, ...prev]);
+      toast.info("Game invite received!", {
+        description: `${invite.hostUsername} invited you to join their lobby`,
+      });
+    };
+
     friendsHub.on("ReceiveFriendInvite", handleReceiveFriendInvite);
     friendsHub.on("FriendRequestAccepted", handleFriendRequestAccepted);
     friendsHub.on("FriendStatusChanged", handleFriendStatusChanged);
+    friendsHub.on("LobbyInviteReceived", handleLobbyInviteReceived);
 
     return () => {
       friendsHub.off("ReceiveFriendInvite", handleReceiveFriendInvite);
       friendsHub.off("FriendRequestAccepted", handleFriendRequestAccepted);
       friendsHub.off("FriendStatusChanged", handleFriendStatusChanged);
+      friendsHub.off("LobbyInviteReceived", handleLobbyInviteReceived);
     };
   }, [friendsHub]);
 
@@ -199,6 +233,35 @@ export default function Friends() {
       });
     } finally {
       setAcceptingRequestId(null);
+    }
+  };
+
+  const handleAcceptInvite = async (invite: LobbyInvite) => {
+    setAcceptingInviteId(invite.inviteId);
+    try {
+      const result = await api.lobby.acceptInvite(invite.inviteId);
+      setGameInvites(prev => prev.filter(i => i.inviteId !== invite.inviteId));
+      toast.success("Invite accepted! Joining lobby...");
+      navigate(`/lobby?tableId=${result.tableId}`);
+    } catch (err: any) {
+      const message = err?.message || "Failed to accept invite";
+      toast.error(message);
+    } finally {
+      setAcceptingInviteId(null);
+    }
+  };
+
+  const handleDeclineInvite = async (invite: LobbyInvite) => {
+    setDecliningInviteId(invite.inviteId);
+    try {
+      await api.lobby.declineInvite(invite.inviteId);
+      setGameInvites(prev => prev.filter(i => i.inviteId !== invite.inviteId));
+      toast.info("Invite declined");
+    } catch (err) {
+      console.error("Failed to decline invite:", err);
+      toast.error("Failed to decline invite");
+    } finally {
+      setDecliningInviteId(null);
     }
   };
 
@@ -279,6 +342,7 @@ export default function Friends() {
           {[
             { id: "friends", label: "All", icon: Users },
             { id: "requests", label: "Pending", icon: UserPlus, count: friendRequests.length },
+            { id: "invites", label: "Game Invites", icon: Gamepad2, count: gameInvites.length },
             { id: "find", label: "Add Friend", icon: Search },
           ].map((tab) => (
             <button
@@ -299,7 +363,7 @@ export default function Friends() {
       {/* Content Area */}
       <div className="space-y-6">
         {/* Global Search (only for existing friends/requests) */}
-        {activeTab !== "find" && (
+        {activeTab !== "find" && activeTab !== "invites" && (
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 h-4 w-4 transition-colors" />
             <Input
@@ -410,6 +474,79 @@ export default function Friends() {
                       </Button>
                       <Button variant="ghost" size="sm" className="h-8 hover:bg-red-500/10 text-gray-400 hover:text-red-400">
                         Decline
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </>
+          )}
+
+          {activeTab === "invites" && (
+            <>
+              {isLoadingInvites ? (
+                <div className="flex items-center justify-center py-12">
+                  <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+                </div>
+              ) : gameInvites.length === 0 ? (
+                <div className="text-center py-12 space-y-3">
+                  <Gamepad2 className="h-10 w-10 text-gray-700 mx-auto" />
+                  <p className="text-gray-500 text-sm">No pending game invites</p>
+                </div>
+              ) : (
+                gameInvites.map((invite) => (
+                  <div
+                    key={invite.inviteId}
+                    className="group flex items-center justify-between p-4 border-y border-transparent hover:bg-gray-900/40 hover:border-t-white/5"
+                  >
+                    <div className="flex items-center gap-4">
+                      <Avatar className="flex items-center justify-center h-10 w-10 bg-amber-900/20 text-amber-500 font-bold">
+                        {invite.hostUsername[0]}
+                      </Avatar>
+                      <div>
+                        <h4 className="text-sm font-bold text-gray-200">
+                          {invite.hostUsername}
+                        </h4>
+                        <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">
+                          Game Invite • Table #{invite.tableId} •{" "}
+                          {formatDistanceToNow(new Date(invite.sentAt), {
+                            addSuffix: true,
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="amber"
+                        size="sm"
+                        className="h-8 px-4"
+                        onClick={() => handleAcceptInvite(invite)}
+                        disabled={acceptingInviteId === invite.inviteId}
+                      >
+                        {acceptingInviteId === invite.inviteId ? (
+                          <>
+                            <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                            Joining...
+                          </>
+                        ) : (
+                          <>
+                            <Check className="h-3 w-3 mr-1" />
+                            Accept
+                          </>
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 hover:bg-red-500/10 text-gray-400 hover:text-red-400"
+                        onClick={() => handleDeclineInvite(invite)}
+                        disabled={decliningInviteId === invite.inviteId}
+                      >
+                        {decliningInviteId === invite.inviteId ? (
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                        ) : (
+                          "Decline"
+                        )}
                       </Button>
                     </div>
                   </div>

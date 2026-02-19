@@ -15,8 +15,9 @@ public class LobbyHub : Hub
     private readonly IGameService _gameService;
     private readonly IGameStateManager _gameStateManager;
     private readonly BotService _botService;
+    private readonly IHubContext<FriendsHub> _friendsHubContext;
 
-    public LobbyHub(ILobbyStateManager lobbyStateManager, ITableService tableService, IUserService userService, BotService botService, IGameService gameService, IGameStateManager gameStateManager)
+    public LobbyHub(ILobbyStateManager lobbyStateManager, ITableService tableService, IUserService userService, BotService botService, IGameService gameService, IGameStateManager gameStateManager, IHubContext<FriendsHub> friendsHubContext)
     {
         _lobbyStateManager = lobbyStateManager;
         _tableService = tableService;
@@ -24,6 +25,7 @@ public class LobbyHub : Hub
         _botService = botService;
         _gameService = gameService;
         _gameStateManager = gameStateManager;
+        _friendsHubContext = friendsHubContext;
     }
 
     public async Task CreateLobby(int tableId)
@@ -331,14 +333,21 @@ public class LobbyHub : Hub
         await _lobbyStateManager.SaveInviteAsync(invite.InviteId, invite);
         await _lobbyStateManager.AddUserInviteAsync(friendId, invite.InviteId);
 
-        await Clients.User(friendId).SendAsync("LobbyInviteReceived", new
+        var invitePayload = new
         {
             invite.InviteId,
             invite.LobbyId,
             invite.HostUsername,
             invite.TableId,
             invite.SentAt
-        });
+        };
+
+        // Send via LobbyHub (if user is connected)
+        await Clients.User(friendId).SendAsync("LobbyInviteReceived", invitePayload);
+
+        // Also send via FriendsHub (always connected)
+        await _friendsHubContext.Clients.User(friendId)
+            .SendAsync("LobbyInviteReceived", invitePayload);
 
         await Clients.Caller.SendAsync("InviteSent", invitedUser.UserName);
     }
