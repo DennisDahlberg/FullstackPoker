@@ -10,6 +10,7 @@ pnpm-debug.log*
 .vite/
 .env
 .env.*.local
+.env.tunnel
 
 # ===== Tailwind / PostCSS =====
 *.css.map
