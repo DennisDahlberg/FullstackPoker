@@ -120,5 +120,37 @@ public class LobbyHub : Hub
         await Clients.Group($"lobby_{lobbyId}").SendAsync("LobbyUpdated", lobby);
         await Clients.Group($"lobby_{lobbyId}").SendAsync("BotAdded", botsResult.Value[0].Username);
     }
+
+    public async Task RemoveBotFromLobby(int botId)
+    {
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+        var lobbyId = await _lobbyStateManager.GetUserCurrentLobbyAsync(userId);
+        
+        if (lobbyId == null)
+        {
+            await Clients.Caller.SendAsync("Error", "You are not in a lobby");
+            return;
+        }
+
+        var lobby = await _lobbyStateManager.GetLobbyStateAsync(lobbyId);
+        if (lobby == null)
+        {
+            await Clients.Caller.SendAsync("Error", "Lobby not found");
+            return;
+        }
+        
+        if (lobby.HostUserId != userId)
+        {
+            await Clients.Caller.SendAsync("Error", "Only the host can remove bots");
+            return;
+        }
+        
+        if (lobby.BotIds.Remove(botId))
+        {
+            await _lobbyStateManager.SaveLobbyStateAsync(lobbyId, lobby);
+            await Clients.Group($"lobby_{lobbyId}").SendAsync("LobbyUpdated", lobby);
+            await Clients.Group($"lobby_{lobbyId}").SendAsync("BotRemoved", botId);
+        }
+    }
     
 }
