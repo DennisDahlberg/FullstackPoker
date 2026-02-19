@@ -1,10 +1,12 @@
 using Application.Services;
 using Core.Interfaces;
 using Core.Models.Lobby;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace backend.Hubs;
 
+[Authorize]
 public class LobbyHub : Hub
 {
     private readonly ILobbyStateManager _lobbyStateManager;
@@ -22,7 +24,8 @@ public class LobbyHub : Hub
 
     public async Task CreateLobby(int tableId)
     {
-        var user = await _userService.GetLoggedInUser(Context.User!);
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+        var user = await _userService.GetUserById(userId ?? "");
         if (user is null)
         {
             await Clients.Caller.SendAsync("Error", "User not found");

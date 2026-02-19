@@ -16,3 +16,19 @@ export interface TableConfig {
   smallBlind: number;
   difficulty: "Casual" | "Standard" | "Hardcore";
 }
+
+export interface LobbyPlayer {
+  userId: string;
+  username: string;
+  isHost: boolean;
+  isReady: boolean;
+}
+
+export interface LobbyState {
+  lobbyId: string;
+  hostUserId: string;
+  hostUsername: string;
+  tableId: number;
+  players: LobbyPlayer[];
+  botIds: number[];
+}
