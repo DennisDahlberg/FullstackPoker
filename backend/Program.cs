@@ -28,8 +28,8 @@ namespace backend
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddTransient<JwtTokenService>();
-            builder.Services.AddTransient<UserService>();
-            builder.Services.AddTransient<GameService>();
+            builder.Services.AddTransient<IUserService, UserService>();
+            builder.Services.AddTransient<IGameService, GameService>();
             builder.Services.AddTransient<BotAiService>();
             builder.Services.AddTransient<FriendsRepository>();
             builder.Services.AddTransient<FriendService>();
@@ -41,6 +41,7 @@ namespace backend
             builder.Services.AddTransient<IGameHistoryService, GameHistoryService>();
             builder.Services.AddTransient<IGameRepository, GameRepository>();
             builder.Services.AddTransient<IGameStateManager, GameStateManager>();
+            builder.Services.AddTransient<ILobbyStateManager, LobbyStateManager>();
 
             //EF Core
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -71,7 +72,7 @@ namespace backend
             {
                 options.AddPolicy("AllowFrontend", policy =>
                 {
-                    policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
+                    policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "https://poker.pokergame.win")
                       .AllowAnyMethod()
                       .AllowAnyHeader()
                       .AllowCredentials();
@@ -170,6 +171,8 @@ namespace backend
             }
 
             app.MapHub<FriendsHub>("/hubs/friends");
+            app.MapHub<GameHub>("/hubs/game");
+            app.MapHub<LobbyHub>("/hubs/lobby");
 
             app.Run();
         }

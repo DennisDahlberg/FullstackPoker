@@ -9,6 +9,9 @@ export default defineConfig({
   server: {
     host: true,  
     port: 5173, 
+    allowedHosts: [
+      'poker.pokergame.win'
+    ]
   },
   resolve: {
     alias: {

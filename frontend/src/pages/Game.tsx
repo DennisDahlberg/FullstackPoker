@@ -24,15 +24,18 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 export default function Game() {
   const navigate = useNavigate();
   const game = useGameStore((s) => s.game);
-  // const loading = useGameStore((s) => s.loading);
-  const getGame = useGameStore((s) => s.getGame);
+  const error = useGameStore((s) => s.error);
+  const connectToGame = useGameStore((s) => s.connectToGame);
+  const disconnectFromGame = useGameStore((s) => s.disconnectFromGame);
   const playerAction = useGameStore((s) => s.playerAction);
   const startNewRound = useGameStore((s) => s.startNewRound);
   const leaveGame = useGameStore((s) => s.leaveGame);
+  const clearError = useGameStore((s) => s.clearError);
 
   const [raiseValue, setRaiseValue] = useState(0);
   const [isRaiseModalOpen, setIsRaiseModalOpen] = useState(false);
@@ -40,8 +43,19 @@ export default function Game() {
   const minRaise = game ? game.smallBlind : 0;
 
   useEffect(() => {
-    getGame();
-  }, [getGame]);
+    connectToGame();
+
+    return () => {
+      disconnectFromGame();
+    };
+  }, [connectToGame, disconnectFromGame]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      clearError();
+    }
+  }, [error, clearError]);
 
   const handleLeaveClick = () => {
     setIsLeaveWarningOpen(true);

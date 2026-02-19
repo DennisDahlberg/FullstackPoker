@@ -1,6 +1,7 @@
 using Application.Services;
 using backend.Hubs;
 using Core.DTOs.Friend;
+using Core.Interfaces;
 using Core.Models;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -16,11 +17,11 @@ namespace backend.Controllers;
 public class FriendsController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly UserService _userService;
+    private readonly IUserService _userService;
     private readonly FriendService _friendService;
     private readonly IHubContext<FriendsHub> _hubContext;
     
-    public FriendsController(UserManager<ApplicationUser> userManager, UserService userService, FriendService friendService, IHubContext<FriendsHub> hubContext)
+    public FriendsController(UserManager<ApplicationUser> userManager, IUserService userService, FriendService friendService, IHubContext<FriendsHub> hubContext)
     {
         _userManager = userManager;
         _userService = userService;

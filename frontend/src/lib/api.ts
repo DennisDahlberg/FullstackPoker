@@ -1,5 +1,4 @@
 import axios from "axios";
-import type { GameActionPayload } from "@/types/GameState";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -80,29 +79,6 @@ export const api = {
         }
         throw 'An error occurred while initializing game';
       }
-    },
-    async getGameData() {
-      const response = await apiClient.get(`${backendUrl}/game`);
-      return response.data;
-    },
-    async playerAction(action:string, payload?:GameActionPayload) {
-      const response = await apiClient.post(`${backendUrl}/game/action`, {
-        action: action,
-        amount: payload?.amount
-      });
-      return response.data;
-    },
-    async botAction() {
-      const response = await apiClient.post(`${backendUrl}/game/bot-action`);
-      return response.data;
-    },
-    async startNewRound() {
-      const response = await apiClient.post(`${backendUrl}/game/new-round`);
-      return response.data;
-    },
-    async leaveGame() {
-      const response = await apiClient.post(`${backendUrl}/game/leave`);
-      return response.data;
     }
   },
 

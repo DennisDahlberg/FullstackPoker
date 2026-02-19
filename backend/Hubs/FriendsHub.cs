@@ -1,5 +1,6 @@
 ﻿using System.Reflection.Metadata.Ecma335;
 using Application.Services;
+using Core.Interfaces;
 using Core.Models;
 using Infrastructure.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -12,12 +13,12 @@ namespace backend.Hubs
     public class FriendsHub : Hub
     {
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
         private readonly FriendService _friendService;
         private static readonly Dictionary<string, HashSet<string>> _userConnections = new();
         private static readonly object _lock = new();
 
-        public FriendsHub(UserManager<ApplicationUser> userManager, UserService userService, FriendService friendService)
+        public FriendsHub(UserManager<ApplicationUser> userManager, IUserService userService, FriendService friendService)
         {
             _userManager = userManager;
             _userService = userService;

@@ -9,9 +9,9 @@ namespace Application.Services;
 public class GameHistoryService : IGameHistoryService
 {
     private readonly IGameRepository _gameRepository;
-    private readonly UserService _userService;
+    private readonly IUserService _userService;
 
-    public GameHistoryService(IGameRepository gamerepository, UserService userService)
+    public GameHistoryService(IGameRepository gamerepository, IUserService userService)
     {
         _gameRepository = gamerepository;
         _userService = userService;
