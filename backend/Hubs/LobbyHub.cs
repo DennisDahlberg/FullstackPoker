@@ -1,3 +1,4 @@
+using Application.Services;
 using Core.Interfaces;
 using Core.Models.Lobby;
 using Microsoft.AspNetCore.SignalR;
@@ -9,12 +10,14 @@ public class LobbyHub : Hub
     private readonly ILobbyStateManager _lobbyStateManager;
     private readonly ITableService _tableService;
     private readonly IUserService _userService;
+    private readonly BotService _botService;
 
-    public LobbyHub(ILobbyStateManager lobbyStateManager, ITableService tableService, IUserService userService)
+    public LobbyHub(ILobbyStateManager lobbyStateManager, ITableService tableService, IUserService userService, BotService botService)
     {
         _lobbyStateManager = lobbyStateManager;
         _tableService = tableService;
         _userService = userService;
+        _botService = botService;
     }
 
     public async Task CreateLobby(int tableId)
@@ -73,4 +76,49 @@ public class LobbyHub : Hub
         await Groups.AddToGroupAsync(Context.ConnectionId, $"lobby_{lobby.LobbyId}");
         await Clients.Caller.SendAsync("LobbyCreated", lobby);
     }
+
+    public async Task AddBotToLobby(int botId)
+    {
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+        var lobbyId = await _lobbyStateManager.GetUserCurrentLobbyAsync(userId);
+        
+        if (lobbyId == null)
+        {
+            await Clients.Caller.SendAsync("Error", "You are not in a lobby");
+            return;
+        }
+
+        var lobby = await _lobbyStateManager.GetLobbyStateAsync(lobbyId);
+        if (lobby == null)
+        {
+            await Clients.Caller.SendAsync("Error", "Lobby not found");
+            return;
+        }
+        
+        if (lobby.HostUserId != userId)
+        {
+            await Clients.Caller.SendAsync("Error", "Only the host can add bots");
+            return;
+        }
+        
+        var botsResult = await _botService.GetBotsForGameAsync(new List<int> { botId });
+        if (botsResult.IsFailed || botsResult.Value.Count == 0)
+        {
+            await Clients.Caller.SendAsync("Error", "Invalid bot");
+            return;
+        }
+        
+        int totalPlayers = lobby.Players.Count + lobby.BotIds.Count;
+        if (totalPlayers >= 8)
+        {
+            await Clients.Caller.SendAsync("Error", "Lobby is full");
+            return;
+        }
+        
+        lobby.BotIds.Add(botId);
+        await _lobbyStateManager.SaveLobbyStateAsync(lobbyId, lobby);
+        await Clients.Group($"lobby_{lobbyId}").SendAsync("LobbyUpdated", lobby);
+        await Clients.Group($"lobby_{lobbyId}").SendAsync("BotAdded", botsResult.Value[0].Username);
+    }
+    
 }
