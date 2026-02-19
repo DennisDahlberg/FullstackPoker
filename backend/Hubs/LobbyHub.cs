@@ -276,6 +276,73 @@ public class LobbyHub : Hub
         }
     }
 
+    public async Task InvitePlayer(string friendId)
+    {
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+        var lobbyId = await _lobbyStateManager.GetUserCurrentLobbyAsync(userId);
+
+        if (lobbyId is null)
+        {
+            await Clients.Caller.SendAsync("Error", "You are not in a lobby");
+            return;
+        }
+
+        var lobby = await _lobbyStateManager.GetLobbyStateAsync(lobbyId);
+        if (lobby is null)
+        {
+            await Clients.Caller.SendAsync("Error", "Lobby not found");
+            return;
+        }
+
+        if (lobby.HostUserId != userId)
+        {
+            await Clients.Caller.SendAsync("Error", "Only the host can invite players");
+            return;
+        }
+
+        if (lobby.Players.Any(p => p.UserId == friendId))
+        {
+            await Clients.Caller.SendAsync("Error", "Player is already in the lobby");
+            return;
+        }
+
+        var totalPlayers = lobby.Players.Count + lobby.BotIds.Count;
+        if (totalPlayers >= 8)
+        {
+            await Clients.Caller.SendAsync("Error", "Lobby is full");
+            return;
+        }
+
+        var invitedUser = await _userService.GetUserById(friendId);
+        if (invitedUser is null)
+        {
+            await Clients.Caller.SendAsync("Error", "User not found");
+            return;
+        }
+
+        var invite = new LobbyInvite
+        {
+            LobbyId = lobbyId,
+            HostUsername = lobby.HostUsername,
+            TableId = lobby.TableId,
+            InvitedUserId = friendId
+        };
+
+        await _lobbyStateManager.SaveInviteAsync(invite.InviteId, invite);
+        await _lobbyStateManager.AddUserInviteAsync(friendId, invite.InviteId);
+
+        await Clients.User(friendId).SendAsync("LobbyInviteReceived", new
+        {
+            invite.InviteId,
+            invite.LobbyId,
+            invite.HostUsername,
+            invite.TableId,
+            invite.SentAt
+        });
+
+        await Clients.Caller.SendAsync("InviteSent", invitedUser.UserName);
+    }
+
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
         try
