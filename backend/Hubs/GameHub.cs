@@ -177,4 +177,26 @@ public class GameHub : Hub
             await Clients.Caller.SendAsync("Error", ex.Message);
         }
     }
+
+    public override async Task OnDisconnectedAsync(Exception? exception)
+    {
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+        if (!string.IsNullOrEmpty(userId))
+        {
+            var gameId = await _gameStateManager.GetUserCurrentGameAsync(userId);
+            if (gameId != null)
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"game_{gameId}");
+                
+                var user = await _userService.GetUserById(userId);
+                if (user != null)
+                {
+                    await Clients.OthersInGroup($"game_{gameId}")
+                        .SendAsync("PlayerDisconnected", user.UserName);
+                }
+            }
+        }
+        
+        await base.OnDisconnectedAsync(exception);
+    }
 }
