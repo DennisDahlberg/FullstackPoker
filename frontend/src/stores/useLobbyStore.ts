@@ -14,6 +14,8 @@ interface LobbyStore {
   addBot: (botId: number) => Promise<void>;
   removeBot: (botId: number) => Promise<void>;
   clearError: () => void;
+  leaveLobby: () => Promise<void>;
+  startGame: () => Promise<void>;
 }
 
 export const useLobbyStore = create<LobbyStore>((set, get) => ({
@@ -133,6 +135,41 @@ export const useLobbyStore = create<LobbyStore>((set, get) => ({
     } catch (err) {
       console.error("Failed to remove bot:", err);
       toast.error("Failed to remove bot");
+    }
+  },
+
+  leaveLobby: async () => {
+    const { connection } = get();
+    if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+      set({ lobby: null, connection: null });
+      return;
+    }
+    try {
+      await connection.invoke("LeaveLobby");
+      await connection.stop();
+    } catch (err) {
+      console.error("Failed to leave lobby:", err);
+      await connection.stop();
+    }
+    set({ connection: null, lobby: null, loading: false, error: null });
+  },
+
+  startGame: async () => {
+    const { connection } = get();
+    if (
+      !connection ||
+      connection.state !== signalR.HubConnectionState.Connected
+    ) {
+      toast.error("Not connected to lobby");
+      return;
+    }
+    try {
+      set({ loading: true });
+      await connection.invoke("StartGame");
+    } catch (err: any) {
+      console.error("Failed to start game:", err);
+      toast.error(err.message || "Failed to start game");
+      set({ loading: false });
     }
   },
 }));
