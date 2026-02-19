@@ -20,10 +20,10 @@ namespace backend.Controllers
         private readonly IGameHistoryService _gameHistoryService;
         private readonly BotService _botService;
         private readonly ITableService _tableService;
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
         private readonly IGameStateManager _gameStateManager;
 
-        public GameController(IGameService gameService, ITableService tableService, BotService botService, UserService userService, IGameHistoryService gameHistoryService, IGameStateManager gameStateManager)
+        public GameController(IGameService gameService, ITableService tableService, BotService botService, IUserService userService, IGameHistoryService gameHistoryService, IGameStateManager gameStateManager)
         {
             _gameService = gameService;
             _tableService = tableService;

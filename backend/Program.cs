@@ -28,7 +28,7 @@ namespace backend
             builder.Services.AddHttpContextAccessor();
 
             builder.Services.AddTransient<JwtTokenService>();
-            builder.Services.AddTransient<UserService>();
+            builder.Services.AddTransient<IUserService, UserService>();
             builder.Services.AddTransient<IGameService, GameService>();
             builder.Services.AddTransient<BotAiService>();
             builder.Services.AddTransient<FriendsRepository>();

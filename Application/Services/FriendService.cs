@@ -1,4 +1,5 @@
 using Core.DTOs.Friend;
+using Core.Interfaces;
 using Core.Models;
 using FluentResults;
 using Infrastructure.Repositories;
@@ -10,9 +11,9 @@ namespace Application.Services;
 public class FriendService
 {
     private readonly FriendsRepository _repository;
-    private readonly UserService _userService;
+    private readonly IUserService _userService;
 
-    public FriendService(FriendsRepository repository, UserService userService)
+    public FriendService(FriendsRepository repository, IUserService userService)
     {
         _repository = repository;
         _userService = userService;

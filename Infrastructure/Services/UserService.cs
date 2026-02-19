@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Core.DTOs;
+using Core.Interfaces;
 using Core.Models;
 using FluentResults;
 using Microsoft.AspNetCore.Identity;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Infrastructure.Services
 {
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly UserManager<ApplicationUser> _userManager;
 

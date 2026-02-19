@@ -13,6 +13,4 @@ public class GameHub : Hub
     {
         _gameStateManager = gameStateManager;
     }
-    
-    
 }

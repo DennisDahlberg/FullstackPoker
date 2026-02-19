@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Core.Interfaces;
 
 namespace backend.Controllers
 {
@@ -21,9 +22,9 @@ namespace backend.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly JwtTokenService _jwtTokenService;
-        private readonly UserService _userService;
+        private readonly IUserService _userService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, JwtTokenService jwtTokenService, UserService userService)
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, JwtTokenService jwtTokenService, IUserService userService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
