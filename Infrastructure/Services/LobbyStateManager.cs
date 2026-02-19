@@ -1,9 +1,10 @@
+using Core.Interfaces;
 using Microsoft.Extensions.Configuration;
 using StackExchange.Redis;
 
 namespace Infrastructure.Services;
 
-public class LobbyStateManager
+public class LobbyStateManager : ILobbyStateManager
 {
     private readonly IConnectionMultiplexer _redis;
     private readonly string _instanceName;

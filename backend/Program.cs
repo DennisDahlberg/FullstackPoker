@@ -41,6 +41,7 @@ namespace backend
             builder.Services.AddTransient<IGameHistoryService, GameHistoryService>();
             builder.Services.AddTransient<IGameRepository, GameRepository>();
             builder.Services.AddTransient<IGameStateManager, GameStateManager>();
+            builder.Services.AddTransient<ILobbyStateManager, LobbyStateManager>();
 
             //EF Core
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
