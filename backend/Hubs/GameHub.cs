@@ -136,6 +136,45 @@ public class GameHub : Hub
             await Clients.Caller.SendAsync("Error", ex.Message);
         }
     }
-    
-    
+
+    public async Task LeaveGame()
+    {
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+        var gameId = await _gameStateManager.GetUserCurrentGameAsync(userId);
+        if (gameId is null)
+            return;
+
+        var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+        if (gameState == null)
+            return;
+
+        try
+        {
+            bool isEarlyLeave = !gameState.IsGameOver;
+
+            await _gameHistoryService.UpdatePlayerBalanceFromGame(gameState);
+            await _gameStateManager.DeleteGameStateAsync(gameId);
+            await _gameStateManager.DeleteUserCurrentGameAsync(userId);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"game_{gameId}");
+
+            await Clients.Caller.SendAsync("GameLeft", new
+            {
+                message = "Successfully left game",
+                balanceReturned = isEarlyLeave
+                    ? gameState.EarlyLeavePayout
+                    : gameState.Players.First(p => p.IsPlayer).Chips
+            });
+
+            var user = await _userService.GetUserById(userId);
+            if (user != null)
+            {
+                await Clients.OthersInGroup($"game_{gameId}")
+                    .SendAsync("PlayerDisconnected", user.UserName);
+            }
+        }
+        catch (Exception ex)
+        {
+            await Clients.Caller.SendAsync("Error", ex.Message);
+        }
+    }
 }

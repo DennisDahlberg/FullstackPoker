@@ -76,48 +76,5 @@ namespace backend.Controllers
             
             return Ok();
         }
-        
-        [HttpPost("new-round")]
-        public async Task<IActionResult> NewRound()
-        {
-            var user = await _userService.GetLoggedInUser(User);
-            if (user is null)
-                return Unauthorized();
-            
-            var gameId = await _gameStateManager.GetUserCurrentGameAsync(user.Id);
-            if (gameId is null)
-                return NotFound(new { message = "No active game found" });
-
-            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
-            if (gameState is null)
-                return NotFound(new { message = "Game not found" });
-            
-            var newGameState = _gameService.NewRound(gameState!);
-            await _gameStateManager.SaveGameStateAsync(newGameState.GameId, newGameState);
-            
-            return Ok(newGameState);
-        }
-
-        [HttpPost("leave")]
-        public async Task<IActionResult> Leave()
-        {
-            var user = await _userService.GetLoggedInUser(User);
-            if (user is null)
-                return Unauthorized();
-            
-            var gameId = await _gameStateManager.GetUserCurrentGameAsync(user.Id);
-            if (gameId is null)
-                return NotFound(new { message = "No active game found" });
-
-            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
-            if (gameState is null)
-                return NotFound(new { message = "Game not found" });
-            
-            await _gameHistoryService.UpdatePlayerBalanceFromGame(gameState);
-            await _gameStateManager.DeleteGameStateAsync(gameState.GameId);
-            await _gameStateManager.DeleteUserCurrentGameAsync(user.Id);
-            
-            return Ok();
-        }
     }
 }
