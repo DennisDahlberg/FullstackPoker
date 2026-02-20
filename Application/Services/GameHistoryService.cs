@@ -72,6 +72,38 @@ public class GameHistoryService : IGameHistoryService
         return stats;
     }
 
+    public PlayerSessionSummary GetGameSessionForPlayer(Player player, GameState gameState)
+    {
+        var isEarlyLeave = !gameState.IsGameOver;
+        var penaltyAmount = isEarlyLeave ? (int)(player.Chips * 0.1) : 0;
+        var payout = player.Chips - penaltyAmount;
+
+        var duration = DateTimeOffset.UtcNow - gameState.StartedAt;
+        var summary = new PlayerSessionSummary()
+        {
+            Duration = FormatDuration(duration),
+            TotalSeconds = (int)duration.TotalSeconds,
+            StartingChips = player.GameStartingChips,
+            FinalChips = player.Chips,
+            Profit = player.Chips - player.GameStartingChips,
+            RoundsPlayed = gameState.RoundsPlayed,
+            BalanceReturned = payout,
+            PenaltyAmount = penaltyAmount,
+            WasEarlyLeave = isEarlyLeave,
+        };
+
+        return summary;
+    }
+
+    private string FormatDuration(TimeSpan duration)
+    {
+        if (duration.TotalHours >= 1)
+            return $"{(int)duration.TotalHours}h {duration.Minutes}m";
+        if (duration.TotalMinutes >= 1)
+            return $"{duration.Minutes}m {duration.Seconds}s";
+        return $"{duration.Seconds}s";
+    }
+
     private bool IsPlayerWinner(GameState state, Player player)
     {
         foreach (var winnerPos in state.WinnersPositions)

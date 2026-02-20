@@ -274,6 +274,8 @@ public class GameHub : Hub
             int payout = isEarlyLeave
                 ? (int)(leavingPlayer.Chips * 0.9)
                 : leavingPlayer.Chips;
+            
+            var session = _gameHistoryService.GetGameSessionForPlayer(leavingPlayer, gameState);
 
             leavingPlayer.IsFolded = true;
             leavingPlayer.IsActive = false;
@@ -300,11 +302,7 @@ public class GameHub : Hub
             await _gameStateManager.DeleteUserCurrentGameAsync(leavingUserId!);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"game_{gameId}");
 
-            await Clients.Caller.SendAsync("GameLeft", new
-            {
-                message = "Successfully left game",
-                balanceReturned = payout
-            });
+            await Clients.Caller.SendAsync("GameLeft", session);
 
             var remainingHumans = gameState.Players
                 .Where(p => p.IsPlayer && p.UserId != null)

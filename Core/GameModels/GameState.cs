@@ -33,5 +33,6 @@
         public int PenaltyAmount { get; set; }
         public int EarlyLeavePayout { get; set; }
         public string CurrentViewerUserId { get; set; }
+        public int RoundsPlayed { get; set; }
     }
 }

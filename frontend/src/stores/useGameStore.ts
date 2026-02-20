@@ -75,9 +75,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({ error: message, loading: false, animating: false });
       });
 
-      connection.on("GameLeft", (data: any) => {
-        toast.success(data.message);
-        set({ game: null, connection: null });
+      connection.on("GameLeft", (summary: GameSessionSummary) => {
+        toast.success("Game ended! Returning to lobby...");
+        set({ sessionSummary: summary, game: null, connection: null });
       });
 
       connection.onreconnecting((error) => {
