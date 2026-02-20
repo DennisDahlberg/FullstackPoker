@@ -18,7 +18,6 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
 
             try {
                 const profile =  await api.auth.getProfile();
-                console.log(profile);
                 setData({
                     token: localStorage.getItem("token"),
                     user: {

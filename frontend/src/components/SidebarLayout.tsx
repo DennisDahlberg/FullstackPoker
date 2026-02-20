@@ -45,8 +45,6 @@ export default function SidebarLayout() {
     navigate("/");
   }
 
-  console.log(data);
-
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 relative">
       {/* Mobile Overlay */}
