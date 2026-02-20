@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using Core.GameModels;
 using Core.Interfaces;
 using HoldemPoker.Cards;
@@ -13,7 +14,8 @@ public class GameHub : Hub
     private readonly IUserService _userService;
     private readonly IGameHistoryService _gameHistoryService;
     private readonly IGameService _gameService;
-    
+
+    private static readonly ConcurrentDictionary<string, SemaphoreSlim> _gameLocks = new();
 
     public GameHub(IGameStateManager gameStateManager, IUserService userService, IGameHistoryService gameHistoryService, IGameService gameService)
     {
@@ -21,6 +23,11 @@ public class GameHub : Hub
         _userService = userService;
         _gameHistoryService = gameHistoryService;
         _gameService = gameService;
+    }
+
+    private SemaphoreSlim GetGameLock(string gameId)
+    {
+        return _gameLocks.GetOrAdd(gameId, _ => new SemaphoreSlim(1, 1));
     }
     
     private async Task BroadcastGameState(string gameId, GameState gameState)
@@ -122,26 +129,35 @@ public class GameHub : Hub
             await Clients.Caller.SendAsync("Error", "No active game found. Please start a new game from the lobby.");
             return;
         }
-        
-        var gameState = await _gameStateManager.GetGameStateAsync(gameId);
-        if (gameState is null)
-        {
-            await Clients.Caller.SendAsync("Error", "Game state not found");
-            return;
-        }
-        
-        await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{gameId}");
-        
-        var personalizedState = CreatePersonalizedGameState(gameState, userId);
-        await Clients.Caller.SendAsync("GameStateUpdated", personalizedState);
 
-        var user = await _userService.GetUserById(userId);
-        if (user is not null)
+        var gameLock = GetGameLock(gameId);
+        await gameLock.WaitAsync();
+        try
         {
-            await Clients.OthersInGroup($"game_{gameId}").SendAsync("PlayerConnected", user.UserName);
+            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+            if (gameState is null)
+            {
+                await Clients.Caller.SendAsync("Error", "Game state not found");
+                return;
+            }
+
+            await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{gameId}");
+
+            var personalizedState = CreatePersonalizedGameState(gameState, userId);
+            await Clients.Caller.SendAsync("GameStateUpdated", personalizedState);
+
+            var user = await _userService.GetUserById(userId);
+            if (user is not null)
+            {
+                await Clients.OthersInGroup($"game_{gameId}").SendAsync("PlayerConnected", user.UserName);
+            }
+
+            await ProcessBotTurns(gameId, gameState);
         }
-        
-        await ProcessBotTurns(gameId, gameState);
+        finally
+        {
+            gameLock.Release();
+        }
     }
 
     public async Task PlayerAction(string action, int? amount)
@@ -154,22 +170,24 @@ public class GameHub : Hub
             return;
         }
 
-        var gameState = await _gameStateManager.GetGameStateAsync(gameId);
-        if (gameState == null)
-        {
-            await Clients.Caller.SendAsync("Error", "Game not found");
-            return;
-        }
-
-        var currentPlayer = gameState.Players[gameState.CurrentPlayerIndex];
-        if (currentPlayer.UserId != userId)
-        {
-            await Clients.Caller.SendAsync("Error", "Not your turn");
-            return;
-        }
-
+        var gameLock = GetGameLock(gameId);
+        await gameLock.WaitAsync();
         try
         {
+            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+            if (gameState == null)
+            {
+                await Clients.Caller.SendAsync("Error", "Game not found");
+                return;
+            }
+
+            var currentPlayer = gameState.Players[gameState.CurrentPlayerIndex];
+            if (currentPlayer.UserId != userId)
+            {
+                await Clients.Caller.SendAsync("Error", "Not your turn");
+                return;
+            }
+
             var request = new PlayerActionRequest
             {
                 Action = action,
@@ -185,6 +203,10 @@ public class GameHub : Hub
         catch (Exception ex)
         {
             await Clients.Caller.SendAsync("Error", ex.Message);
+        }
+        finally
+        {
+            gameLock.Release();
         }
     }
 
@@ -237,12 +259,14 @@ public class GameHub : Hub
         if (gameId is null)
             return;
 
-        var gameState = await _gameStateManager.GetGameStateAsync(gameId);
-        if (gameState == null)
-            return;
-
+        var gameLock = GetGameLock(gameId);
+        await gameLock.WaitAsync();
         try
         {
+            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+            if (gameState == null)
+                return;
+
             var leavingPlayer = gameState.Players.FirstOrDefault(p => p.UserId == userId);
             if (leavingPlayer == null) return;
 
@@ -251,8 +275,29 @@ public class GameHub : Hub
                 ? (int)(leavingPlayer.Chips * 0.9)
                 : leavingPlayer.Chips;
 
-            await _userService.UpdateUserBalanceAsync(userId, payout);
-            await _gameStateManager.DeleteUserCurrentGameAsync(userId);
+            leavingPlayer.IsFolded = true;
+            leavingPlayer.IsActive = false;
+            leavingPlayer.Chips = 0;
+            var leavingUserId = leavingPlayer.UserId;
+            leavingPlayer.UserId = null;
+
+            if (gameState.CurrentPlayerIndex >= 0 && 
+                gameState.CurrentPlayerIndex < gameState.Players.Count &&
+                gameState.Players[gameState.CurrentPlayerIndex] == leavingPlayer)
+            {
+                var activePlayers = gameState.Players.Where(p => p.IsActive).ToList();
+                if (activePlayers.Count <= 1)
+                {
+                    await _gameService.HandlePlayerAction(new PlayerActionRequest { Action = "fold" }, gameState);
+                }
+                else
+                {
+                    _gameService.HandleNextPlayer(gameState);
+                }
+            }
+
+            await _userService.UpdateUserBalanceAsync(leavingUserId!, payout);
+            await _gameStateManager.DeleteUserCurrentGameAsync(leavingUserId!);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"game_{gameId}");
 
             await Clients.Caller.SendAsync("GameLeft", new
@@ -262,28 +307,19 @@ public class GameHub : Hub
             });
 
             var remainingHumans = gameState.Players
-                .Where(p => p.IsPlayer && p.UserId != null && p.UserId != userId)
+                .Where(p => p.IsPlayer && p.UserId != null)
                 .ToList();
 
             if (remainingHumans.Count == 0)
             {
                 await _gameStateManager.DeleteGameStateAsync(gameId);
+                _gameLocks.TryRemove(gameId, out _);
             }
             else
             {
-                if (gameState.Players[gameState.CurrentPlayerIndex].UserId == userId)
-                {
-                    await _gameService.HandlePlayerAction(new PlayerActionRequest { Action = "fold" }, gameState);
-                }
-                
-                leavingPlayer.IsFolded = true;
-                leavingPlayer.IsActive = false;
-                leavingPlayer.Chips = 0;
-                leavingPlayer.UserId = null;
-
                 await _gameStateManager.SaveGameStateAsync(gameId, gameState);
 
-                var user = await _userService.GetUserById(userId);
+                var user = await _userService.GetUserById(leavingUserId!);
                 if (user != null)
                 {
                     await Clients.Group($"game_{gameId}")
@@ -291,11 +327,16 @@ public class GameHub : Hub
                 }
 
                 await BroadcastGameState(gameId, gameState);
+                await ProcessBotTurns(gameId, gameState);
             }
         }
         catch (Exception ex)
         {
             await Clients.Caller.SendAsync("Error", ex.Message);
+        }
+        finally
+        {
+            gameLock.Release();
         }
     }
 
