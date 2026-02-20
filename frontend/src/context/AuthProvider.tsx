@@ -25,7 +25,8 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
                         id: profile.id,
                         name: profile.username,
                         email: profile.email,
-                        rank: profile.rank
+                        rank: profile.rank,
+                        balance: profile.balance
                     }
                 });
             } catch (err) {

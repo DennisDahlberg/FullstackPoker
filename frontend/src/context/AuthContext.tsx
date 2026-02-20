@@ -7,6 +7,7 @@ export interface ContextData {
         name: string;
         email: string;
         rank: string;
+        balance?: number;
     } | null;
 }
 

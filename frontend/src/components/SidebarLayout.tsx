@@ -45,6 +45,8 @@ export default function SidebarLayout() {
     navigate("/");
   }
 
+  console.log(data);
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 relative">
       {/* Mobile Overlay */}
@@ -135,6 +137,10 @@ export default function SidebarLayout() {
                         data?.user?.rank === "Pro" && "text-amber-500",
                         data?.user?.rank === "Elite" && "text-red-500",
                       )}>{data?.user?.rank}</span>
+                      <span className="truncate text-xs text-amber-400 flex items-center gap-1">
+                        <Coins className="w-3 h-3" />
+                        {data?.user?.balance?.toLocaleString() ?? 0}
+                      </span>
                     </div>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4 text-gray-500" />
