@@ -85,7 +85,7 @@ public class GameHistoryService : IGameHistoryService
             TotalSeconds = (int)duration.TotalSeconds,
             StartingChips = player.GameStartingChips,
             FinalChips = player.Chips,
-            Profit = player.Chips - player.GameStartingChips,
+            Profit = payout - player.GameStartingChips,
             RoundsPlayed = gameState.RoundsPlayed,
             BalanceReturned = payout,
             PenaltyAmount = penaltyAmount,

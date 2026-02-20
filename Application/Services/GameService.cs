@@ -38,6 +38,7 @@ namespace Application.Services
                 Name = userData.Username,
                 UserId = userData.Id,
                 Chips = table.BuyIn,
+                GameStartingChips = table.BuyIn,
                 IsPlayer = true,
                 CurrentBet = 0,
                 SeatNumber = allPlayers.Count 

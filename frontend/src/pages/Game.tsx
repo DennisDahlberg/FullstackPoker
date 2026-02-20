@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import PlayerSeat from "@/components/PlayerSeat";
-import { LogOut, Settings } from "lucide-react";
+import { Clock, LogOut, Minus, Settings, TrendingDown, TrendingUp, Trophy } from "lucide-react";
 import PlayingCard from "@/components/PlayingCard";
 import { useEffect, useState } from "react";
 import { useGameStore } from "@/stores/useGameStore";
@@ -30,12 +30,14 @@ export default function Game() {
   const navigate = useNavigate();
   const game = useGameStore((s) => s.game);
   const error = useGameStore((s) => s.error);
+  const sessionSummary = useGameStore((s) => s.sessionSummary);
   const connectToGame = useGameStore((s) => s.connectToGame);
   const disconnectFromGame = useGameStore((s) => s.disconnectFromGame);
   const playerAction = useGameStore((s) => s.playerAction);
   const startNewRound = useGameStore((s) => s.startNewRound);
   const leaveGame = useGameStore((s) => s.leaveGame);
   const clearError = useGameStore((s) => s.clearError);
+  const clearSessionSummary = useGameStore((s) => s.clearSessionSummary);
 
   const [raiseValue, setRaiseValue] = useState(0);
   const [isRaiseModalOpen, setIsRaiseModalOpen] = useState(false);
@@ -64,6 +66,10 @@ export default function Game() {
   const confirmLeave = async () => {
     setIsLeaveWarningOpen(false);
     await leaveGame();
+  };
+
+  const handleSessionSummaryClose = () => {
+    clearSessionSummary();
     navigate("/dashboard");
   };
 
@@ -115,13 +121,13 @@ export default function Game() {
     }
   };
 
-  if (!game) return <div>Loading...</div>;
+  if (!game && !sessionSummary) return <div>Loading...</div>;
 
-  const myUserId = game.currentViewerUserId;
-  const player = game.players.find((p) => p.userId === myUserId);
-  const myPlayerIndex = game.players.findIndex((p) => p.userId === myUserId);
-  const isMyTurn = myPlayerIndex === game.currentPlayerIndex;
-  const hasPenalty = !game.isGameOver && game.penaltyAmount > 0;
+  const myUserId = game?.currentViewerUserId;
+  const player = game?.players.find((p) => p.userId === myUserId);
+  const myPlayerIndex = game?.players.findIndex((p) => p.userId === myUserId);
+  const isMyTurn = myPlayerIndex === game?.currentPlayerIndex;
+  const hasPenalty = game ? !game.isGameOver && game.penaltyAmount > 0 : false;
 
   return (
     <div className="fixed inset-0 bg-gray-950 flex flex-col">
@@ -131,8 +137,8 @@ export default function Game() {
           {isMyTurn && (
             <span className="text-amber-500 font-bold animate-pulse">Your turn</span>
           )}
-          {!isMyTurn && !game.isGameOver && (
-            <span>Waiting for {game.players[game.currentPlayerIndex]?.name}...</span>
+          {!isMyTurn && !game?.isGameOver && (
+            <span>Waiting for {game?.players[game.currentPlayerIndex]?.name}...</span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -168,13 +174,13 @@ export default function Game() {
               {/* Pot */}
               <div className="bg-black/40 px-6 py-2 rounded-full">
                 <span className="text-amber-400 font-bold text-lg md:text-xl">
-                  Pot: ${game.pot.toLocaleString()}
+                  Pot: ${game?.pot.toLocaleString()}
                 </span>
               </div>
 
               {/* Community Cards */}
               <div className="flex gap-2 md:gap-3">
-                {game.communityCards.map((card, index) => (
+                {game?.communityCards.map((card, index) => (
                   <PlayingCard
                     key={index}
                     value={`${card.rank}${card.suit}`}
@@ -186,19 +192,19 @@ export default function Game() {
           </div>
 
           {/* Player Seats */}
-          {game.players.map((p, index) => (
+          {game?.players.map((p, index) => (
             <PlayerSeat
               key={index}
               position={index}
               player={p || undefined}
-              isCurrentPlayer={index === game.currentPlayerIndex}
+              isCurrentPlayer={index === game?.currentPlayerIndex}
               isMe={p.userId === myUserId}
             />
           ))}
         </div>
       </div>
 
-      {game.isGameOver && (
+      {game?.isGameOver && (
         <div className="w-full flex flex-col items-center justify-center">
           <h1 className="text-4xl font-bold mb-6">
             Winners:{" "}
@@ -215,9 +221,9 @@ export default function Game() {
       {/* Actions */}
       <div className="h-24 bg-gray-900 border-t border-gray-800 p-6">
         <div className="max-w-2xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 h-full">
-          {isMyTurn && game.availableActions.length > 0 ? (
+          {isMyTurn && (game?.availableActions.length ?? 0) > 0 ? (
             <div className="flex items-center gap-3">
-              {game.availableActions.map((action) => {
+              {game?.availableActions.map((action) => {
                 const buttonConfig = getButtonConfig(action);
                 return (
                   <Button
@@ -233,9 +239,9 @@ export default function Game() {
             </div>
           ) : (
             <p className="text-gray-500 text-sm">
-              {game.isGameOver
+              {game?.isGameOver
                 ? "Round over"
-                : `Waiting for ${game.players[game.currentPlayerIndex]?.name}...`}
+                : `Waiting for ${game?.players[game?.currentPlayerIndex]?.name}...`}
             </p>
           )}
         </div>
@@ -347,12 +353,12 @@ export default function Game() {
                     </div>
                     <div className="flex justify-between text-red-400">
                       <span>Early leave penalty (10%):</span>
-                      <span className="font-bold">-${game.penaltyAmount}</span>
+                      <span className="font-bold">-${game?.penaltyAmount}</span>
                     </div>
                     <div className="border-t border-gray-700 pt-2 mt-2 flex justify-between text-lg">
                       <span>You will receive:</span>
                       <span className="font-bold text-amber-400">
-                        ${game.earlyLeavePayout}
+                        ${game?.earlyLeavePayout}
                       </span>
                     </div>
                   </div>
@@ -394,6 +400,97 @@ export default function Game() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Session Summary Dialog */}
+      <Dialog open={!!sessionSummary} onOpenChange={(open) => { if (!open) handleSessionSummaryClose(); }}>
+        <DialogContent className="sm:max-w-lg bg-gray-900 text-white border-gray-700">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-center">
+              Session Summary
+            </DialogTitle>
+          </DialogHeader>
+
+          {sessionSummary && (
+            <div className="space-y-6 py-4">
+              {/* Profit/Loss Header */}
+              <div className="flex flex-col items-center gap-2">
+                {sessionSummary.profit > 0 ? (
+                  <TrendingUp className="w-12 h-12 text-green-400" />
+                ) : sessionSummary.profit < 0 ? (
+                  <TrendingDown className="w-12 h-12 text-red-400" />
+                ) : (
+                  <Minus className="w-12 h-12 text-gray-400" />
+                )}
+                <span
+                  className={`text-4xl font-bold ${
+                    sessionSummary.profit > 0
+                      ? "text-green-400"
+                      : sessionSummary.profit < 0
+                        ? "text-red-400"
+                        : "text-gray-400"
+                  }`}
+                >
+                  {sessionSummary.profit >= 0 ? "+" : ""}${sessionSummary.profit.toLocaleString()}
+                </span>
+                <span className="text-sm text-gray-400">
+                  {sessionSummary.profit > 0
+                    ? "Nice session!"
+                    : sessionSummary.profit < 0
+                      ? "Better luck next time"
+                      : "Break even"}
+                </span>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-black/30 p-4 rounded-lg text-center">
+                  <Clock className="w-5 h-5 mx-auto mb-1 text-gray-400" />
+                  <p className="text-lg font-bold">{sessionSummary.duration}</p>
+                  <p className="text-xs text-gray-500">Duration</p>
+                </div>
+                <div className="bg-black/30 p-4 rounded-lg text-center">
+                  <Trophy className="w-5 h-5 mx-auto mb-1 text-amber-400" />
+                  <p className="text-lg font-bold">{sessionSummary.roundsPlayed}</p>
+                  <p className="text-xs text-gray-500">Rounds Played</p>
+                </div>
+              </div>
+
+              {/* Chip Breakdown */}
+              <div className="bg-black/30 p-4 rounded-lg space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Starting chips</span>
+                  <span className="font-medium">${sessionSummary.startingChips.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Final chips</span>
+                  <span className="font-medium">${sessionSummary.finalChips.toLocaleString()}</span>
+                </div>
+                {sessionSummary.wasEarlyLeave && sessionSummary.penaltyAmount > 0 && (
+                  <div className="flex justify-between text-sm text-red-400">
+                    <span>Early leave penalty</span>
+                    <span className="font-medium">-${sessionSummary.penaltyAmount.toLocaleString()}</span>
+                  </div>
+                )}
+                <div className="border-t border-gray-700 pt-2 flex justify-between">
+                  <span className="text-gray-300 font-medium">Balance returned</span>
+                  <span className="font-bold text-amber-400">
+                    ${sessionSummary.balanceReturned.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              className="w-full bg-amber-600 hover:bg-amber-700"
+              onClick={handleSessionSummaryClose}
+            >
+              Back to Dashboard
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
