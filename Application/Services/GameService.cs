@@ -431,6 +431,7 @@ namespace Application.Services
 
         state.IsGameOver = true;
         state.PenaltyAmount = 0;
+        state.RoundsPlayed++;
 
         await _gameHistoryService.SaveGameAsync(state);
     }
