@@ -27,22 +27,44 @@ namespace Application.Services
         _gameHistoryService = gameHistoryService;
     }
 
-    public GameState InitializeGame(UserDTO playerInfo, TableDto table, List<BotDto> bots)
+    public GameState InitializeGame(List<UserDTO> players, TableDto table, List<BotDto> bots)
     {
-        var gameState = new GameState();
+        var allPlayers = new List<Player>();
 
-        gameState.Players.Add(new Player
+        foreach (var userData in players)   
         {
-            Name = playerInfo.Username, Chips = table.BuyIn, RoundStartingChips = table.BuyIn,
-            GameStartingChips = table.BuyIn, IsPlayer = true, UserId = playerInfo.Id
-        });
-        foreach (var bot in bots)
-        {
-            gameState.Players.Add(new Player { Name = bot.Username, Chips = table.BuyIn, IsPlayer = false });
+            allPlayers.Add(new Player
+            {
+                Name = userData.Username,
+                UserId = userData.Id,
+                Chips = table.BuyIn,
+                IsPlayer = true,
+                CurrentBet = 0,
+                SeatNumber = allPlayers.Count 
+            });
         }
 
-        gameState.TableId = table.Id;
-        gameState.StartedAt = DateTimeOffset.UtcNow;
+        foreach (var bot in bots)
+        {
+            allPlayers.Add(new Player
+            {
+                Name = bot.Username,
+                UserId = null,
+                Chips = table.BuyIn,
+                IsPlayer = false,
+                ProfileImageUrl = bot.ProfileImageUrl,
+                PlayStyle = bot.PlayStyle,
+                SkillLevel = bot.SkillLevel,
+                SeatNumber = allPlayers.Count
+            });
+        }
+
+        var gameState = new GameState
+        {
+            Players = allPlayers,
+            StartedAt = DateTimeOffset.UtcNow,
+            TableId = table.Id
+        };
 
         SetupBlinds(gameState, table);
 

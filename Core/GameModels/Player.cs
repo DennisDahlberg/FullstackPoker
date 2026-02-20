@@ -16,5 +16,11 @@
         public string? LastAction { get; set; }
         public int? LastActionAmount { get; set; }
         public string? UserId { get; set; }
+        public int SeatNumber { get; set; }
+        
+        public string Description { get; set; } = null!;
+        public string PlayStyle { get; set; } = null!;
+        public string SkillLevel { get; set; } = null!;
+        public string? ProfileImageUrl { get; set; }
     }
 }

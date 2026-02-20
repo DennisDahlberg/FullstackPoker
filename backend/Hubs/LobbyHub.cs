@@ -1,4 +1,5 @@
 using Application.Services;
+using Core.DTOs;
 using Core.Interfaces;
 using Core.Models.Lobby;
 using Microsoft.AspNetCore.Authorization;
@@ -208,6 +209,7 @@ public class LobbyHub : Hub
             return;
         }
 
+        var playerIds = new List<UserDTO>();
         foreach (var player in lobby.Players)
         {
             var balanceResult = await _userService.UpdateUserBalanceAsync(player.UserId, -table.BuyIn);
@@ -216,16 +218,17 @@ public class LobbyHub : Hub
                 await Clients.Caller.SendAsync("Error", $"Player {player.Username} has insufficient balance");
                 return;
             }
-        }
-        
-        var userData = await _userService.GetUserDataAsync(userId);
-        if (userData.IsFailed)
-        {
-            await Clients.Caller.SendAsync("Error", "Failed to load user data");
-            return;
+
+            var userData = await _userService.GetUserDataAsync(player.UserId);
+            if (userData.IsFailed)
+            {
+                await Clients.Caller.SendAsync("Error", "Failed to load user data");
+                return;
+            }
+            playerIds.Add(userData.Value);
         }
 
-        var gameState = _gameService.InitializeGame(userData.Value, table, botsResult.Value);
+        var gameState = _gameService.InitializeGame(playerIds, table, botsResult.Value);
 
         await _gameStateManager.SaveGameStateAsync(gameState.GameId, gameState);
 

@@ -33,48 +33,48 @@ namespace backend.Controllers
             _gameStateManager = gameStateManager;
         }
 
-        [HttpPost("start")]
-        public async Task<IActionResult> InitializeGame([FromBody] StartGameRequest request)
-        {
-            var table = await _tableService.GetTableByIdAsync(request.TableId);
-            if (table.IsFailed)
-                return BadRequest(new 
-                {
-                    message = table.Errors.FirstOrDefault()?.Message 
-                    ?? "Failed to find table by given id"
-                });
-
-            var bots = await _botService
-                .GetBotsForGameAsync(request.BotIds);
-            if (bots.IsFailed)
-                return BadRequest(new 
-                { 
-                    message = bots.Errors.FirstOrDefault()?.Message
-                    ?? "Failed to find bots for game" 
-                });
-            var userId = _userService.GetLoggedInUserId(User);
-            
-            var userBalanceChangeResult = await _userService.UpdateUserBalanceAsync(userId, -table.Value.BuyIn); 
-            if (userBalanceChangeResult.IsFailed)
-                return BadRequest(new
-                {
-                    message = userBalanceChangeResult.Errors.FirstOrDefault()?.Message
-                    ?? "Failed to update balance"
-                });
-            
-            var user = await _userService.GetUserDataAsync(userId);
-            if (user.IsFailed)
-                return BadRequest(new
-                {
-                    message = user.Errors.FirstOrDefault()?.Message 
-                              ?? "Failed to find user"
-                });
-
-            var gameState = _gameService.InitializeGame(user.Value, table.Value, bots.Value);
-            await _gameStateManager.SaveGameStateAsync(gameState.GameId, gameState);
-            await _gameStateManager.SaveUserCurrentGameAsync(userId, gameState.GameId);
-            
-            return Ok();
-        }
+        // [HttpPost("start")]
+        // public async Task<IActionResult> InitializeGame([FromBody] StartGameRequest request)
+        // {
+        //     var table = await _tableService.GetTableByIdAsync(request.TableId);
+        //     if (table.IsFailed)
+        //         return BadRequest(new 
+        //         {
+        //             message = table.Errors.FirstOrDefault()?.Message 
+        //             ?? "Failed to find table by given id"
+        //         });
+        //
+        //     var bots = await _botService
+        //         .GetBotsForGameAsync(request.BotIds);
+        //     if (bots.IsFailed)
+        //         return BadRequest(new 
+        //         { 
+        //             message = bots.Errors.FirstOrDefault()?.Message
+        //             ?? "Failed to find bots for game" 
+        //         });
+        //     var userId = _userService.GetLoggedInUserId(User);
+        //     
+        //     var userBalanceChangeResult = await _userService.UpdateUserBalanceAsync(userId, -table.Value.BuyIn); 
+        //     if (userBalanceChangeResult.IsFailed)
+        //         return BadRequest(new
+        //         {
+        //             message = userBalanceChangeResult.Errors.FirstOrDefault()?.Message
+        //             ?? "Failed to update balance"
+        //         });
+        //     
+        //     var user = await _userService.GetUserDataAsync(userId);
+        //     if (user.IsFailed)
+        //         return BadRequest(new
+        //         {
+        //             message = user.Errors.FirstOrDefault()?.Message 
+        //                       ?? "Failed to find user"
+        //         });
+        //
+        //     var gameState = _gameService.InitializeGame(user.Value, table.Value, bots.Value);
+        //     await _gameStateManager.SaveGameStateAsync(gameState.GameId, gameState);
+        //     await _gameStateManager.SaveUserCurrentGameAsync(userId, gameState.GameId);
+        //     
+        //     return Ok();
+        // }
     }
 }

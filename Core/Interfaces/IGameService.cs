@@ -8,7 +8,7 @@ namespace Core.Interfaces;
 
 public interface IGameService
 {
-    GameState InitializeGame(UserDTO playerInfo, TableDto table, List<BotDto> bots);
+    GameState InitializeGame(List<UserDTO> players, TableDto table, List<BotDto> bots);
     GameState NewRound(GameState gameState);
     void SetupBlinds(GameState state, TableDto table);
     void GetStartingHand(Player player, List<PlayerCard> deck);
