@@ -33,6 +33,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   clearError: () => set({ error: null }),
 
   connectToGame: async () => {
+    const existing = get().connection;
+    if (
+      existing &&
+      existing.state !== signalR.HubConnectionState.Disconnected
+    ) {
+      return;
+    }
+
     set({ loading: true, error: null });
 
     try {
@@ -135,7 +143,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     try {
-      const amount = payload && 'amount' in payload ? payload.amount : null;
+      const amount = payload && "amount" in payload ? payload.amount : null;
       await connection.invoke("PlayerAction", action, amount);
     } catch (error: any) {
       console.error("Failed to send action:", error);
@@ -145,8 +153,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   startNewRound: async () => {
-    const {connection} = get();
-    if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+    const { connection } = get();
+    if (
+      !connection ||
+      connection.state !== signalR.HubConnectionState.Connected
+    ) {
       toast.error("Not connected to game");
       return;
     }
@@ -161,8 +172,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   leaveGame: async () => {
     const { connection } = get();
-    
-    if (!connection || connection.state !== signalR.HubConnectionState.Connected) {
+
+    if (
+      !connection ||
+      connection.state !== signalR.HubConnectionState.Connected
+    ) {
       set({ game: null });
       return;
     }
