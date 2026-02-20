@@ -139,7 +139,7 @@ export default function SidebarLayout() {
                       )}>{data?.user?.rank}</span>
                       <span className="truncate text-xs text-amber-400 flex items-center gap-1">
                         <Coins className="w-3 h-3" />
-                        {data?.user?.balance?.toLocaleString() ?? 0}
+                        {data?.user?.balance?.toLocaleString()}
                       </span>
                     </div>
                   </div>
