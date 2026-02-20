@@ -271,6 +271,11 @@ public class GameHub : Hub
             }
             else
             {
+                if (gameState.Players[gameState.CurrentPlayerIndex].UserId == userId)
+                {
+                    await _gameService.HandlePlayerAction(new PlayerActionRequest { Action = "fold" }, gameState);
+                }
+                
                 leavingPlayer.IsFolded = true;
                 leavingPlayer.IsActive = false;
                 leavingPlayer.Chips = 0;

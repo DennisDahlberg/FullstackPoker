@@ -291,7 +291,7 @@ export default function Lobby() {
                       <Button
                         variant="outline"
                         size="sm"
-                        disabled={invited || isInviting || !friend.isOnline}
+                        disabled={invited || isInviting}
                         onClick={() => handleInviteFriend(friend.id)}
                         className={cn(
                           "h-8 text-xs shrink-0",
