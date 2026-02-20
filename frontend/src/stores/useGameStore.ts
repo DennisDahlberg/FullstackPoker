@@ -135,7 +135,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }
 
     try {
-      await connection.invoke("PlayerAction", action, payload ?? null);
+      const amount = payload && 'amount' in payload ? payload.amount : null;
+      await connection.invoke("PlayerAction", action, amount);
     } catch (error: any) {
       console.error("Failed to send action:", error);
       toast.error(error.message || "Failed to perform action");

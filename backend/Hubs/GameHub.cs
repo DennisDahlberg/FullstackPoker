@@ -261,19 +261,16 @@ public class GameHub : Hub
                 balanceReturned = payout
             });
 
-            // Check remaining human players
             var remainingHumans = gameState.Players
                 .Where(p => p.IsPlayer && p.UserId != null && p.UserId != userId)
                 .ToList();
 
             if (remainingHumans.Count == 0)
             {
-                // No humans left — clean up the game entirely
                 await _gameStateManager.DeleteGameStateAsync(gameId);
             }
             else
             {
-                // Mark the leaving player as inactive
                 leavingPlayer.IsFolded = true;
                 leavingPlayer.IsActive = false;
                 leavingPlayer.Chips = 0;
@@ -288,7 +285,6 @@ public class GameHub : Hub
                         .SendAsync("PlayerDisconnected", user.UserName);
                 }
 
-                // Broadcast updated state to remaining players
                 await BroadcastGameState(gameId, gameState);
             }
         }
