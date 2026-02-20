@@ -155,7 +155,7 @@ export default function Lobby() {
   // Loading state
   if (loading && !lobby) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-4">
+      <div className="flex flex-col items-center justify-center h-dvh gap-4">
         <Loader2 className="h-10 w-10 animate-spin text-amber-500" />
         <p className="text-gray-400">Creating lobby...</p>
       </div>
@@ -165,7 +165,7 @@ export default function Lobby() {
   // Error state
   if (error && !lobby) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-4">
+      <div className="flex flex-col items-center justify-center h-dvh gap-4">
         <p className="text-red-500 text-lg">{error}</p>
         <Button variant="outline" onClick={() => navigate("/lobby/create")}>
           <ArrowLeft className="w-4 h-4 mr-2" />
