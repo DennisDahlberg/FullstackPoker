@@ -63,14 +63,6 @@ export const useLobbyStore = create<LobbyStore>((set, get) => ({
         set({ lobby: lobbyState });
       });
 
-      connection.on("BotAdded", (botName: string) => {
-        toast.success(`${botName} added to lobby`);
-      });
-
-      connection.on("BotRemoved", (_botId: number) => {
-        toast.info("Bot removed from lobby");
-      });
-
       connection.on("GameStarted", (gameId: string) => {
         toast.success("Game starting!");
         set({ gameStartedId: gameId, loading: false });

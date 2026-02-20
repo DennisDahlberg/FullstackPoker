@@ -128,7 +128,6 @@ public class LobbyHub : Hub
         lobby.BotIds.Add(botId);
         await _lobbyStateManager.SaveLobbyStateAsync(lobbyId, lobby);
         await Clients.Group($"lobby_{lobbyId}").SendAsync("LobbyUpdated", lobby);
-        await Clients.Group($"lobby_{lobbyId}").SendAsync("BotAdded", botsResult.Value[0].Username);
     }
 
     public async Task RemoveBotFromLobby(int botId)
@@ -159,7 +158,6 @@ public class LobbyHub : Hub
         {
             await _lobbyStateManager.SaveLobbyStateAsync(lobbyId, lobby);
             await Clients.Group($"lobby_{lobbyId}").SendAsync("LobbyUpdated", lobby);
-            await Clients.Group($"lobby_{lobbyId}").SendAsync("BotRemoved", botId);
         }
     }
 
