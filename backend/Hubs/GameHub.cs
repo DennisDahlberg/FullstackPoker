@@ -290,7 +290,10 @@ public class GameHub : Hub
                 var activePlayers = gameState.Players.Where(p => p.IsActive).ToList();
                 if (activePlayers.Count <= 1)
                 {
-                    await _gameService.HandlePlayerAction(new PlayerActionRequest { Action = "fold" }, gameState);
+                    leavingPlayer.IsFolded = true;
+                    leavingPlayer.IsActive = false;
+                    leavingPlayer.LastAction = "fold";
+                    leavingPlayer.HasActedThisRound = true;
                 }
                 else
                 {
