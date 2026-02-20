@@ -68,9 +68,8 @@ export default function Game() {
   };
 
   const getCallAmount = () => {
-    if (!game) return 0;
-    const currentPlayer = game.players[game.currentPlayerIndex];
-    return game.highestBet - (currentPlayer?.currentBet || 0);
+    if (!game || !player) return 0;
+    return game.highestBet - (player.currentBet || 0);
   };
 
   const getButtonConfig = (action: string) => {
@@ -118,13 +117,24 @@ export default function Game() {
 
   if (!game) return <div>Loading...</div>;
 
-  const player = game.players.find((p) => p.isPlayer);
+  const myUserId = game.currentViewerUserId;
+  const player = game.players.find((p) => p.userId === myUserId);
+  const myPlayerIndex = game.players.findIndex((p) => p.userId === myUserId);
+  const isMyTurn = myPlayerIndex === game.currentPlayerIndex;
   const hasPenalty = !game.isGameOver && game.penaltyAmount > 0;
 
   return (
     <div className="fixed inset-0 bg-gray-950 flex flex-col">
       {/* Header */}
-      <div className="h-14 bg-gray-900/80 border-b border-gray-800 flex items-center justify-end px-4">
+      <div className="h-14 bg-gray-900/80 border-b border-gray-800 flex items-center justify-between px-4">
+        <div className="flex items-center gap-2 text-sm text-gray-400">
+          {isMyTurn && (
+            <span className="text-amber-500 font-bold animate-pulse">Your turn</span>
+          )}
+          {!isMyTurn && !game.isGameOver && (
+            <span>Waiting for {game.players[game.currentPlayerIndex]?.name}...</span>
+          )}
+        </div>
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
@@ -176,12 +186,13 @@ export default function Game() {
           </div>
 
           {/* Player Seats */}
-          {game.players.map((player, index) => (
+          {game.players.map((p, index) => (
             <PlayerSeat
               key={index}
               position={index}
-              player={player || undefined}
+              player={p || undefined}
               isCurrentPlayer={index === game.currentPlayerIndex}
+              isMe={p.userId === myUserId}
             />
           ))}
         </div>
@@ -204,21 +215,29 @@ export default function Game() {
       {/* Actions */}
       <div className="h-24 bg-gray-900 border-t border-gray-800 p-6">
         <div className="max-w-2xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 h-full">
-          <div className="flex items-center gap-3">
-            {game.availableActions.map((action) => {
-              const buttonConfig = getButtonConfig(action);
-              return (
-                <Button
-                  key={action}
-                  variant="outline"
-                  className={buttonConfig?.className}
-                  onClick={buttonConfig?.onClick}
-                >
-                  {buttonConfig?.label}
-                </Button>
-              );
-            })}
-          </div>
+          {isMyTurn && game.availableActions.length > 0 ? (
+            <div className="flex items-center gap-3">
+              {game.availableActions.map((action) => {
+                const buttonConfig = getButtonConfig(action);
+                return (
+                  <Button
+                    key={action}
+                    variant="outline"
+                    className={buttonConfig?.className}
+                    onClick={buttonConfig?.onClick}
+                  >
+                    {buttonConfig?.label}
+                  </Button>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">
+              {game.isGameOver
+                ? "Round over"
+                : `Waiting for ${game.players[game.currentPlayerIndex]?.name}...`}
+            </p>
+          )}
         </div>
       </div>
       <Dialog open={isRaiseModalOpen} onOpenChange={setIsRaiseModalOpen}>
@@ -235,7 +254,7 @@ export default function Game() {
               <Input
                 type="number"
                 value={raiseValue}
-                max={game.players[game.currentPlayerIndex].chips}
+                max={player?.chips ?? 0}
                 min={minRaise}
                 step={5}
                 onChange={(e) => setRaiseValue(Number(e.target.value))}
@@ -245,7 +264,7 @@ export default function Game() {
 
             <Slider
               value={[raiseValue]}
-              max={game.players[game.currentPlayerIndex].chips}
+              max={player?.chips ?? 0}
               min={minRaise}
               step={1}
               onValueChange={([val]) => setRaiseValue(val)}
@@ -256,7 +275,7 @@ export default function Game() {
               <Button
                 variant="outline"
                 onClick={() =>
-                  setRaiseValue(game.players[game.currentPlayerIndex].chips / 4)
+                  setRaiseValue(Math.floor((player?.chips ?? 0) / 4))
                 }
               >
                 1/4 Pot
@@ -264,7 +283,7 @@ export default function Game() {
               <Button
                 variant="outline"
                 onClick={() =>
-                  setRaiseValue(game.players[game.currentPlayerIndex].chips / 2)
+                  setRaiseValue(Math.floor((player?.chips ?? 0) / 2))
                 }
               >
                 1/2 Pot
@@ -273,7 +292,7 @@ export default function Game() {
                 variant="outline"
                 onClick={() =>
                   setRaiseValue(
-                    (game.players[game.currentPlayerIndex].chips * 3) / 4,
+                    Math.floor(((player?.chips ?? 0) * 3) / 4),
                   )
                 }
               >
@@ -283,7 +302,7 @@ export default function Game() {
                 variant="outline"
                 className="border-purple-500"
                 onClick={() =>
-                  setRaiseValue(game.players[game.currentPlayerIndex].chips)
+                  setRaiseValue(player?.chips ?? 0)
                 }
               >
                 All-In

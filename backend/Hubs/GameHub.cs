@@ -53,6 +53,9 @@ public class GameHub : Hub
                 SkillLevel = p.SkillLevel,
                 SeatNumber = p.SeatNumber,
                 Hand = p.Hand,
+                IsDealer = p.IsDealer,
+                LastAction = p.LastAction,
+                LastActionAmount = p.LastActionAmount,
             };
 
             bool isMe = p.UserId == viewerUserId;
@@ -71,6 +74,26 @@ public class GameHub : Hub
             return clonedPlayer;
         }).ToList();
 
+        // Compute per-viewer available actions
+        var viewerPlayer = gameState.Players.FirstOrDefault(p => p.UserId == viewerUserId);
+        var viewerIndex = viewerPlayer != null ? gameState.Players.IndexOf(viewerPlayer) : -1;
+        var isMyTurn = viewerIndex == gameState.CurrentPlayerIndex;
+
+        var actions = new List<string>();
+        if (isMyTurn && viewerPlayer != null && viewerPlayer.IsActive && !gameState.IsGameOver)
+        {
+            actions = gameState.AvailableActions;
+        }
+
+        // Compute per-viewer leave penalty
+        int penaltyAmount = 0;
+        int earlyLeavePayout = 0;
+        if (viewerPlayer != null)
+        {
+            penaltyAmount = (int)(viewerPlayer.Chips * 0.1);
+            earlyLeavePayout = viewerPlayer.Chips - penaltyAmount;
+        }
+
         return new GameState
         {
             GameId = gameState.GameId,
@@ -82,10 +105,10 @@ public class GameHub : Hub
             BigBlind = gameState.BigBlind,
             IsGameOver = gameState.IsGameOver,
             HighestBet = gameState.HighestBet,
-            AvailableActions = gameState.AvailableActions,
+            AvailableActions = actions,
             WinnersPositions = gameState.WinnersPositions,
-            PenaltyAmount = gameState.PenaltyAmount,
-            EarlyLeavePayout = gameState.EarlyLeavePayout,
+            PenaltyAmount = penaltyAmount,
+            EarlyLeavePayout = earlyLeavePayout,
             CurrentViewerUserId = viewerUserId,
         };
     }
@@ -155,7 +178,6 @@ public class GameHub : Hub
 
             await _gameService.HandlePlayerAction(request, gameState);
             await _gameStateManager.SaveGameStateAsync(gameId, gameState);
-            await Clients.Group($"game_{gameId}").SendAsync("GameStateUpdated", gameState);
             
             await BroadcastGameState(gameId, gameState);
             await ProcessBotTurns(gameId, gameState);
@@ -198,7 +220,6 @@ public class GameHub : Hub
         {
             var newGameState = _gameService.NewRound(gameState);
             await _gameStateManager.SaveGameStateAsync(gameId, newGameState);
-            await Clients.Group($"game_{gameId}").SendAsync("GameStateUpdated", newGameState);
             
             await BroadcastGameState(gameId, newGameState);
             await ProcessBotTurns(gameId, newGameState);
@@ -222,28 +243,54 @@ public class GameHub : Hub
 
         try
         {
-            bool isEarlyLeave = !gameState.IsGameOver;
+            var leavingPlayer = gameState.Players.FirstOrDefault(p => p.UserId == userId);
+            if (leavingPlayer == null) return;
 
-            await _gameHistoryService.UpdatePlayerBalanceFromGame(gameState);
-            await _gameStateManager.DeleteGameStateAsync(gameId);
+            bool isEarlyLeave = !gameState.IsGameOver;
+            int payout = isEarlyLeave
+                ? (int)(leavingPlayer.Chips * 0.9)
+                : leavingPlayer.Chips;
+
+            await _userService.UpdateUserBalanceAsync(userId, payout);
             await _gameStateManager.DeleteUserCurrentGameAsync(userId);
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"game_{gameId}");
 
             await Clients.Caller.SendAsync("GameLeft", new
             {
                 message = "Successfully left game",
-                balanceReturned = isEarlyLeave
-                    ? gameState.EarlyLeavePayout
-                    : gameState.Players.First(p => p.IsPlayer).Chips
+                balanceReturned = payout
             });
 
-            var user = await _userService.GetUserById(userId);
-            if (user != null)
+            // Check remaining human players
+            var remainingHumans = gameState.Players
+                .Where(p => p.IsPlayer && p.UserId != null && p.UserId != userId)
+                .ToList();
+
+            if (remainingHumans.Count == 0)
             {
-                await Clients.OthersInGroup($"game_{gameId}")
-                    .SendAsync("PlayerDisconnected", user.UserName);
+                // No humans left — clean up the game entirely
+                await _gameStateManager.DeleteGameStateAsync(gameId);
             }
-            await BroadcastGameState(gameId, gameState);
+            else
+            {
+                // Mark the leaving player as inactive
+                leavingPlayer.IsFolded = true;
+                leavingPlayer.IsActive = false;
+                leavingPlayer.Chips = 0;
+                leavingPlayer.UserId = null;
+
+                await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+
+                var user = await _userService.GetUserById(userId);
+                if (user != null)
+                {
+                    await Clients.Group($"game_{gameId}")
+                        .SendAsync("PlayerDisconnected", user.UserName);
+                }
+
+                // Broadcast updated state to remaining players
+                await BroadcastGameState(gameId, gameState);
+            }
         }
         catch (Exception ex)
         {

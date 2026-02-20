@@ -228,16 +228,16 @@ namespace Application.Services
     {
         var actions = new List<string>();
 
-        var currentBet = state.Players.Max(p => p.CurrentBet);
-        var player = state.Players.First(p => p.IsPlayer == true);
-        var playerBet = player.CurrentBet;
-        var callAmount = currentBet - playerBet;
+        var player = state.Players[state.CurrentPlayerIndex];
+
+        // Only show actions for human players on their turn
+        if (!player.IsPlayer)
+            return actions;
 
         if (player.IsActive == false)
             return actions;
 
-        if (state.Players[state.CurrentPlayerIndex].IsPlayer == false)
-            return actions;
+        var callAmount = state.HighestBet - player.CurrentBet;
 
         if (callAmount == 0)
             actions.Add("check");
@@ -444,11 +444,13 @@ namespace Application.Services
 
     public void CalculateLeavePenalty(GameState state)
     {
-        var player = state.Players.FirstOrDefault(p => p.IsPlayer);
-        if (player != null)
+        // Calculate for the current player at index (used during game logic)
+        // Per-viewer penalty is computed in CreatePersonalizedGameState
+        var currentPlayer = state.Players.ElementAtOrDefault(state.CurrentPlayerIndex);
+        if (currentPlayer != null && currentPlayer.IsPlayer)
         {
-            state.PenaltyAmount = (int)(player.Chips * 0.1);
-            state.EarlyLeavePayout = player.Chips - state.PenaltyAmount;
+            state.PenaltyAmount = (int)(currentPlayer.Chips * 0.1);
+            state.EarlyLeavePayout = currentPlayer.Chips - state.PenaltyAmount;
         }
     }
     }

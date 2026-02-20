@@ -15,6 +15,7 @@ export interface Player {
     isDealer: boolean;
     lastAction?: string;
     lastActionAmount?: number;
+    userId?: string | null;
 }
 
 export interface GameState {
@@ -35,6 +36,7 @@ export interface GameState {
     winnersPositions: number[];
     penaltyAmount: number;
     earlyLeavePayout: number;
+    currentViewerUserId?: string | null;
 }
 
 export type GameActionPayload = 
