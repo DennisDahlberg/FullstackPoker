@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import * as signalR from "@microsoft/signalr";
-import type { GameState } from "@/types/GameState";
+import type { GameSessionSummary, GameState } from "@/types/GameState";
 import type { GameActionPayload } from "@/types/GameState";
 import { toast } from "sonner";
 
@@ -10,6 +10,7 @@ interface GameStore {
   animating: boolean;
   connection: signalR.HubConnection | null;
   error: string | null;
+  sessionSummary: GameSessionSummary | null;
 
   connectToGame: () => Promise<void>;
   disconnectFromGame: () => Promise<void>;
@@ -20,6 +21,7 @@ interface GameStore {
   leaveGame: () => Promise<void>;
 
   clearError: () => void;
+  clearSessionSummary: () => void;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -28,9 +30,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   connection: null,
   error: null,
   animating: false,
+  sessionSummary: null,
 
   setAnimating: (v) => set({ animating: v }),
   clearError: () => set({ error: null }),
+  clearSessionSummary: () => set({ sessionSummary: null }),
 
   connectToGame: async () => {
     const existing = get().connection;
@@ -41,7 +45,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       return;
     }
 
-    set({ loading: true, error: null });
+    set({ loading: true, error: null, sessionSummary: null });
 
     try {
       const token = localStorage.getItem("token");
@@ -94,6 +98,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       });
 
       connection.onclose((error) => {
+        if (get().sessionSummary) return;
         console.error("Connection closed:", error);
         toast.error("Connection lost. Please refresh the page.");
         set({

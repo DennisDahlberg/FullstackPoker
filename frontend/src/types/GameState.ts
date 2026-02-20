@@ -39,6 +39,18 @@ export interface GameState {
     currentViewerUserId?: string | null;
 }
 
+export interface GameSessionSummary {
+  duration: string;
+  totalSeconds: number;
+  startingChips: number;
+  finalChips: number;
+  profit: number;
+  roundsPlayed: number;
+  balanceReturned: number;
+  penaltyAmount: number;
+  wasEarlyLeave: boolean;
+}
+
 export type GameActionPayload = 
     | { amount: number }  
     | undefined               
