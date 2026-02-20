@@ -33,8 +33,7 @@ export const useLobbyStore = create<LobbyStore>((set, get) => ({
 
   connectAndCreate: async (tableId: number) => {
     const existing = get().connection;
-    if (existing) {
-      // Already connected — just invoke CreateLobby again
+    if (existing && existing.state !== signalR.HubConnectionState.Disconnected) {
       try {
         await existing.invoke("CreateLobby", tableId);
       } catch (err) {
