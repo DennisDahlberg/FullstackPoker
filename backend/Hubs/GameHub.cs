@@ -1,5 +1,6 @@
 using Core.GameModels;
 using Core.Interfaces;
+using HoldemPoker.Cards;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -21,6 +22,73 @@ public class GameHub : Hub
         _gameHistoryService = gameHistoryService;
         _gameService = gameService;
     }
+    
+    private async Task BroadcastGameState(string gameId, GameState gameState)
+    {
+        var humanPlayers = gameState.Players.Where(p => p.IsPlayer && p.UserId != null).ToList();
+
+        foreach (var player in humanPlayers)
+        {
+            var personalizedState = CreatePersonalizedGameState(gameState, player.UserId!);
+            await Clients.User(player.UserId!).SendAsync("GameStateUpdated", personalizedState);
+        }
+    }
+
+    private GameState CreatePersonalizedGameState(GameState gameState, string viewerUserId)
+    {
+        var personalizedPlayers = gameState.Players.Select(p =>
+        {
+            var clonedPlayer = new Player
+            {
+                Name = p.Name,
+                UserId = p.UserId,
+                Chips = p.Chips,
+                IsPlayer = p.IsPlayer,
+                CurrentBet = p.CurrentBet,
+                IsFolded = p.IsFolded,
+                HasActedThisRound = p.HasActedThisRound,
+                IsActive = p.IsActive,
+                ProfileImageUrl = p.ProfileImageUrl,
+                PlayStyle = p.PlayStyle,
+                SkillLevel = p.SkillLevel,
+                SeatNumber = p.SeatNumber,
+                Hand = p.Hand,
+            };
+
+            bool isMe = p.UserId == viewerUserId;
+            bool isShowdown = gameState.IsGameOver;
+            
+            if (!isMe && !isShowdown)
+            {
+                clonedPlayer.Hand = p.Hand.Select(c => new PlayerCard()
+                {
+                    Rank = c.Rank,
+                    Suit = c.Suit,
+                    IsHidden = true
+                }).ToList();
+            }
+
+            return clonedPlayer;
+        }).ToList();
+
+        return new GameState
+        {
+            GameId = gameState.GameId,
+            Players = personalizedPlayers,
+            CommunityCards = gameState.CommunityCards,
+            Pot = gameState.Pot,
+            CurrentPlayerIndex = gameState.CurrentPlayerIndex,
+            SmallBlind = gameState.SmallBlind,
+            BigBlind = gameState.BigBlind,
+            IsGameOver = gameState.IsGameOver,
+            HighestBet = gameState.HighestBet,
+            AvailableActions = gameState.AvailableActions,
+            WinnersPositions = gameState.WinnersPositions,
+            PenaltyAmount = gameState.PenaltyAmount,
+            EarlyLeavePayout = gameState.EarlyLeavePayout,
+            CurrentViewerUserId = viewerUserId,
+        };
+    }
 
     public async Task JoinGame()
     {
@@ -40,7 +108,9 @@ public class GameHub : Hub
         }
         
         await Groups.AddToGroupAsync(Context.ConnectionId, $"game_{gameId}");
-        await Clients.Caller.SendAsync("GameStateUpdated", gameState);
+        
+        var personalizedState = CreatePersonalizedGameState(gameState, userId);
+        await Clients.Caller.SendAsync("GameStateUpdated", personalizedState);
 
         var user = await _userService.GetUserById(userId);
         if (user is not null)
@@ -87,6 +157,7 @@ public class GameHub : Hub
             await _gameStateManager.SaveGameStateAsync(gameId, gameState);
             await Clients.Group($"game_{gameId}").SendAsync("GameStateUpdated", gameState);
             
+            await BroadcastGameState(gameId, gameState);
             await ProcessBotTurns(gameId, gameState);
         }
         catch (Exception ex)
@@ -102,7 +173,7 @@ public class GameHub : Hub
         {
             await _gameService.HandleBotAction(gameState);
             await _gameStateManager.SaveGameStateAsync(gameId, gameState);
-            await Clients.Group($"game_{gameId}").SendAsync("GameStateUpdated", gameState);
+            await BroadcastGameState(gameId, gameState);
         }
     }
 
@@ -129,6 +200,7 @@ public class GameHub : Hub
             await _gameStateManager.SaveGameStateAsync(gameId, newGameState);
             await Clients.Group($"game_{gameId}").SendAsync("GameStateUpdated", newGameState);
             
+            await BroadcastGameState(gameId, newGameState);
             await ProcessBotTurns(gameId, newGameState);
         }
         catch (Exception ex)
@@ -171,6 +243,7 @@ public class GameHub : Hub
                 await Clients.OthersInGroup($"game_{gameId}")
                     .SendAsync("PlayerDisconnected", user.UserName);
             }
+            await BroadcastGameState(gameId, gameState);
         }
         catch (Exception ex)
         {
