@@ -11,7 +11,7 @@ import {
   ChevronsUpDown,
   CirclePlay,
   UserRound,
-  UsersRound
+  ChartColumn
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "./ui/skeleton";
@@ -37,7 +37,7 @@ export default function SidebarLayout() {
     { icon: CirclePlay, label: "Game", href: "/lobby" },
     { icon: UserRound, label: "Friends", href: "/friends" },
     { icon: Settings, label: "Settings", href: "/settings" },
-    // { icon: UsersRound, label: "Lobby", href: "/lobby" },
+    { icon: ChartColumn, label: "Statistics", href: "/statistics" }
   ];
 
   function handleLogOut() {
