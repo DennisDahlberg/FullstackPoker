@@ -90,6 +90,7 @@ public class GameHistoryService : IGameHistoryService
             BalanceReturned = payout,
             PenaltyAmount = penaltyAmount,
             WasEarlyLeave = isEarlyLeave,
+            Hand = player.BestHand
         };
 
         return summary;

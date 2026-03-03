@@ -11,4 +11,5 @@ public class PlayerSessionSummary
     public int PenaltyAmount { get; set; }
     public bool WasEarlyLeave { get; set; }
     public int RoundsPlayed { get; set; }
+    public string Hand { get; set; } = null!;
 }
