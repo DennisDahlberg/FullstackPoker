@@ -424,6 +424,15 @@ namespace Application.Services
             player.Hand[1].IsHidden = false;
         }
 
+        foreach (var player in state.Players)
+        {
+            player.BestHand =
+                HoldemHandEvaluator
+                    .GetHandCategory(
+                    player.Hand.Select(ConvertToHoldemPokerCard).Concat(board).ToArray()).
+                    ToString();
+        }
+
         foreach (var winner in winners)
         {
             winner.Player.Chips += winAmount;
