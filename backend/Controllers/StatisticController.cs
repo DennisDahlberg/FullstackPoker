@@ -6,10 +6,10 @@ namespace backend.Controllers;
 [Authorize]
 [ApiController]
 [Route("[Controller]")]
-public class StatisticsController : Controller
+public class StatisticController : Controller
 {
-    public IActionResult Index()
+    public IActionResult GetStatistics()
     {
-        return View();
+        return Ok();
     }
 }
