@@ -37,6 +37,7 @@ public class StatisticService : IStatisticService
                 Profit = x.Stat.Profit,
                 Duration = durationStr,
                 BestHand = x.Stat.Hand,
+                Players = x.Game.PlayerCount
             };
         }).ToList();
 
