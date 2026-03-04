@@ -25,4 +25,17 @@ public class StatisticController : Controller
         
         return Ok();
     }
+
+    [HttpGet("history")]
+    public async Task<IActionResult> GetGameHistry([FromQuery]  int page = 1, [FromQuery]  int pageSize = 5)
+    {
+        var user = await _userService.GetLoggedInUser(User);
+        if (user is null)
+            return Unauthorized();
+        
+        if (page < 1)
+            return BadRequest(new { message = "Invalid page number" });
+        
+        return Ok();
+    }
 }
