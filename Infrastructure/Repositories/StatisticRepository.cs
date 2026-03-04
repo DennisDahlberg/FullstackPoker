@@ -1,3 +1,4 @@
+using Core.DTOs.Statistics;
 using Core.Interfaces;
 using Core.Models.Games;
 using Infrastructure.Data;
@@ -14,11 +15,24 @@ public class StatisticRepository : IStatisticRepository
         _context = context;
     }
 
-    public async Task<List<PlayerGameStat>> GetPlayerGameStatsAsync(string userId)
+    public async Task<(List<PlayerGameStatJoined> Items, int Total)> GetPlayerGameStatsAsync(string userId, int page, int pageSize)
     {
-        var stats = await  _context.PlayerGameStats
+        var query = _context.PlayerGameStats
             .Where(x => x.UserId == userId)
+            .Join(
+                _context.Games,
+                stat => stat.GameId,
+                game => game.Id,
+                (stat, game) => new PlayerGameStatJoined { Stat = stat, Game = game })
+            .OrderByDescending(x => x.Game.FinishedAt);
+
+        var total = await query.CountAsync();
+
+        var items = await query
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .ToListAsync();
-        return stats;
+        
+        return (items, total);
     }
 }
