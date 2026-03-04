@@ -10,10 +10,12 @@ namespace backend.Controllers;
 public class StatisticController : Controller
 {
     private readonly IUserService _userService;
+    private readonly IStatisticService _statisticService;
 
-    public StatisticController(IUserService userService)
+    public StatisticController(IUserService userService, IStatisticService statisticService)
     {
         _userService = userService;
+        _statisticService = statisticService;
     }
 
     [HttpGet("summary")]
