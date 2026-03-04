@@ -9,4 +9,5 @@ public class Game
     public List<string> WinnerIds { get; set; } = null!;
     public DateTimeOffset StartedAt { get; set; }
     public DateTimeOffset FinishedAt { get; set; }
+    public int PlayerCount { get; set; }
 }

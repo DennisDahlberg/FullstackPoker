@@ -29,6 +29,7 @@ public class GameHistoryService : IGameHistoryService
             TableId = gameState.TableId,
             StartedAt = gameState.StartedAt,
             WinnerIds = winnerIds,
+            PlayerCount = gameState.Players.Count,
         };
         
         var playerStats = GetPlayerStatsFromGame(gameState);
@@ -66,6 +67,7 @@ public class GameHistoryService : IGameHistoryService
                 IsWinner = IsPlayerWinner(gameState, player),
                 UserId = player.UserId,
                 Profit = player.Chips - player.RoundStartingChips,
+                Hand =  player.BestHand
             };
             stats.Add(playerStat);
         }

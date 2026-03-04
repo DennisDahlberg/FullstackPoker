@@ -11,4 +11,5 @@ public class PlayerGameStat
     public int Profit { get; set; }
     public int HandsWon { get; set; }
     public DateTimeOffset CreatedAt { get; set; }
+    public string Hand { get; set; } = null!;
 }
