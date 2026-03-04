@@ -4,6 +4,7 @@ namespace Core.DTOs.Statistics;
 
 public class GameHistoryItemDto
 {
+    public int Id { get; set; }
     public string Date { get; set; } = null!;
     public int Players { get; set; }
     public int BuyIn { get; set; }

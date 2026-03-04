@@ -31,6 +31,7 @@ public class StatisticService : IStatisticService
 
             return new GameHistoryItemDto
             {
+                Id = x.Game.Id,
                 Date = x.Game.FinishedAt.ToString("MMM d, yyyy"),
                 BuyIn = x.Stat.ChipsStart,
                 Result = x.Stat.IsWinner ? "win" : "loss",
