@@ -29,7 +29,7 @@ public class StatisticController : Controller
     }
 
     [HttpGet("history")]
-    public async Task<IActionResult> GetGameHistry([FromQuery]  int page = 1, [FromQuery]  int pageSize = 5)
+    public async Task<IActionResult> GetGameHistory([FromQuery]  int page = 1, [FromQuery]  int pageSize = 5)
     {
         var user = await _userService.GetLoggedInUser(User);
         if (user is null)

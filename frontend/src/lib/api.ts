@@ -213,6 +213,22 @@ export const api = {
     }
   },
 
+  statistics: {
+    async getGameHistory(page: number, pageSize: number) {
+      try {
+        const response = await apiClient.get(`${backendUrl}/statistic/history`, {
+          params: { page, pageSize }
+        });
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to fetch game history';
+        }
+        throw 'An error occurred while fetching game history';
+      }
+    }
+  },
+
   auth: {
     async login(email:string, password:string) {
       try {
