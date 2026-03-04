@@ -37,7 +37,9 @@ public class StatisticController : Controller
         
         if (page < 1)
             return BadRequest(new { message = "Invalid page number" });
+
+        var result = await _statisticService.GetGameHistoryAsync(user.Id, page, pageSize);
         
-        return Ok();
+        return Ok(result);
     }
 }
