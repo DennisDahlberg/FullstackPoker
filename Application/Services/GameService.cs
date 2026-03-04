@@ -39,6 +39,7 @@ namespace Application.Services
                 UserId = userData.Id,
                 Chips = table.BuyIn,
                 GameStartingChips = table.BuyIn,
+                RoundStartingChips = table.BuyIn,
                 IsPlayer = true,
                 CurrentBet = 0,
                 SeatNumber = allPlayers.Count 

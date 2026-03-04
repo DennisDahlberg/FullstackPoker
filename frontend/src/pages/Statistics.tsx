@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { api } from "@/lib/api";
 import {
   XAxis,
   YAxis,
@@ -60,24 +61,8 @@ interface PastGame {
   bestHand: string;
 }
 
-const pastGames: PastGame[] = [
-  { id: "g1", date: "Apr 20, 2026", players: 5, buyIn: 500, result: "win", profit: 320, duration: "1h 24m", bestHand: "Full House" },
-  { id: "g2", date: "Apr 18, 2026", players: 4, buyIn: 500, result: "loss", profit: -200, duration: "52m", bestHand: "Two Pair" },
-  { id: "g3", date: "Apr 15, 2026", players: 6, buyIn: 1000, result: "win", profit: 850, duration: "2h 10m", bestHand: "Straight Flush" },
-  { id: "g4", date: "Apr 13, 2026", players: 3, buyIn: 250, result: "win", profit: 340, duration: "45m", bestHand: "Flush" },
-  { id: "g5", date: "Apr 10, 2026", players: 5, buyIn: 500, result: "loss", profit: -150, duration: "1h 5m", bestHand: "Pair" },
-  { id: "g6", date: "Apr 8, 2026", players: 4, buyIn: 500, result: "win", profit: 275, duration: "1h 30m", bestHand: "Three of a Kind" },
-  { id: "g7", date: "Apr 5, 2026", players: 6, buyIn: 1000, result: "loss", profit: -500, duration: "1h 48m", bestHand: "Two Pair" },
-  { id: "g8", date: "Apr 2, 2026", players: 3, buyIn: 250, result: "win", profit: 180, duration: "38m", bestHand: "Straight" },
-  { id: "g9", date: "Mar 30, 2026", players: 5, buyIn: 500, result: "win", profit: 420, duration: "1h 55m", bestHand: "Four of a Kind" },
-  { id: "g10", date: "Mar 27, 2026", players: 4, buyIn: 500, result: "loss", profit: -300, duration: "1h 12m", bestHand: "High Card" },
-  { id: "g11", date: "Mar 24, 2026", players: 6, buyIn: 1000, result: "win", profit: 600, duration: "2h 5m", bestHand: "Full House" },
-  { id: "g12", date: "Mar 20, 2026", players: 3, buyIn: 250, result: "win", profit: 190, duration: "42m", bestHand: "Flush" },
-];
-
 const GAMES_PER_PAGE = 5;
 
-// ── Custom Tooltip ─────────────────────────────────────────────────────────
 
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null;
@@ -93,38 +78,45 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
-// ── Component ──────────────────────────────────────────────────────────────
 
 export default function Statistics() {
-  const [visibleGames, setVisibleGames] = useState(GAMES_PER_PAGE);
+  const [games, setGames] = useState<PastGame[]>([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [total, setTotal] = useState(0);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
-  const displayedGames = pastGames.slice(0, visibleGames);
-  const hasMore = visibleGames < pastGames.length;
+  const fetchGames = useCallback(async (nextPage: number, append: boolean) => {
+    try {
+      const data = await api.statistics.getGameHistory(nextPage, GAMES_PER_PAGE);
+      setGames((prev) => append ? [...prev, ...data.games] : data.games);
+      setHasMore(data.hasMore);
+      setTotal(data.total);
+      setPage(nextPage);
+    } catch (err) {
+      console.error("Failed to fetch game history:", err);
+    } finally {
+      setLoadingMore(false);
+      setInitialLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchGames(1, false);
+  }, [fetchGames]);
 
   const handleLoadMore = () => {
     setLoadingMore(true);
-    // Simulate network delay
-    setTimeout(() => {
-      setVisibleGames((prev) => Math.min(prev + GAMES_PER_PAGE, pastGames.length));
-      setLoadingMore(false);
-    }, 600);
-  };
-
-  // Stats calculations
-  const totalGames = pastGames.length;
-  const wins = pastGames.filter((g) => g.result === "win").length;
+    fetchGames(page + 1, true);
+  }
+  
+  const totalGames = 12;
+  const wins = 10;
   const winRate = Math.round((wins / totalGames) * 100);
-  const totalProfit = pastGames.reduce((sum, g) => sum + g.profit, 0);
-  const biggestWin = Math.max(...pastGames.map((g) => g.profit));
-  const currentStreak = (() => {
-    let streak = 0;
-    for (const game of pastGames) {
-      if (game.result === "win") streak++;
-      else break;
-    }
-    return streak;
-  })();
+  const totalProfit = 6310;
+  const biggestWin = 250;
+  const currentStreak = 2;
 
   const statBoxes = [
     {
@@ -272,7 +264,7 @@ export default function Statistics() {
         </h2>
 
         <div className="space-y-2">
-          {displayedGames.map((game) => (
+          {games.map((game) => (
             <div
               key={game.id}
               className="group flex items-center justify-between p-4 rounded-xl border border-transparent bg-gray-900/40 hover:bg-gray-900/70 hover:border-gray-800 transition-all"
@@ -359,16 +351,16 @@ export default function Statistics() {
               ) : (
                 <>
                   <ChevronDown className="w-4 h-4 mr-2" />
-                  Load More ({pastGames.length - visibleGames} remaining)
+                  Load More ({total - games.length} remaining)
                 </>
               )}
             </Button>
           </div>
         )}
 
-        {!hasMore && pastGames.length > GAMES_PER_PAGE && (
+        {!hasMore && total > GAMES_PER_PAGE && (
           <p className="text-center text-xs text-gray-600 pt-2">
-            All {pastGames.length} games loaded
+            All {total} games loaded
           </p>
         )}
       </div>
