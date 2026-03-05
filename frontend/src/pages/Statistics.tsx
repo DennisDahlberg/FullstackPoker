@@ -326,7 +326,7 @@ export default function Statistics() {
                     {game.profit.toLocaleString()}
                   </p>
                   <p className="text-xs text-gray-600">
-                    Buy-in: {game.buyIn.toLocaleString()}
+                    Chips: {game.buyIn.toLocaleString()}
                   </p>
                 </div>
               </div>
