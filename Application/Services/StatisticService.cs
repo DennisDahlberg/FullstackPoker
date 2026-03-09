@@ -26,8 +26,8 @@ public class StatisticService : IStatisticService
         {
             var duration = x.Game.FinishedAt - x.Game.StartedAt;
             var durationStr = duration.TotalHours >= 1
-                ? $"{(int)duration.TotalHours}h {duration.Minutes}m"
-                : $"{duration.Minutes}m";
+                ? $"{(int)duration.TotalHours}h {duration.Minutes}m {duration.Seconds}s"
+                : $"{duration.Minutes}m {duration.Seconds}s";
 
             return new GameHistoryItemDto
             {
@@ -38,7 +38,8 @@ public class StatisticService : IStatisticService
                 Profit = x.Stat.Profit,
                 Duration = durationStr,
                 BestHand = x.Stat.Hand,
-                Players = x.Game.PlayerCount
+                Players = x.Game.PlayerCount,
+                ChipsPostGame = x.Stat.ChipsEnd
             };
         }).ToList();
 

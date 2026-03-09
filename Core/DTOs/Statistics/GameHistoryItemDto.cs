@@ -8,6 +8,7 @@ public class GameHistoryItemDto
     public string Date { get; set; } = null!;
     public int Players { get; set; }
     public int BuyIn { get; set; }
+    public int ChipsPostGame { get; set; }
     public string Result { get; set; } = null!;
     public int Profit { get; set; }
     public string Duration { get; set; } = null!;

@@ -59,6 +59,7 @@ interface PastGame {
   profit: number;
   duration: string;
   bestHand: string;
+  chipsPostGame: number;
 }
 
 const GAMES_PER_PAGE = 5;
@@ -326,7 +327,7 @@ export default function Statistics() {
                     {game.profit.toLocaleString()}
                   </p>
                   <p className="text-xs text-gray-600">
-                    Chips: {game.buyIn.toLocaleString()}
+                    Chips: {game.chipsPostGame.toLocaleString()}
                   </p>
                 </div>
               </div>
