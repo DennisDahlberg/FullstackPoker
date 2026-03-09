@@ -25,9 +25,12 @@ public class StatisticService : IStatisticService
         var items = rows.Select(x =>
         {
             var duration = x.Game.FinishedAt - x.Game.StartedAt;
-            var durationStr = duration.TotalHours >= 1
-                ? $"{(int)duration.TotalHours}h {duration.Minutes}m {duration.Seconds}s"
-                : $"{duration.Minutes}m {duration.Seconds}s";
+            var durationStr = duration.TotalSeconds switch
+            {
+                >= 3600 => $"{duration.Hours}h {duration.Minutes}m {duration.Seconds}s",
+                >= 60   => $"{duration.Minutes}m {duration.Seconds}s",
+                _       => $"{duration.Seconds}s"
+            };
 
             return new GameHistoryItemDto
             {
