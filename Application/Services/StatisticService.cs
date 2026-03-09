@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using Core.DTOs.Statistics;
 using Core.Interfaces;
 
@@ -32,6 +33,8 @@ public class StatisticService : IStatisticService
                 _       => $"{duration.Seconds}s"
             };
 
+            var bestHandStr = Regex.Replace(x.Stat.Hand, "(?<!^)([A-Z])", " $1");
+
             return new GameHistoryItemDto
             {
                 Id = x.Game.Id,
@@ -40,7 +43,7 @@ public class StatisticService : IStatisticService
                 Result = x.Stat.IsWinner ? "win" : "loss",
                 Profit = x.Stat.Profit,
                 Duration = durationStr,
-                BestHand = x.Stat.Hand,
+                BestHand = bestHandStr,
                 Players = x.Game.PlayerCount,
                 ChipsPostGame = x.Stat.ChipsEnd
             };

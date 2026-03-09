@@ -456,8 +456,6 @@ namespace Application.Services
 
     public void CalculateLeavePenalty(GameState state)
     {
-        // Calculate for the current player at index (used during game logic)
-        // Per-viewer penalty is computed in CreatePersonalizedGameState
         var currentPlayer = state.Players.ElementAtOrDefault(state.CurrentPlayerIndex);
         if (currentPlayer != null && currentPlayer.IsPlayer)
         {
