@@ -63,6 +63,16 @@ interface PastGame {
   chipsPostGame: number;
 }
 
+interface Summmary {
+    totalGames: number;
+    wins: number;
+    losses: number;
+    winRate: number;
+    totalProfit: number;
+    biggestWin: number;
+    currentStreak: number;
+}
+
 const GAMES_PER_PAGE = 5;
 
 function CustomTooltip({ active, payload, label }: any) {
@@ -87,6 +97,8 @@ function CustomTooltip({ active, payload, label }: any) {
 
 export default function Statistics() {
   const [games, setGames] = useState<PastGame[]>([]);
+  const [summary, setSummary] = useState<Summmary | null>(null);
+  const [summaryLoading, setSummaryLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
   const [total, setTotal] = useState(0);
@@ -112,6 +124,13 @@ export default function Statistics() {
   }, []);
 
   useEffect(() => {
+    api.statistics.getSummary()
+      .then(setSummary)
+      .catch(console.error)
+      .finally(() => setSummaryLoading(false));
+  }, []);
+
+  useEffect(() => {
     fetchGames(1, false);
   }, [fetchGames]);
 
@@ -120,17 +139,10 @@ export default function Statistics() {
     fetchGames(page + 1, true);
   };
 
-  const totalGames = 12;
-  const wins = 10;
-  const winRate = Math.round((wins / totalGames) * 100);
-  const totalProfit = 6310;
-  const biggestWin = 250;
-  const currentStreak = 2;
-
   const statBoxes = [
     {
       label: "Games Played",
-      value: totalGames.toString(),
+      value: summary ? summary.totalGames.toString() : "0",
       icon: Target,
       color: "text-blue-400",
       bgColor: "bg-blue-500/10",
@@ -138,7 +150,7 @@ export default function Statistics() {
     },
     {
       label: "Win Rate",
-      value: `${winRate}%`,
+      value: summary ? `${summary.winRate}%` : "0%",
       icon: Trophy,
       color: "text-amber-400",
       bgColor: "bg-amber-500/10",
@@ -146,16 +158,15 @@ export default function Statistics() {
     },
     {
       label: "Total Profit",
-      value: `${totalProfit >= 0 ? "+" : ""}${totalProfit.toLocaleString()}`,
-      icon: totalProfit >= 0 ? TrendingUp : TrendingDown,
-      color: totalProfit >= 0 ? "text-green-400" : "text-red-400",
-      bgColor: totalProfit >= 0 ? "bg-green-500/10" : "bg-red-500/10",
-      borderColor:
-        totalProfit >= 0 ? "border-green-500/20" : "border-red-500/20",
+      value: summary ? `${summary.totalProfit >= 0 ? "+" : ""}${summary.totalProfit.toLocaleString()}` : "0",
+      icon: summary ? (summary.totalProfit >= 0 ? TrendingUp : TrendingDown) : TrendingUp,
+      color: summary ? (summary.totalProfit >= 0 ? "text-green-400" : "text-red-400") : "text-green-400",
+      bgColor: summary ? (summary.totalProfit >= 0 ? "bg-green-500/10" : "bg-red-500/10") : "bg-green-500/10",
+      borderColor: summary ? (summary.totalProfit >= 0 ? "border-green-500/20" : "border-red-500/20") : "border-green-500/20",
     },
     {
       label: "Biggest Win",
-      value: `+${biggestWin.toLocaleString()}`,
+      value: summary ? `+${summary.biggestWin.toLocaleString()}` : "+0",
       icon: Crown,
       color: "text-purple-400",
       bgColor: "bg-purple-500/10",
@@ -163,7 +174,7 @@ export default function Statistics() {
     },
     {
       label: "Games Won",
-      value: wins.toString(),
+      value: summary ? summary.wins.toString() : "0",
       icon: Flame,
       color: "text-orange-400",
       bgColor: "bg-orange-500/10",
@@ -171,7 +182,7 @@ export default function Statistics() {
     },
     {
       label: "Win Streak",
-      value: currentStreak.toString(),
+      value: summary ? summary.currentStreak.toString() : "0",
       icon: Coins,
       color: "text-emerald-400",
       bgColor: "bg-emerald-500/10",
