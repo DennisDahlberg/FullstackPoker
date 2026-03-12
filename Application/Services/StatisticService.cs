@@ -18,6 +18,35 @@ public class StatisticService : IStatisticService
         await Task.CompletedTask;
     }
 
+    public async Task<StatisticSummaryDto> GetStatisticSummaryAsync(string userId)
+    {
+        var stats = await _statRepository.GetPlayerGameStatsAsync(userId);
+
+        var totalGames = stats.Count;
+        var wins = stats.Count(g => g.IsWinner);
+        var biggestWin = stats
+            .Select(g => g.Profit)
+            .DefaultIfEmpty(0)
+            .Max();
+        var streak = 0;
+        foreach (var stat in stats)
+        {
+            if (stat.IsWinner) streak++;
+            else break;
+        }
+
+        return new StatisticSummaryDto
+        {
+            TotalGames =  totalGames,
+            Wins = wins,
+            Losses = totalGames - wins,
+            WinRate = (int)Math.Round((double)wins / totalGames * 100),
+            TotalProfit = stats.Sum(g => g.Profit),
+            BiggestWin = biggestWin,
+            CurrentStreak =  streak
+        };
+    }
+
     public async Task<GameHistoryResponse> GetGameHistoryAsync(string userId,  int page, int pageSize)
     {
         var (rows, total) = await _statRepository
