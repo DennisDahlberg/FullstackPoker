@@ -34,22 +34,35 @@ public class StatisticService : IStatisticService
             if (stat.IsWinner) streak++;
             else break;
         }
+        
+        var today = DateTimeOffset.UtcNow.Date;
+        var startDate = today.AddDays(-29); 
+        
+        var profitByDay = stats
+            .Where(s => s.CreatedAt.Date >= startDate)
+            .GroupBy(s => s.CreatedAt.Date)
+            .ToDictionary(g => g.Key, g => g.Sum(s => s.Profit));
 
-        var cumulative = 0;
-        var profitHistory = stats
-            .AsEnumerable()
-            .Reverse()
-            .Select(s =>
+        var baselineCumulative = stats
+            .Where(s => s.CreatedAt.Date < startDate)
+            .Sum(s => s.Profit);
+
+        var cumulative = baselineCumulative;
+        var profitHistory = Enumerable
+            .Range(0, 30)
+            .Select(i => startDate.AddDays(i))
+            .Select(date =>
             {
-                cumulative += s.Profit;
-                return new ProfitChartDataDto
+                cumulative += profitByDay.GetValueOrDefault(date, 0);
+                return new ProfitChartDataDto()
                 {
-                    Profit = s.Profit,
+                    Date = date.ToString("MMM d"),
+                    Profit = profitByDay.GetValueOrDefault(date, 0),
                     Cumulative = cumulative,
-                    Date = s.CreatedAt.ToString("MMM d, yyyy"),
                 };
-            }).ToList();
-
+            })
+            .ToList();
+        
         return new StatisticSummaryDto
         {
             TotalGames =  totalGames,
