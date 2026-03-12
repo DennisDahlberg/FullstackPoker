@@ -226,6 +226,18 @@ export const api = {
         }
         throw 'An error occurred while fetching game history';
       }
+    },
+
+    async getSummary() {
+      try {
+        const response = await apiClient.get(`/statistic/summary`);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to fetch statistics summary';
+        }
+        throw 'An error occurred while fetching statistics summary';
+      }
     }
   },
 
