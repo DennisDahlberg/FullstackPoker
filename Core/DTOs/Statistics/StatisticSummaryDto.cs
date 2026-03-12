@@ -9,4 +9,5 @@ public class StatisticSummaryDto
     public int TotalProfit { get; set; }
     public int BiggestWin { get; set; }
     public int CurrentStreak { get; set; }
+    public List<ProfitChartDataDto> ProfitHistory { get; set; } = [];
 }
