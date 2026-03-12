@@ -35,6 +35,21 @@ public class StatisticService : IStatisticService
             else break;
         }
 
+        var cumulative = 0;
+        var profitHistory = stats
+            .AsEnumerable()
+            .Reverse()
+            .Select(s =>
+            {
+                cumulative += s.Profit;
+                return new ProfitChartDataDto
+                {
+                    Profit = s.Profit,
+                    Cumulative = cumulative,
+                    Date = s.CreatedAt.ToString("MMM d, yyyy"),
+                };
+            }).ToList();
+
         return new StatisticSummaryDto
         {
             TotalGames =  totalGames,
@@ -43,7 +58,8 @@ public class StatisticService : IStatisticService
             WinRate = (int)Math.Round((double)wins / totalGames * 100),
             TotalProfit = stats.Sum(g => g.Profit),
             BiggestWin = biggestWin,
-            CurrentStreak =  streak
+            CurrentStreak =  streak,
+            ProfitHistory = profitHistory
         };
     }
 
