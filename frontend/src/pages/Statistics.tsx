@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import type { PastGame, Summary } from "@/types/Statistics";
 import {
   XAxis,
   YAxis,
@@ -27,37 +28,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-type GameResult = "win" | "loss";
-
-interface ChartDataPoint {
-  date: string;
-  profit: number;
-  cumulative: number;
-}
-
-interface PastGame {
-  id: string;
-  date: string;
-  players: number;
-  buyIn: number;
-  result: GameResult;
-  profit: number;
-  duration: string;
-  bestHand: string;
-  chipsPostGame: number;  
-}
-
-interface Summmary {
-  totalGames: number;
-  wins: number;
-  losses: number;
-  winRate: number;
-  totalProfit: number;
-  biggestWin: number;
-  currentStreak: number;
-  profitHistory: ChartDataPoint[];
-}
-
 const GAMES_PER_PAGE = 5;
 
 function CustomTooltip({ active, payload, label }: any) {
@@ -82,7 +52,7 @@ function CustomTooltip({ active, payload, label }: any) {
 
 export default function Statistics() {
   const [games, setGames] = useState<PastGame[]>([]);
-  const [summary, setSummary] = useState<Summmary | null>(null);
+  const [summary, setSummary] = useState<Summary | null>(null);
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
