@@ -23,33 +23,17 @@ import {
   Clock,
   Crown,
   ChevronDown,
-  Divide,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-// ── Mock Data ──────────────────────────────────────────────────────────────
-
-const profitHistory = [
-  { date: "Jan 5", profit: 0, cumulative: 0 },
-  { date: "Jan 12", profit: 120, cumulative: 120 },
-  { date: "Jan 19", profit: -45, cumulative: 75 },
-  { date: "Jan 26", profit: 200, cumulative: 275 },
-  { date: "Feb 2", profit: -80, cumulative: 195 },
-  { date: "Feb 9", profit: 150, cumulative: 345 },
-  { date: "Feb 16", profit: 310, cumulative: 655 },
-  { date: "Feb 23", profit: -120, cumulative: 535 },
-  { date: "Mar 2", profit: 90, cumulative: 625 },
-  { date: "Mar 9", profit: 250, cumulative: 875 },
-  { date: "Mar 16", profit: -30, cumulative: 845 },
-  { date: "Mar 23", profit: 180, cumulative: 1025 },
-  { date: "Mar 30", profit: 75, cumulative: 1100 },
-  { date: "Apr 6", profit: -200, cumulative: 900 },
-  { date: "Apr 13", profit: 340, cumulative: 1240 },
-  { date: "Apr 20", profit: 110, cumulative: 1350 },
-];
-
 type GameResult = "win" | "loss";
+
+interface ChartDataPoint {
+  date: string;
+  profit: number;
+  cumulative: number;
+}
 
 interface PastGame {
   id: string;
@@ -60,7 +44,7 @@ interface PastGame {
   profit: number;
   duration: string;
   bestHand: string;
-  chipsPostGame: number;
+  chipsPostGame: number;  
 }
 
 interface Summmary {
@@ -71,6 +55,7 @@ interface Summmary {
   totalProfit: number;
   biggestWin: number;
   currentStreak: number;
+  profitHistory: ChartDataPoint[];
 }
 
 const GAMES_PER_PAGE = 5;
@@ -269,7 +254,7 @@ export default function Statistics() {
         </h2>
         <div className="bg-gray-900/40 border border-gray-800 rounded-xl p-5 pr-2">
           <ResponsiveContainer width="100%" height={340}>
-            <AreaChart data={profitHistory}>
+            <AreaChart data={summary?.profitHistory}>
               <defs>
                 <linearGradient id="profitGradient" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.3} />
