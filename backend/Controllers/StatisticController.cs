@@ -24,8 +24,9 @@ public class StatisticController : Controller
         var user = await _userService.GetLoggedInUser(User);
         if (user is null)
             return Unauthorized();
-        
-        return Ok();
+
+        var summary = await _statisticService.GetStatisticSummaryAsync(user.Id);
+        return Ok(summary);
     }
 
     [HttpGet("history")]
