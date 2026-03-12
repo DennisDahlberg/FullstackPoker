@@ -64,13 +64,13 @@ interface PastGame {
 }
 
 interface Summmary {
-    totalGames: number;
-    wins: number;
-    losses: number;
-    winRate: number;
-    totalProfit: number;
-    biggestWin: number;
-    currentStreak: number;
+  totalGames: number;
+  wins: number;
+  losses: number;
+  winRate: number;
+  totalProfit: number;
+  biggestWin: number;
+  currentStreak: number;
 }
 
 const GAMES_PER_PAGE = 5;
@@ -124,7 +124,8 @@ export default function Statistics() {
   }, []);
 
   useEffect(() => {
-    api.statistics.getSummary()
+    api.statistics
+      .getSummary()
       .then(setSummary)
       .catch(console.error)
       .finally(() => setSummaryLoading(false));
@@ -158,11 +159,29 @@ export default function Statistics() {
     },
     {
       label: "Total Profit",
-      value: summary ? `${summary.totalProfit >= 0 ? "+" : ""}${summary.totalProfit.toLocaleString()}` : "0",
-      icon: summary ? (summary.totalProfit >= 0 ? TrendingUp : TrendingDown) : TrendingUp,
-      color: summary ? (summary.totalProfit >= 0 ? "text-green-400" : "text-red-400") : "text-green-400",
-      bgColor: summary ? (summary.totalProfit >= 0 ? "bg-green-500/10" : "bg-red-500/10") : "bg-green-500/10",
-      borderColor: summary ? (summary.totalProfit >= 0 ? "border-green-500/20" : "border-red-500/20") : "border-green-500/20",
+      value: summary
+        ? `${summary.totalProfit >= 0 ? "+" : ""}${summary.totalProfit.toLocaleString()}`
+        : "0",
+      icon: summary
+        ? summary.totalProfit >= 0
+          ? TrendingUp
+          : TrendingDown
+        : TrendingUp,
+      color: summary
+        ? summary.totalProfit >= 0
+          ? "text-green-400"
+          : "text-red-400"
+        : "text-green-400",
+      bgColor: summary
+        ? summary.totalProfit >= 0
+          ? "bg-green-500/10"
+          : "bg-red-500/10"
+        : "bg-green-500/10",
+      borderColor: summary
+        ? summary.totalProfit >= 0
+          ? "border-green-500/20"
+          : "border-red-500/20"
+        : "border-green-500/20",
     },
     {
       label: "Biggest Win",
@@ -206,30 +225,41 @@ export default function Statistics() {
       </div>
 
       {/* Stat Boxes */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        {statBoxes.map((stat) => (
-          <div
-            key={stat.label}
-            className={cn(
-              "relative overflow-hidden rounded-xl border p-4 transition-all hover:scale-[1.02]",
-              stat.borderColor,
-              "bg-gray-900/40",
-            )}
-          >
+      {summaryLoading ? (
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {Array.from({ length: 5 }).map((_, i) => (
             <div
-              className={cn("inline-flex rounded-lg p-2 mb-3", stat.bgColor)}
+              key={i}
+              className="h-24 rounded-xl bg-gray-900/40 animate-pulse"
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {statBoxes.map((stat) => (
+            <div
+              key={stat.label}
+              className={cn(
+                "relative overflow-hidden rounded-xl border p-4 transition-all hover:scale-[1.02]",
+                stat.borderColor,
+                "bg-gray-900/40",
+              )}
             >
-              <stat.icon className={cn("w-4 h-4", stat.color)} />
+              <div
+                className={cn("inline-flex rounded-lg p-2 mb-3", stat.bgColor)}
+              >
+                <stat.icon className={cn("w-4 h-4", stat.color)} />
+              </div>
+              <p className="text-2xl font-black text-white tracking-tight">
+                {stat.value}
+              </p>
+              <p className="text-xs text-gray-500 font-medium mt-0.5">
+                {stat.label}
+              </p>
             </div>
-            <p className="text-2xl font-black text-white tracking-tight">
-              {stat.value}
-            </p>
-            <p className="text-xs text-gray-500 font-medium mt-0.5">
-              {stat.label}
-            </p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Profit Chart */}
       <div className="space-y-4">
