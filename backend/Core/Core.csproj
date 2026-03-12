@@ -11,12 +11,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Reference Include="FluentResults">
-      <HintPath>..\..\..\.nuget\packages\fluentresults\4.0.0\lib\net9.0\FluentResults.dll</HintPath>
-    </Reference>
-    <Reference Include="HoldemPoker.Cards">
-      <HintPath>..\..\..\.nuget\packages\holdempoker.cards\0.0.1\lib\net8.0\HoldemPoker.Cards.dll</HintPath>
-    </Reference>
+    <PackageReference Include="FluentResults" Version="4.0.0" />
+    <PackageReference Include="HoldemPoker.Cards" Version="0.0.1" />
   </ItemGroup>
 
 </Project>
