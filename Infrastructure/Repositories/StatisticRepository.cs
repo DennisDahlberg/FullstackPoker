@@ -15,7 +15,17 @@ public class StatisticRepository : IStatisticRepository
         _context = context;
     }
 
-    public async Task<(List<PlayerGameStatJoined> Items, int Total)> GetPlayerGameStatsAsync(string userId, int page, int pageSize)
+    public async Task<List<PlayerGameStat>> GetPlayerGameStatsAsync(string userId)
+    {
+        var stats = await _context.PlayerGameStats
+            .Where(g => g.UserId == userId)
+            .OrderByDescending(g => g.CreatedAt)
+            .ToListAsync();
+
+        return stats;
+    }
+
+    public async Task<(List<PlayerGameStatJoined> Items, int Total)> GetPaginatedPlayerGameStatsAsync(string userId, int page, int pageSize)
     {
         var query = _context.PlayerGameStats
             .Where(x => x.UserId == userId)

@@ -5,5 +5,5 @@ namespace Core.Interfaces;
 
 public interface IStatisticRepository
 {
-    Task<(List<PlayerGameStatJoined> Items, int Total)> GetPlayerGameStatsAsync(string userId, int page, int pageSize);
+    Task<(List<PlayerGameStatJoined> Items, int Total)> GetPaginatedPlayerGameStatsAsync(string userId, int page, int pageSize);
 }

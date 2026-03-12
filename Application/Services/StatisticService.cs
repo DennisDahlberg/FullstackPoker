@@ -21,7 +21,7 @@ public class StatisticService : IStatisticService
     public async Task<GameHistoryResponse> GetGameHistoryAsync(string userId,  int page, int pageSize)
     {
         var (rows, total) = await _statRepository
-            .GetPlayerGameStatsAsync(userId, page, pageSize);
+            .GetPaginatedPlayerGameStatsAsync(userId, page, pageSize);
 
         var items = rows.Select(x =>
         {
