@@ -13,18 +13,51 @@ import {
   CreditCard,
   Wifi,
   Crown,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import type { Summary } from "@/types/Statistics";
+import type { PastGame, Summary } from "@/types/Statistics";
 import { api } from "@/lib/api";
 
 const mockRecentGames = [
-  { id: "1", date: "Mar 12", result: "win" as const, profit: 1200, bestHand: "Full House", players: 4, duration: "32m" },
-  { id: "2", date: "Mar 11", result: "loss" as const, profit: -600, bestHand: "Two Pair", players: 5, duration: "28m" },
-  { id: "3", date: "Mar 10", result: "win" as const, profit: 850, bestHand: "Flush", players: 3, duration: "19m" },
-  { id: "4", date: "Mar 9", result: "win" as const, profit: 2100, bestHand: "Straight", players: 6, duration: "45m" },
+  {
+    id: "1",
+    date: "Mar 12",
+    result: "win" as const,
+    profit: 1200,
+    bestHand: "Full House",
+    players: 4,
+    duration: "32m",
+  },
+  {
+    id: "2",
+    date: "Mar 11",
+    result: "loss" as const,
+    profit: -600,
+    bestHand: "Two Pair",
+    players: 5,
+    duration: "28m",
+  },
+  {
+    id: "3",
+    date: "Mar 10",
+    result: "win" as const,
+    profit: 850,
+    bestHand: "Flush",
+    players: 3,
+    duration: "19m",
+  },
+  {
+    id: "4",
+    date: "Mar 9",
+    result: "win" as const,
+    profit: 2100,
+    bestHand: "Straight",
+    players: 6,
+    duration: "45m",
+  },
 ];
 
 const mockFriends = [
@@ -44,6 +77,9 @@ export default function Dashboard() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(true);
 
+  const [recentGames, setRecentGames] = useState<PastGame[]>([]);
+  const [loadingGames, setLoadingGames] = useState(true);
+
   useEffect(() => {
     api.statistics
       .getSummary()
@@ -52,18 +88,65 @@ export default function Dashboard() {
       .finally(() => setLoadingSummary(false));
   }, []);
 
+  useEffect(() => {
+    api.statistics
+      .getGameHistory(1, 4)
+      .then((data) => setRecentGames(data.games ?? []))
+      .catch(console.error)
+      .finally(() => setLoadingGames(false));
+  }, []);
+
   const statBoxes = [
-    { label: "Games Played", value: summary ? summary.totalGames.toString() : "-", icon: Target, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
-    { label: "Win Rate", value: summary ? `${summary.winRate}%` : "-", icon: Trophy, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
-    { 
-      label: "Total Profit", 
-      value: summary ? `${summary.totalProfit >= 0 ? "+" : ""}${summary.totalProfit.toLocaleString()}` : "-", 
-      icon: summary ? (summary.totalProfit >= 0 ? TrendingUp : TrendingDown) : TrendingUp, 
-      color: summary ? (summary.totalProfit >= 0 ? "text-green-400" : "text-red-400") : "text-green-400", 
-      bg: summary ? (summary.totalProfit >= 0 ? "bg-green-500/10" : "bg-red-500/10") : "bg-green-500/10",
-      border: summary ? (summary.totalProfit >= 0 ? "border-green-500/20" : "border-red-500/20") : "border-green-500/20"
+    {
+      label: "Games Played",
+      value: summary ? summary.totalGames.toString() : "-",
+      icon: Target,
+      color: "text-blue-400",
+      bg: "bg-blue-500/10",
+      border: "border-blue-500/20",
     },
-    { label: "Win Streak", value: summary ? summary.currentStreak.toString() : "-", icon: Flame, color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" },
+    {
+      label: "Win Rate",
+      value: summary ? `${summary.winRate}%` : "-",
+      icon: Trophy,
+      color: "text-amber-400",
+      bg: "bg-amber-500/10",
+      border: "border-amber-500/20",
+    },
+    {
+      label: "Total Profit",
+      value: summary
+        ? `${summary.totalProfit >= 0 ? "+" : ""}${summary.totalProfit.toLocaleString()}`
+        : "-",
+      icon: summary
+        ? summary.totalProfit >= 0
+          ? TrendingUp
+          : TrendingDown
+        : TrendingUp,
+      color: summary
+        ? summary.totalProfit >= 0
+          ? "text-green-400"
+          : "text-red-400"
+        : "text-green-400",
+      bg: summary
+        ? summary.totalProfit >= 0
+          ? "bg-green-500/10"
+          : "bg-red-500/10"
+        : "bg-green-500/10",
+      border: summary
+        ? summary.totalProfit >= 0
+          ? "border-green-500/20"
+          : "border-red-500/20"
+        : "border-green-500/20",
+    },
+    {
+      label: "Win Streak",
+      value: summary ? summary.currentStreak.toString() : "-",
+      icon: Flame,
+      color: "text-orange-400",
+      bg: "bg-orange-500/10",
+      border: "border-orange-500/20",
+    },
   ];
 
   return (
@@ -71,9 +154,12 @@ export default function Dashboard() {
       {/* Header */}
       <div className="border-b border-gray-800 pb-6">
         <h1 className="text-3xl font-black tracking-tight text-white">
-          Welcome back, <span className="text-amber-500">{user?.name ?? "Player"}</span>
+          Welcome back,{" "}
+          <span className="text-amber-500">{user?.name ?? "Player"}</span>
         </h1>
-        <p className="text-gray-400 text-sm mt-1">Here's what's happening with your game</p>
+        <p className="text-gray-400 text-sm mt-1">
+          Here's what's happening with your game
+        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
@@ -87,7 +173,9 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <CreditCard className="w-6 h-6 text-amber-500" />
-                <span className="text-sm font-bold text-amber-500 tracking-widest uppercase">PokerAI</span>
+                <span className="text-sm font-bold text-amber-500 tracking-widest uppercase">
+                  PokerAI
+                </span>
               </div>
               <Wifi className="w-5 h-5 text-gray-500 rotate-90" />
             </div>
@@ -95,7 +183,9 @@ export default function Dashboard() {
             <div className="w-10 h-7 rounded-sm bg-gradient-to-br from-amber-400 to-amber-600 border border-amber-300/40" />
 
             <div>
-              <p className="text-xs text-gray-500 font-medium mb-0.5">Balance</p>
+              <p className="text-xs text-gray-500 font-medium mb-0.5">
+                Balance
+              </p>
               <p className="text-2xl font-black text-white tracking-tight flex items-center gap-1.5">
                 <Coins className="w-5 h-5 text-amber-500" />
                 {balance.toLocaleString()}
@@ -104,19 +194,27 @@ export default function Dashboard() {
 
             <div className="flex items-end justify-between">
               <div>
-                <p className="text-[10px] text-gray-600 uppercase tracking-widest">Card Holder</p>
-                <p className="text-sm font-bold text-gray-200 tracking-wide">{user?.name ?? "Player One"}</p>
+                <p className="text-[10px] text-gray-600 uppercase tracking-widest">
+                  Card Holder
+                </p>
+                <p className="text-sm font-bold text-gray-200 tracking-wide">
+                  {user?.name ?? "Player One"}
+                </p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] text-gray-600 uppercase tracking-widest">Rank</p>
-                <p className={cn(
-                  "text-sm font-bold tracking-wide",
-                  user?.rank === "Beginner" && "text-green-400",
-                  user?.rank === "Intermediate" && "text-blue-400",
-                  user?.rank === "Pro" && "text-amber-400",
-                  user?.rank === "Elite" && "text-red-400",
-                  !user?.rank && "text-gray-400",
-                )}>
+                <p className="text-[10px] text-gray-600 uppercase tracking-widest">
+                  Rank
+                </p>
+                <p
+                  className={cn(
+                    "text-sm font-bold tracking-wide",
+                    user?.rank === "Beginner" && "text-green-400",
+                    user?.rank === "Intermediate" && "text-blue-400",
+                    user?.rank === "Pro" && "text-amber-400",
+                    user?.rank === "Elite" && "text-red-400",
+                    !user?.rank && "text-gray-400",
+                  )}
+                >
                   {user?.rank ?? "Beginner"}
                 </p>
               </div>
@@ -133,7 +231,10 @@ export default function Dashboard() {
         <div className="lg:col-span-3 grid grid-cols-2 gap-3">
           {loadingSummary
             ? Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="h-32 rounded-xl bg-gray-900/40 animate-pulse" />
+                <div
+                  key={i}
+                  className="h-32 rounded-xl bg-gray-900/40 animate-pulse"
+                />
               ))
             : statBoxes.map((stat) => (
                 <div
@@ -144,11 +245,17 @@ export default function Dashboard() {
                     "bg-gray-900/40",
                   )}
                 >
-                  <div className={cn("inline-flex rounded-lg p-2 mb-3", stat.bg)}>
+                  <div
+                    className={cn("inline-flex rounded-lg p-2 mb-3", stat.bg)}
+                  >
                     <stat.icon className={cn("w-4 h-4", stat.color)} />
                   </div>
-                  <p className="text-2xl font-black text-white tracking-tight">{stat.value}</p>
-                  <p className="text-xs text-gray-500 font-medium mt-0.5">{stat.label}</p>
+                  <p className="text-2xl font-black text-white tracking-tight">
+                    {stat.value}
+                  </p>
+                  <p className="text-xs text-gray-500 font-medium mt-0.5">
+                    {stat.label}
+                  </p>
                 </div>
               ))}
         </div>
@@ -162,24 +269,36 @@ export default function Dashboard() {
               <Clock className="text-amber-500 w-5 h-5" />
               Recent Games
             </h2>
-            <Link to="/statistics" className="text-xs text-gray-500 hover:text-amber-500 flex items-center gap-1 transition-colors">
+            <Link
+              to="/statistics"
+              className="text-xs text-gray-500 hover:text-amber-500 flex items-center gap-1 transition-colors"
+            >
               View all <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
 
           <div className="space-y-2 flex-1">
-            {mockRecentGames.map((game) => (
+            {loadingGames ? (
+              <div className="flex justify-center py-8">
+                <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
+              </div>
+            ) : recentGames.length === 0 ? (
+              <p className="text-center text-gray-500 text-sm py-8">No games played yet</p>
+            ) : (
+              recentGames.map((game) => (
               <div
                 key={game.id}
                 className="group flex items-center justify-between p-4 rounded-xl border border-transparent bg-gray-900/40 hover:bg-gray-900/70 hover:border-gray-800 transition-all"
               >
                 <div className="flex items-center gap-4 min-w-0">
-                  <div className={cn(
-                    "flex items-center justify-center w-10 h-10 rounded-lg shrink-0",
-                    game.result === "win"
-                      ? "bg-green-500/10 border border-green-500/20"
-                      : "bg-red-500/10 border border-red-500/20",
-                  )}>
+                  <div
+                    className={cn(
+                      "flex items-center justify-center w-10 h-10 rounded-lg shrink-0",
+                      game.result === "win"
+                        ? "bg-green-500/10 border border-green-500/20"
+                        : "bg-red-500/10 border border-red-500/20",
+                    )}
+                  >
                     {game.result === "win" ? (
                       <TrendingUp className="w-5 h-5 text-green-400" />
                     ) : (
@@ -192,7 +311,9 @@ export default function Dashboard() {
                         {game.result === "win" ? "Victory" : "Defeat"}
                       </span>
                       <span className="text-xs text-gray-600">•</span>
-                      <span className="text-xs text-gray-500">{game.bestHand}</span>
+                      <span className="text-xs text-gray-500">
+                        {game.bestHand}
+                      </span>
                     </div>
                     <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
                       <span>{game.date}</span>
@@ -201,14 +322,19 @@ export default function Dashboard() {
                     </div>
                   </div>
                 </div>
-                <p className={cn(
-                  "text-sm font-black shrink-0",
-                  game.profit >= 0 ? "text-green-400" : "text-red-400",
-                )}>
-                  {game.profit >= 0 ? "+" : ""}{game.profit.toLocaleString()}
+                <p
+                  className={cn(
+                    "text-sm font-black shrink-0",
+                    game.profit >= 0 ? "text-green-400" : "text-red-400",
+                  )}
+                >
+                  {game.profit >= 0 ? "+" : ""}
+                  {game.profit.toLocaleString()}
                 </p>
               </div>
-            ))}
+            ))
+            )}
+
           </div>
         </div>
 
@@ -222,30 +348,42 @@ export default function Dashboard() {
                 {onlineCount} online
               </span>
             </h2>
-            <Link to="/friends" className="text-xs text-gray-500 hover:text-amber-500 flex items-center gap-1 transition-colors">
+            <Link
+              to="/friends"
+              className="text-xs text-gray-500 hover:text-amber-500 flex items-center gap-1 transition-colors"
+            >
               Manage <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
 
           <div className="bg-gray-900/40 border border-gray-800 rounded-xl divide-y divide-gray-800/50 flex-1">
             {mockFriends.map((friend) => (
-              <div key={friend.id} className="flex items-center justify-between px-4 py-3">
+              <div
+                key={friend.id}
+                className="flex items-center justify-between px-4 py-3"
+              >
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-xs font-bold text-gray-400">
                       {friend.username.slice(0, 2).toUpperCase()}
                     </div>
-                    <div className={cn(
-                      "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-gray-900",
-                      friend.isOnline ? "bg-green-500" : "bg-gray-600",
-                    )} />
+                    <div
+                      className={cn(
+                        "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-gray-900",
+                        friend.isOnline ? "bg-green-500" : "bg-gray-600",
+                      )}
+                    />
                   </div>
-                  <span className="text-sm font-medium text-gray-300">{friend.username}</span>
+                  <span className="text-sm font-medium text-gray-300">
+                    {friend.username}
+                  </span>
                 </div>
-                <span className={cn(
-                  "text-[10px] font-medium uppercase tracking-wider",
-                  friend.isOnline ? "text-green-500" : "text-gray-600",
-                )}>
+                <span
+                  className={cn(
+                    "text-[10px] font-medium uppercase tracking-wider",
+                    friend.isOnline ? "text-green-500" : "text-gray-600",
+                  )}
+                >
                   {friend.isOnline ? "Online" : "Offline"}
                 </span>
               </div>
@@ -262,12 +400,18 @@ export default function Dashboard() {
           </Button>
         </Link>
         <Link to="/statistics">
-          <Button variant="outline" className="border-gray-800 text-gray-400 hover:text-white hover:border-gray-700 gap-2">
+          <Button
+            variant="outline"
+            className="border-gray-800 text-gray-400 hover:text-white hover:border-gray-700 gap-2"
+          >
             <Target className="w-4 h-4" /> Full Statistics
           </Button>
         </Link>
         <Link to="/friends">
-          <Button variant="outline" className="border-gray-800 text-gray-400 hover:text-white hover:border-gray-700 gap-2">
+          <Button
+            variant="outline"
+            className="border-gray-800 text-gray-400 hover:text-white hover:border-gray-700 gap-2"
+          >
             <Users className="w-4 h-4" /> Find Friends
           </Button>
         </Link>
