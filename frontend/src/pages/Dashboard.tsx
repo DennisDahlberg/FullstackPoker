@@ -76,18 +76,14 @@ export default function Dashboard() {
         <p className="text-gray-400 text-sm mt-1">Here's what's happening with your game</p>
       </div>
 
-      {/* Credit Card + Quick Stats Row */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-start">
         {/* ── Credit Card ────────────────────────────────── */}
         <div className="lg:col-span-2 relative h-52 rounded-2xl overflow-hidden select-none">
-          {/* Card background */}
           <div className="absolute inset-0 bg-gradient-to-br from-gray-800 via-gray-900 to-gray-950 border border-gray-700/50 rounded-2xl" />
-          {/* Decorative circles */}
           <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-amber-500/10 blur-2xl" />
           <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-amber-600/10 blur-2xl" />
 
           <div className="relative h-full flex flex-col justify-between p-6">
-            {/* Top row */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <CreditCard className="w-6 h-6 text-amber-500" />
@@ -96,10 +92,8 @@ export default function Dashboard() {
               <Wifi className="w-5 h-5 text-gray-500 rotate-90" />
             </div>
 
-            {/* Chip visual */}
             <div className="w-10 h-7 rounded-sm bg-gradient-to-br from-amber-400 to-amber-600 border border-amber-300/40" />
 
-            {/* Balance */}
             <div>
               <p className="text-xs text-gray-500 font-medium mb-0.5">Balance</p>
               <p className="text-2xl font-black text-white tracking-tight flex items-center gap-1.5">
@@ -108,7 +102,6 @@ export default function Dashboard() {
               </p>
             </div>
 
-            {/* Bottom row */}
             <div className="flex items-end justify-between">
               <div>
                 <p className="text-[10px] text-gray-600 uppercase tracking-widest">Card Holder</p>
@@ -127,7 +120,7 @@ export default function Dashboard() {
                   {user?.rank ?? "Beginner"}
                 </p>
               </div>
-              {/* Card brand dots */}
+
               <div className="flex -space-x-2">
                 <div className="w-6 h-6 rounded-full bg-amber-500/80" />
                 <div className="w-6 h-6 rounded-full bg-amber-700/80" />
@@ -138,28 +131,31 @@ export default function Dashboard() {
 
         {/* ── Quick Stat Boxes ───────────────────────────── */}
         <div className="lg:col-span-3 grid grid-cols-2 gap-3">
-          {statBoxes.map((stat) => (
-            <div
-              key={stat.label}
-              className={cn(
-                "relative overflow-hidden rounded-xl border p-4 transition-all hover:scale-[1.02]",
-                stat.border,
-                "bg-gray-900/40",
-              )}
-            >
-              <div className={cn("inline-flex rounded-lg p-2 mb-3", stat.bg)}>
-                <stat.icon className={cn("w-4 h-4", stat.color)} />
-              </div>
-              <p className="text-2xl font-black text-white tracking-tight">{stat.value}</p>
-              <p className="text-xs text-gray-500 font-medium mt-0.5">{stat.label}</p>
-            </div>
-          ))}
+          {loadingSummary
+            ? Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-32 rounded-xl bg-gray-900/40 animate-pulse" />
+              ))
+            : statBoxes.map((stat) => (
+                <div
+                  key={stat.label}
+                  className={cn(
+                    "relative overflow-hidden rounded-xl border p-4 transition-all hover:scale-[1.02]",
+                    stat.border,
+                    "bg-gray-900/40",
+                  )}
+                >
+                  <div className={cn("inline-flex rounded-lg p-2 mb-3", stat.bg)}>
+                    <stat.icon className={cn("w-4 h-4", stat.color)} />
+                  </div>
+                  <p className="text-2xl font-black text-white tracking-tight">{stat.value}</p>
+                  <p className="text-xs text-gray-500 font-medium mt-0.5">{stat.label}</p>
+                </div>
+              ))}
         </div>
       </div>
 
-      {/* Recent Games + Friends Row */}
+      {/* Recent Games */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* ── Recent Games ───────────────────────────────── */}
         <div className="lg:col-span-2 space-y-3 flex flex-col">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-bold text-white flex items-center gap-2">
