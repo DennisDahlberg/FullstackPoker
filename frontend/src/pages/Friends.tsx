@@ -12,7 +12,7 @@ import type { LobbyInvite } from "@/types/Lobby";
 
 type TabId = "friends" | "requests" | "find" | "invites";
 
-interface Friend {
+export interface Friend {
   id: string;
   username: string;
   isOnline: boolean;
