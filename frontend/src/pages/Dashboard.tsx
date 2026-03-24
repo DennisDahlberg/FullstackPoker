@@ -22,45 +22,6 @@ import { useEffect, useState } from "react";
 import type { PastGame, Summary } from "@/types/Statistics";
 import { api } from "@/lib/api";
 
-const mockRecentGames = [
-  {
-    id: "1",
-    date: "Mar 12",
-    result: "win" as const,
-    profit: 1200,
-    bestHand: "Full House",
-    players: 4,
-    duration: "32m",
-  },
-  {
-    id: "2",
-    date: "Mar 11",
-    result: "loss" as const,
-    profit: -600,
-    bestHand: "Two Pair",
-    players: 5,
-    duration: "28m",
-  },
-  {
-    id: "3",
-    date: "Mar 10",
-    result: "win" as const,
-    profit: 850,
-    bestHand: "Flush",
-    players: 3,
-    duration: "19m",
-  },
-  {
-    id: "4",
-    date: "Mar 9",
-    result: "win" as const,
-    profit: 2100,
-    bestHand: "Straight",
-    players: 6,
-    duration: "45m",
-  },
-];
-
 const mockFriends = [
   { id: "1", username: "AceKing22", isOnline: true },
   { id: "2", username: "PokerShark", isOnline: true },
@@ -228,14 +189,18 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* ── Quick Stat Boxes ───────────────────────────── */}
+        {/* ── Stat Boxes ───────────────────────────── */}
         <div className="lg:col-span-3 grid grid-cols-2 gap-3">
           {loadingSummary
             ? Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={i}
-                  className="h-32 rounded-xl bg-gray-900/40 animate-pulse"
-                />
+                  className="rounded-xl border border-gray-800 bg-gray-900/40 p-4"
+                >
+                  <Skeleton className="w-8 h-8 rounded-lg mb-3 bg-gray-800/40" />
+                  <Skeleton className="h-7 w-16 rounded mb-2 bg-gray-800/40" />
+                  <Skeleton className="h-3 w-24 rounded bg-gray-800/40" />
+                </div>
               ))
             : statBoxes.map((stat) => (
                 <div
