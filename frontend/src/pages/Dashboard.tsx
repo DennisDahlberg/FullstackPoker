@@ -16,17 +16,9 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-
-// ── Mock data ───────────────────────────────────────────────────────
-const mockStats = {
-  totalGames: 47,
-  wins: 28,
-  losses: 19,
-  winRate: 59.6,
-  totalProfit: 12_450,
-  biggestWin: 4_800,
-  currentStreak: 3,
-};
+import { useEffect, useState } from "react";
+import type { Summary } from "@/types/Statistics";
+import { api } from "@/lib/api";
 
 const mockRecentGames = [
   { id: "1", date: "Mar 12", result: "win" as const, profit: 1200, bestHand: "Full House", players: 4, duration: "32m" },
@@ -49,11 +41,29 @@ export default function Dashboard() {
   const balance = user?.balance ?? 25_000;
   const onlineCount = mockFriends.filter((f) => f.isOnline).length;
 
+  const [summary, setSummary] = useState<Summary | null>(null);
+  const [loadingSummary, setLoadingSummary] = useState(true);
+
+  useEffect(() => {
+    api.statistics
+      .getSummary()
+      .then(setSummary)
+      .catch(console.error)
+      .finally(() => setLoadingSummary(false));
+  }, []);
+
   const statBoxes = [
-    { label: "Games Played", value: mockStats.totalGames.toString(), icon: Target, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
-    { label: "Win Rate", value: `${mockStats.winRate}%`, icon: Trophy, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
-    { label: "Total Profit", value: `+${mockStats.totalProfit.toLocaleString()}`, icon: TrendingUp, color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20" },
-    { label: "Win Streak", value: mockStats.currentStreak.toString(), icon: Flame, color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" },
+    { label: "Games Played", value: summary ? summary.totalGames.toString() : "-", icon: Target, color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
+    { label: "Win Rate", value: summary ? `${summary.winRate}%` : "-", icon: Trophy, color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
+    { 
+      label: "Total Profit", 
+      value: summary ? `${summary.totalProfit >= 0 ? "+" : ""}${summary.totalProfit.toLocaleString()}` : "-", 
+      icon: summary ? (summary.totalProfit >= 0 ? TrendingUp : TrendingDown) : TrendingUp, 
+      color: summary ? (summary.totalProfit >= 0 ? "text-green-400" : "text-red-400") : "text-green-400", 
+      bg: summary ? (summary.totalProfit >= 0 ? "bg-green-500/10" : "bg-red-500/10") : "bg-green-500/10",
+      border: summary ? (summary.totalProfit >= 0 ? "border-green-500/20" : "border-red-500/20") : "border-green-500/20"
+    },
+    { label: "Win Streak", value: summary ? summary.currentStreak.toString() : "-", icon: Flame, color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/20" },
   ];
 
   return (
