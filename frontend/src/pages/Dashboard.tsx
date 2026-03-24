@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import type { PastGame, Summary } from "@/types/Statistics";
 import { api } from "@/lib/api";
@@ -279,62 +280,75 @@ export default function Dashboard() {
 
           <div className="space-y-2 flex-1">
             {loadingGames ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
-              </div>
+              Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between p-4 rounded-xl bg-gray-900/40"
+                >
+                  <div className="flex items-center gap-4">
+                    <Skeleton className="w-10 h-10 rounded-lg shrink-0 bg-gray-800/40" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-3.5 w-32 rounded bg-gray-800/40" />
+                      <Skeleton className="h-3 w-48 rounded bg-gray-800/40" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-4 w-10 rounded bg-gray-800/40" />
+                </div>
+              ))
             ) : recentGames.length === 0 ? (
-              <p className="text-center text-gray-500 text-sm py-8">No games played yet</p>
+              <p className="text-center text-gray-500 text-sm py-8">
+                No games played yet
+              </p>
             ) : (
               recentGames.map((game) => (
-              <div
-                key={game.id}
-                className="group flex items-center justify-between p-4 rounded-xl border border-transparent bg-gray-900/40 hover:bg-gray-900/70 hover:border-gray-800 transition-all"
-              >
-                <div className="flex items-center gap-4 min-w-0">
-                  <div
+                <div
+                  key={game.id}
+                  className="group flex items-center justify-between p-4 rounded-xl border border-transparent bg-gray-900/40 hover:bg-gray-900/70 hover:border-gray-800 transition-all"
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div
+                      className={cn(
+                        "flex items-center justify-center w-10 h-10 rounded-lg shrink-0",
+                        game.result === "win"
+                          ? "bg-green-500/10 border border-green-500/20"
+                          : "bg-red-500/10 border border-red-500/20",
+                      )}
+                    >
+                      {game.result === "win" ? (
+                        <TrendingUp className="w-5 h-5 text-green-400" />
+                      ) : (
+                        <TrendingDown className="w-5 h-5 text-red-400" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-gray-200 text-sm">
+                          {game.result === "win" ? "Victory" : "Defeat"}
+                        </span>
+                        <span className="text-xs text-gray-600">•</span>
+                        <span className="text-xs text-gray-500">
+                          {game.bestHand}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
+                        <span>{game.date}</span>
+                        <span>{game.players} players</span>
+                        <span>{game.duration}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p
                     className={cn(
-                      "flex items-center justify-center w-10 h-10 rounded-lg shrink-0",
-                      game.result === "win"
-                        ? "bg-green-500/10 border border-green-500/20"
-                        : "bg-red-500/10 border border-red-500/20",
+                      "text-sm font-black shrink-0",
+                      game.profit >= 0 ? "text-green-400" : "text-red-400",
                     )}
                   >
-                    {game.result === "win" ? (
-                      <TrendingUp className="w-5 h-5 text-green-400" />
-                    ) : (
-                      <TrendingDown className="w-5 h-5 text-red-400" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-gray-200 text-sm">
-                        {game.result === "win" ? "Victory" : "Defeat"}
-                      </span>
-                      <span className="text-xs text-gray-600">•</span>
-                      <span className="text-xs text-gray-500">
-                        {game.bestHand}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-3 mt-1 text-xs text-gray-500">
-                      <span>{game.date}</span>
-                      <span>{game.players} players</span>
-                      <span>{game.duration}</span>
-                    </div>
-                  </div>
+                    {game.profit >= 0 ? "+" : ""}
+                    {game.profit.toLocaleString()}
+                  </p>
                 </div>
-                <p
-                  className={cn(
-                    "text-sm font-black shrink-0",
-                    game.profit >= 0 ? "text-green-400" : "text-red-400",
-                  )}
-                >
-                  {game.profit >= 0 ? "+" : ""}
-                  {game.profit.toLocaleString()}
-                </p>
-              </div>
-            ))
+              ))
             )}
-
           </div>
         </div>
 
