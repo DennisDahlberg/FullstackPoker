@@ -12,10 +12,12 @@ namespace Api.Controllers;
 public class BotController : Controller
 {
     private readonly IBotService _botService;
+    private readonly IUserService _userService;
 
-    public BotController(IBotService botService)
+    public BotController(IBotService botService, IUserService userService)
     {
         _botService = botService;
+        _userService = userService;
     }
 
     [HttpGet]
@@ -29,8 +31,12 @@ public class BotController : Controller
     [HttpGet("user-created")]
     public async Task<IActionResult> GetUserCreatedBotAsync()
     {
-               
+        var userId = _userService.GetLoggedInUserId(User);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "No user found" });
+        
+        var bots = await _botService.GetAllUserCreatedBotsAsync(userId);
 
-        return Ok();
+        return Ok(bots);
     }
 }
