@@ -9,26 +9,7 @@ import { toast } from "sonner";
 import { useFriendsHub } from "@/context/FriendsHubContext";
 import { formatDistanceToNow } from "date-fns";
 import type { LobbyInvite } from "@/types/Lobby";
-
-type TabId = "friends" | "requests" | "find" | "invites";
-
-export interface Friend {
-  id: string;
-  username: string;
-  isOnline: boolean;
-}
-
-interface FriendRequest {
-  id: number;
-  username: string;
-  sentAt: string;
-}
-
-interface User {
-  id: string;
-  username: string;
-  status: "none" | "friend" | "pending" | "requested";
-}
+import type { Friend, FriendRequest, TabId, User } from "@/types/Friends";
 
 export default function Friends() {
   const navigate = useNavigate();
@@ -45,7 +26,6 @@ export default function Friends() {
   const [isLoadingFriends, setIsLoadingFriends] = useState(true);
   const [isLoadingRequests, setIsLoadingRequests] = useState(true);
 
-  // Game invites state
   const [gameInvites, setGameInvites] = useState<LobbyInvite[]>([]);
   const [isLoadingInvites, setIsLoadingInvites] = useState(true);
   const [acceptingInviteId, setAcceptingInviteId] = useState<string | null>(null);
@@ -53,7 +33,6 @@ export default function Friends() {
 
   const friendsHub = useFriendsHub();
 
-  // Fetch friends on mount
   useEffect(() => {
     const fetchFriends = async () => {
       setIsLoadingFriends(true);
@@ -71,7 +50,6 @@ export default function Friends() {
     fetchFriends();
   }, []);
 
-  // Fetch friend requests on mount
   useEffect(() => {
     const fetchRequests = async () => {
       setIsLoadingRequests(true);
@@ -89,7 +67,6 @@ export default function Friends() {
     fetchRequests();
   }, []);
 
-  // Fetch game invites on mount
   useEffect(() => {
     const fetchInvites = async () => {
       setIsLoadingInvites(true);

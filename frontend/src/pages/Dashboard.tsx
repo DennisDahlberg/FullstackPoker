@@ -13,7 +13,6 @@ import {
   CreditCard,
   Wifi,
   Crown,
-  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,14 +21,6 @@ import { useEffect, useState } from "react";
 import type { PastGame, Summary } from "@/types/Statistics";
 import { api } from "@/lib/api";
 import type { Friend } from "./Friends";
-
-const mockFriends = [
-  { id: "1", username: "AceKing22", isOnline: true },
-  { id: "2", username: "PokerShark", isOnline: true },
-  { id: "3", username: "BluffMaster", isOnline: false },
-  { id: "4", username: "RiverRat99", isOnline: true },
-  { id: "5", username: "ChipStacker", isOnline: false },
-];
 
 export default function Dashboard() {
   const { data } = useAuthContext();
