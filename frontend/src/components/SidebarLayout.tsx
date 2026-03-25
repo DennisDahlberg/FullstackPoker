@@ -11,7 +11,8 @@ import {
   ChevronsUpDown,
   CirclePlay,
   UserRound,
-  ChartColumn
+  ChartColumn,
+  Bot
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "./ui/skeleton";
@@ -35,9 +36,9 @@ export default function SidebarLayout() {
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
     { icon: CirclePlay, label: "Game", href: "/lobby" },
+    { icon: Bot, label: "Bots", href: "/bots" },
     { icon: UserRound, label: "Friends", href: "/friends" },
-    { icon: Settings, label: "Settings", href: "/settings" },
-    { icon: ChartColumn, label: "Statistics", href: "/statistics" }
+    { icon: ChartColumn, label: "Statistics", href: "/statistics" },    
   ];
 
   function handleLogOut() {
