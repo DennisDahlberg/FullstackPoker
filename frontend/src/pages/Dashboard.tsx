@@ -20,7 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 import type { PastGame, Summary } from "@/types/Statistics";
 import { api } from "@/lib/api";
-import type { Friend } from "./Friends";
+import type { Friend } from "@/types/Friends";
 
 export default function Dashboard() {
   const { data } = useAuthContext();
