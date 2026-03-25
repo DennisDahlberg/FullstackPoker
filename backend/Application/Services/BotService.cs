@@ -32,6 +32,23 @@ public class BotService : IBotService
         return bots;
     }
 
+    public async Task<List<BotDto>> GetAllUserCreatedBotsAsync(string userId)
+    {
+        var result = await _botRepository.GetAllUserCreatedBotsAsync(userId);
+        var bots = result.Select(b => new BotDto
+            {
+                Id = b.Id,
+                Username =  b.Username,
+                Description =  b.Description,
+                IsUserCreated =  b.IsUserCreated,
+                ProfileImageUrl =  b.ProfileImageUrl,
+                PlayStyle =  b.PlayStyle,
+                SkillLevel = b.SkillLevel.ToString(),
+            }
+        ).ToList();
+        return bots;
+    }
+
     public async Task<Result<List<BotDto>>> GetBotsForGameAsync(List<int> botIds)
     {
         var bots = new List<BotDto>();

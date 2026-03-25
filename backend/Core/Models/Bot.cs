@@ -14,6 +14,8 @@ public class Bot
 {
     [Key]
     public int Id { get; set; }
+
+    public string? UserId { get; set; }
     
     [Required]
     [StringLength(20, ErrorMessage = "Username can be a maximum of 20 characters long"), 
