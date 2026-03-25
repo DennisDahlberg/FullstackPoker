@@ -20,6 +20,15 @@ public class BotRepository : IBotRepository
         return bots;
     }
 
+    public async Task<List<Bot>> GetAllUserCreatedBotsAsync()
+    {
+        var bots = await _context.Bots
+            .Where(b => b.IsUserCreated == true)
+            .ToListAsync();
+
+        return bots;
+    }
+
     public async Task<Bot?> GetBotByIdAsync(int botId)
     {
         var bot = await _context.Bots.FirstOrDefaultAsync(b => b.Id == botId);
