@@ -34,7 +34,7 @@ const mockFriends = [
 export default function Dashboard() {
   const { data } = useAuthContext();
   const user = data?.user;
-  const balance = user?.balance ?? 25_000; 
+  const balance = user?.balance ?? 25_000;
 
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(true);
@@ -349,31 +349,51 @@ export default function Dashboard() {
 
           <div className="bg-gray-900/40 border border-gray-800 rounded-xl divide-y divide-gray-800/50 flex-1">
             {loadingFriends ? (
-              <div className="flex justify-center py-8">
-                <Loader2 className="w-6 h-6 animate-spin text-amber-500" />
-              </div>
+              Array.from({ length: 5 }).map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between px-4 py-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="w-8 h-8 rounded-full bg-gray-800/40" />
+                    <Skeleton className="h-3.5 w-24 rounded bg-gray-800/40" />
+                  </div>
+                  <Skeleton className="h-3 w-12 rounded bg-gray-800/40" />
+                </div>
+              ))
             ) : friends.length === 0 ? (
-              <p className="text-center text-gray-500 text-sm py-8">No friends yet</p>
+              <p className="text-center text-gray-500 text-sm py-8">
+                No friends yet
+              </p>
             ) : (
               <div className="divide-y divide-gray-800/50">
                 {friends.slice(0, 5).map((friend) => (
-                  <div key={friend.id} className="flex items-center justify-between px-4 py-3">
+                  <div
+                    key={friend.id}
+                    className="flex items-center justify-between px-4 py-3"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="relative">
                         <div className="w-8 h-8 rounded-full bg-gray-800 flex items-center justify-center text-xs font-bold text-gray-400">
                           {friend.username.slice(0, 2).toUpperCase()}
                         </div>
-                        <div className={cn(
-                          "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-gray-900",
-                          friend.isOnline ? "bg-green-500" : "bg-gray-600",
-                        )} />
+                        <div
+                          className={cn(
+                            "absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-gray-900",
+                            friend.isOnline ? "bg-green-500" : "bg-gray-600",
+                          )}
+                        />
                       </div>
-                      <span className="text-sm font-medium text-gray-300">{friend.username}</span>
+                      <span className="text-sm font-medium text-gray-300">
+                        {friend.username}
+                      </span>
                     </div>
-                    <span className={cn(
-                      "text-[10px] font-medium uppercase tracking-wider",
-                      friend.isOnline ? "text-green-500" : "text-gray-600",
-                    )}>
+                    <span
+                      className={cn(
+                        "text-[10px] font-medium uppercase tracking-wider",
+                        friend.isOnline ? "text-green-500" : "text-gray-600",
+                      )}
+                    >
                       {friend.isOnline ? "Online" : "Offline"}
                     </span>
                   </div>
