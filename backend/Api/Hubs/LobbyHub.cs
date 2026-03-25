@@ -15,10 +15,10 @@ public class LobbyHub : Hub
     private readonly IUserService _userService;
     private readonly IGameService _gameService;
     private readonly IGameStateManager _gameStateManager;
-    private readonly BotService _botService;
+    private readonly IBotService _botService;
     private readonly IHubContext<FriendsHub> _friendsHubContext;
 
-    public LobbyHub(ILobbyStateManager lobbyStateManager, ITableService tableService, IUserService userService, BotService botService, IGameService gameService, IGameStateManager gameStateManager, IHubContext<FriendsHub> friendsHubContext)
+    public LobbyHub(ILobbyStateManager lobbyStateManager, ITableService tableService, IUserService userService, IBotService botService, IGameService gameService, IGameStateManager gameStateManager, IHubContext<FriendsHub> friendsHubContext)
     {
         _lobbyStateManager = lobbyStateManager;
         _tableService = tableService;

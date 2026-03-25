@@ -1,18 +1,19 @@
 using Application.Services;
+using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
-namespace backend.Controllers;
+namespace Api.Controllers;
 
 [Authorize]
 [ApiController]
 [Route("[Controller]")]
 public class BotController : Controller
 {
-    private readonly BotService _botService;
+    private readonly IBotService _botService;
 
-    public BotController(BotService botService)
+    public BotController(IBotService botService)
     {
         _botService = botService;
     }
@@ -23,5 +24,13 @@ public class BotController : Controller
         var result = await _botService.GetAllBotsAsync();
 
         return Ok(result);
+    }
+
+    [HttpGet("user-created")]
+    public async Task<IActionResult> GetUserCreatedBotAsync()
+    {
+        
+
+        return Ok();
     }
 }

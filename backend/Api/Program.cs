@@ -27,15 +27,15 @@ namespace backend
             builder.Services.AddOpenApi();
             builder.Services.AddHttpContextAccessor();
 
+            builder.Services.AddTransient<DataInitializer>();
             builder.Services.AddTransient<JwtTokenService>();
             builder.Services.AddTransient<IUserService, UserService>();
             builder.Services.AddTransient<IGameService, GameService>();
             builder.Services.AddTransient<BotAiService>();
             builder.Services.AddTransient<FriendsRepository>();
             builder.Services.AddTransient<FriendService>();
-            builder.Services.AddTransient<BotService>();
-            builder.Services.AddTransient<BotRepository>();
-            builder.Services.AddTransient<DataInitializer>();
+            builder.Services.AddTransient<IBotService, BotService>();
+            builder.Services.AddTransient<IBotRepository, BotRepository>();
             builder.Services.AddTransient<ITableService, TableService>();
             builder.Services.AddTransient<ITableRepository, TableRepository>();
             builder.Services.AddTransient<IGameHistoryService, GameHistoryService>();

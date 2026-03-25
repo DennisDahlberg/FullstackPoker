@@ -1,10 +1,11 @@
+using Core.Interfaces;
 using Core.Models;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
 
-public class BotRepository
+public class BotRepository : IBotRepository
 {
     private readonly ApplicationDbContext _context;
 

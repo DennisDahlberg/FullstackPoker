@@ -1,4 +1,5 @@
 using Core.DTOs.Bot;
+using Core.Interfaces;
 using FluentResults;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
@@ -6,11 +7,11 @@ using Mapster;
 
 namespace Application.Services;
 
-public class BotService
+public class BotService : IBotService
 {
-    private readonly BotRepository _botRepository;
+    private readonly IBotRepository _botRepository;
 
-    public BotService(BotRepository botRepository)
+    public BotService(IBotRepository botRepository)
     {
         _botRepository = botRepository;
     }
