@@ -1,5 +1,7 @@
+using Core.DTOs.Bot;
 using Core.Interfaces;
 using Core.Models;
+using FluentResults;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,5 +36,20 @@ public class BotRepository : IBotRepository
     {
         var bot = await _context.Bots.FirstOrDefaultAsync(b => b.Id == botId);
         return bot;
+    }
+
+    public async Task<Result> CreateBotAsync(Bot bot)
+    {
+        try
+        {
+            await _context.Bots.AddAsync(bot);
+            await _context.SaveChangesAsync();
+            return Result.Ok();
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(ex.Message);
+        }
+        
     }
 }

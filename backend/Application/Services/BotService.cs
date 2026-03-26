@@ -1,5 +1,6 @@
 using Core.DTOs.Bot;
 using Core.Interfaces;
+using Core.Models;
 using FluentResults;
 using Infrastructure.Data;
 using Infrastructure.Repositories;
@@ -63,5 +64,13 @@ public class BotService : IBotService
             return Result.Fail("No bots were found");
         
         return Result.Ok(bots);
+    }
+
+    public async Task<Result> CreateBotAsync(CreateBotDto botDto)
+    {
+        var bot =  botDto.Adapt<Bot>();
+        bot.IsUserCreated = true;
+        var result = await _botRepository.CreateBotAsync(bot);
+        return result;
     }
 }
