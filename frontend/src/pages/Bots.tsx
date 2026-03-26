@@ -147,7 +147,7 @@ export default function Bots() {
   }
 
   async function handleSaveBot() {
-    // if (!validateForm()) return;
+    if (!validateForm()) return;
     try {
       if (editingBot) {
         const updated = bots.map((b) =>
