@@ -21,7 +21,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { BotEntry, BotTabId, SkillLevel, CreateBotDto } from "@/types/Bot";
+import type {
+  BotEntry,
+  BotTabId,
+  SkillLevel,
+  CreateBotDto,
+  UpdateBotDto,
+} from "@/types/Bot";
 import { api } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -84,7 +90,7 @@ export default function Bots() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBot, setEditingBot] = useState<BotEntry | null>(null);
-  const [form, setForm] = useState<CreateBotDto>(EMPTY_FORM);
+  const [form, setForm] = useState<CreateBotDto | UpdateBotDto>(EMPTY_FORM);
   const [formErrors, setFormErrors] = useState<Partial<CreateBotDto>>({});
 
   const [deletingBot, setDeletingBot] = useState<BotEntry | null>(null);
@@ -125,6 +131,7 @@ export default function Bots() {
   function openEditDialog(bot: BotEntry) {
     setEditingBot(bot);
     setForm({
+      id: bot.id,
       username: bot.username,
       description: bot.description,
       playStyle: bot.playStyle,
@@ -150,11 +157,8 @@ export default function Bots() {
     if (!validateForm()) return;
     try {
       if (editingBot) {
-        const updated = bots.map((b) =>
-          b.id === editingBot.id ? { ...b, ...form } : b,
-        );
-        setBots(updated);
-        persistUserBots(updated);
+        await api.bots.updateBot(form as UpdateBotDto);
+        await api.bots.getBotProfiles().then(setBots);
         toast.success("Bot updated", {
           description: `${form.username} has been updated.`,
         });
@@ -175,8 +179,7 @@ export default function Bots() {
             error.propertyName.charAt(0).toLowerCase() +
             error.propertyName.slice(1);
           if (!mapped[key as keyof CreateBotDto]) {
-            mapped[key as keyof CreateBotDto] =
-              error.errorMessage;
+            mapped[key as keyof CreateBotDto] = error.errorMessage;
           }
         }
         setFormErrors(mapped);
