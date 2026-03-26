@@ -65,6 +65,12 @@ public class BotController : Controller
     [HttpPut("{botId}")]
     public async Task<IActionResult> UpdateBotAsync([FromRoute] int botId, [FromBody] UpdateBotDto bot)
     {
+        var userId = _userService.GetLoggedInUserId(User);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "No user found" });
+        
+        
+        
         return Ok();
     }
 }
