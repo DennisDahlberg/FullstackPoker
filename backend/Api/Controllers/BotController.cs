@@ -39,4 +39,10 @@ public class BotController : Controller
 
         return Ok(bots);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateBotAsync()
+    {
+        
+    }
 }
