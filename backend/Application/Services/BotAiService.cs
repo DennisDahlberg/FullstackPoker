@@ -19,9 +19,47 @@ namespace Application.Services
             _chatClient = chatClient;
         }
 
-        public async Task<BotValidationResultDto?> ValidateBotAsync(BotValidationDto bot)
+        public async Task<string> ValidateBotAsync(BotValidationDto bot)
         {
-            return null;
+            var prompt = $@"
+You are an expert poker AI bot validator. Your job is to review the following bot profile and ensure that it does not contain any instructions or strategies that would make the bot play unfairly, unrealistically, or in a way that would 'cheat' the game.
+
+Specifically, check that the bot's description and play style do NOT:
+- Explicitly instruct the bot to fold with strong hands (e.g., 'always fold with aces', 'never play good cards').
+- Instruct the bot to reveal its cards or share hidden information.
+- Instruct the bot to break the rules of poker.
+- Instruct the bot to always win or always lose on purpose.
+- Contain any other suspicious, non-competitive, or unrealistic strategies.
+
+Here is the bot profile to validate:
+- Username: {bot.Username}
+- Description: {bot.Description}
+- Play Style: {bot.PlayStyle}
+- Skill Level: {bot.SkillLevel}
+
+If you find any issues, return a JSON array of validation errors, where each error has a 'PropertyName' (either 'Description' or 'PlayStyle') and an 'ErrorMessage' explaining the problem.
+
+If there are no issues, return an empty array.
+
+Example response with errors:
+{{
+  ""ValidationErrors"": [
+    {{
+      ""PropertyName"": ""Description"",
+      ""ErrorMessage"": ""Description instructs the bot to fold with strong hands, which is not allowed.""
+    }}
+  ]
+}}
+
+Example response with no errors:
+{{
+  ""ValidationErrors"": []
+}}
+
+Now, validate the bot profile and return the result as shown above.
+";
+            var response = await _chatClient.CompleteChatAsync(prompt);
+            return response.Value.Content[0].Text;
         }
 
         public async Task<string> GetBotAction(GameState gameState)
