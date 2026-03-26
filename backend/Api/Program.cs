@@ -12,9 +12,11 @@ using System.Text;
 using Core.Interfaces;
 using Infrastructure.Repositories;
 using StackExchange.Redis;
+using FluentValidation;
+using Application.Validators;
 
 
-namespace backend
+namespace Api
 {
     public class Program
     {
@@ -44,6 +46,9 @@ namespace backend
             builder.Services.AddTransient<ILobbyStateManager, LobbyStateManager>();
             builder.Services.AddTransient<IStatisticService, StatisticService>();
             builder.Services.AddTransient<IStatisticRepository, StatisticRepository>();
+            
+            // Validation
+            builder.Services.AddValidatorsFromAssemblyContaining<CreateBotValidator>();
 
             //EF Core
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
