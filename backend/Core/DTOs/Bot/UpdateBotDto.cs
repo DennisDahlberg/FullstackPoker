@@ -4,6 +4,7 @@ namespace Core.DTOs.Bot;
 
 public class UpdateBotDto
 {
+    public int Id { get; set; }
     public string Username { get; set; } = null!;
     public string Description { get; set; } = null!;
     public string PlayStyle { get; set; } = null!;

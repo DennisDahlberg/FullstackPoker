@@ -16,4 +16,12 @@ export interface CreateBotDto {
   skillLevel: SkillLevel;
 }
 
+export interface UpdateBotDto {
+  id: number;
+  username: string;
+  description: string;
+  playStyle: string;
+  skillLevel: SkillLevel;
+}
+
 export type BotTabId = "all" | "mine";

@@ -1,4 +1,4 @@
-import type { CreateBotDto } from "@/types/Bot";
+import type { CreateBotDto, UpdateBotDto } from "@/types/Bot";
 import axios from "axios";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -208,6 +208,18 @@ export const api = {
           throw err.response?.data || 'Failed to create bot';
         }
         throw 'An error occurred while creating bot';
+      }
+    },
+
+    async updateBot(bot: UpdateBotDto) {
+      try {
+        const response = await apiClient.put(`/bot/${bot.id}`, bot);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to update bot';
+        }
+        throw 'An error occurred while updating bot';
       }
     }
   },
