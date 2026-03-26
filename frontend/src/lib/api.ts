@@ -221,6 +221,18 @@ export const api = {
         }
         throw 'An error occurred while updating bot';
       }
+    },
+
+    async deleteBot(botId: number) {
+      try {
+        const response = await apiClient.delete(`/bot/${botId}`);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to delete bot';
+        }
+        throw 'An error occurred while deleting bot';
+      }
     }
   },
 
