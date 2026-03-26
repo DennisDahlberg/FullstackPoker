@@ -73,4 +73,9 @@ public class BotService : IBotService
         var result = await _botRepository.CreateBotAsync(bot);
         return result;
     }
+
+    public async Task<Result> UpdateBotAsync(UpdateBotDto botDto)
+    {
+        
+    }
 }

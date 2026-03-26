@@ -3,6 +3,7 @@ using Core.Interfaces;
 using Core.Models;
 using FluentResults;
 using Infrastructure.Data;
+using Mapster;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Repositories;
@@ -51,5 +52,24 @@ public class BotRepository : IBotRepository
             return Result.Fail(ex.Message);
         }
         
+    }
+
+    public async Task<Result> UpdateBotAsync(Bot bot)
+    {
+        try
+        {
+            var botToUpdate = await _context.Bots.FirstOrDefaultAsync(b => b.Id == bot.Id);
+            if (botToUpdate == null)
+                return Result.Fail("Bot not found");
+            
+            bot.Adapt(botToUpdate);
+            
+            _context.Bots.Update(botToUpdate);
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(ex.Message);
+        }
     }
 }
