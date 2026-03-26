@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Core.DTOs.Bot;
 
 namespace Application.Services
 {
@@ -16,6 +17,11 @@ namespace Application.Services
         public BotAiService(ChatClient chatClient)
         {
             _chatClient = chatClient;
+        }
+
+        public async Task<BotValidationResultDto?> ValidateBotAsync(BotValidationDto bot)
+        {
+            return null;
         }
 
         public async Task<string> GetBotAction(GameState gameState)
