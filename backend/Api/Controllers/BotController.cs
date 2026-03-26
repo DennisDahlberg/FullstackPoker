@@ -16,12 +16,14 @@ public class BotController : Controller
     private readonly IBotService _botService;
     private readonly IUserService _userService;
     private readonly IValidator<CreateBotDto> _createValidator;
+    private readonly IValidator<UpdateBotDto> _updateValidator;
 
-    public BotController(IBotService botService, IUserService userService, IValidator<CreateBotDto> createValidator)
+    public BotController(IBotService botService, IUserService userService, IValidator<CreateBotDto> createValidator, IValidator<UpdateBotDto> updateValidator)
     {
         _botService = botService;
         _userService = userService;
         _createValidator = createValidator;
+        _updateValidator = updateValidator;
     }
 
     [HttpGet]
@@ -68,8 +70,14 @@ public class BotController : Controller
         var userId = _userService.GetLoggedInUserId(User);
         if (string.IsNullOrEmpty(userId))
             return Unauthorized(new { message = "No user found" });
+    
+        var validationResult = await _updateValidator.ValidateAsync(bot);
+        if (!validationResult.IsValid)
+            return BadRequest(validationResult.Errors);
         
-        
+        var result = await _botService.UpdateBotAsync(bot);
+        if (result.IsFailed)
+            return BadRequest(new {message = "Failed to update bot"});
         
         return Ok();
     }
