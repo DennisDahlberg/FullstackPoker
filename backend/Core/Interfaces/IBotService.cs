@@ -10,4 +10,5 @@ public interface IBotService
     Task<Result<List<BotDto>>> GetBotsForGameAsync(List<int> botIds);
     Task<Result> CreateBotAsync(CreateBotDto botDto);
     Task<Result> UpdateBotAsync(UpdateBotDto botDto);
+    Task<Result> DeleteBotAsync(int botId);
 }

@@ -85,7 +85,7 @@ public class BotService : IBotService
 
     public async Task<Result> DeleteBotAsync(int botId)
     {
-        
+        return await _botRepository.DeleteBotAsync(botId);
     }
     
     
