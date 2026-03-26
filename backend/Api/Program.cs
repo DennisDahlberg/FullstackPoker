@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OpenAI.Chat;
 using System.Text;
+using System.Text.Json.Serialization;
 using Core.Interfaces;
 using Infrastructure.Repositories;
 using StackExchange.Redis;
@@ -25,7 +26,11 @@ namespace Api
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                });;
             builder.Services.AddOpenApi();
             builder.Services.AddHttpContextAccessor();
 

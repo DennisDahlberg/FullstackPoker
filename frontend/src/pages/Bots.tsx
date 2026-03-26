@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from "react";
 import { Bot, Plus, Search, Pencil, Trash2, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -22,25 +21,54 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { BotEntry, BotTabId, SkillLevel } from "@/types/Bot";
+import type { BotEntry, BotTabId, SkillLevel, CreateBotDto } from "@/types/Bot";
 import { api } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const SKILL_LEVELS: SkillLevel[] = ["Beginner", "Intermediate", "Pro", "Elite"];
 
-const skillStyle: Record<SkillLevel, { text: string; bg: string; border: string }> = {
-  Beginner: { text: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/20" },
-  Intermediate: { text: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20" },
-  Pro: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20" },
-  Elite: { text: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" },
+const skillStyle: Record<
+  SkillLevel,
+  { text: string; bg: string; border: string }
+> = {
+  Beginner: {
+    text: "text-green-400",
+    bg: "bg-green-500/10",
+    border: "border-green-500/20",
+  },
+  Intermediate: {
+    text: "text-blue-400",
+    bg: "bg-blue-500/10",
+    border: "border-blue-500/20",
+  },
+  Pro: {
+    text: "text-amber-400",
+    bg: "bg-amber-500/10",
+    border: "border-amber-500/20",
+  },
+  Elite: {
+    text: "text-red-400",
+    bg: "bg-red-500/10",
+    border: "border-red-500/20",
+  },
 };
 
-const EMPTY_FORM = { username: "", description: "", playStyle: "", skillLevel: "Beginner" as SkillLevel };
+const EMPTY_FORM: CreateBotDto = {
+  username: "",
+  description: "",
+  playStyle: "",
+  skillLevel: "Beginner",
+};
 
 function persistUserBots(bots: BotEntry[]) {
   try {
-    localStorage.setItem("userBots", JSON.stringify(bots.filter((b) => b.isUserCreated)));
-  } catch { /* ignore */ }
+    localStorage.setItem(
+      "userBots",
+      JSON.stringify(bots.filter((b) => b.isUserCreated)),
+    );
+  } catch {
+    /* ignore */
+  }
 }
 
 function getInitials(username: string) {
@@ -56,8 +84,8 @@ export default function Bots() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBot, setEditingBot] = useState<BotEntry | null>(null);
-  const [form, setForm] = useState(EMPTY_FORM);
-  const [formErrors, setFormErrors] = useState<Partial<typeof EMPTY_FORM>>({});
+  const [form, setForm] = useState<CreateBotDto>(EMPTY_FORM);
+  const [formErrors, setFormErrors] = useState<Partial<CreateBotDto>>({});
 
   const [deletingBot, setDeletingBot] = useState<BotEntry | null>(null);
 
@@ -69,17 +97,22 @@ export default function Bots() {
       if (skillFilter !== "All" && b.skillLevel !== skillFilter) return false;
       if (searchQuery) {
         const q = searchQuery.toLowerCase();
-        if (!b.username.toLowerCase().includes(q) && !b.playStyle.toLowerCase().includes(q)) return false;
+        if (
+          !b.username.toLowerCase().includes(q) &&
+          !b.playStyle.toLowerCase().includes(q)
+        )
+          return false;
       }
       return true;
     });
   }, [bots, activeTab, skillFilter, searchQuery]);
 
   useEffect(() => {
-    api.bots.getBotProfiles()
-        .then(setBots)
-        .catch(() => toast.error("Failed to load bots"))
-        .finally(() => setLoading(false));
+    api.bots
+      .getBotProfiles()
+      .then(setBots)
+      .catch(() => toast.error("Failed to load bots"))
+      .finally(() => setLoading(false));
   }, []);
 
   function openCreateDialog() {
@@ -91,35 +124,67 @@ export default function Bots() {
 
   function openEditDialog(bot: BotEntry) {
     setEditingBot(bot);
-    setForm({ username: bot.username, description: bot.description, playStyle: bot.playStyle, skillLevel: bot.skillLevel });
+    setForm({
+      username: bot.username,
+      description: bot.description,
+      playStyle: bot.playStyle,
+      skillLevel: bot.skillLevel,
+    });
     setFormErrors({});
     setDialogOpen(true);
   }
 
   function validateForm(): boolean {
     const errors: Partial<typeof EMPTY_FORM> = {};
-    if (form.username.length < 3 || form.username.length > 20) errors.username = "Username must be 3–20 characters";
-    if (form.description.length < 5 || form.description.length > 50) errors.description = "Description must be 5–50 characters";
-    if (form.playStyle.length < 3 || form.playStyle.length > 15) errors.playStyle = "Play style must be 3–15 characters";
+    if (form.username.length < 3 || form.username.length > 20)
+      errors.username = "Username must be 3–20 characters";
+    if (form.description.length < 5 || form.description.length > 50)
+      errors.description = "Description must be 5–50 characters";
+    if (form.playStyle.length < 3 || form.playStyle.length > 15)
+      errors.playStyle = "Play style must be 3–15 characters";
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   }
 
-  function handleSaveBot() {
-    if (!validateForm()) return;
-    if (editingBot) {
-      const updated = bots.map((b) => (b.id === editingBot.id ? { ...b, ...form } : b));
-      setBots(updated);
-      persistUserBots(updated);
-      toast.success("Bot updated", { description: `${form.username} has been updated.` });
-    } else {
-      const newBot: BotEntry = { id: Date.now(), ...form, isUserCreated: true };
-      const updated = [...bots, newBot];
-      setBots(updated);
-      persistUserBots(updated);
-      toast.success("Bot created", { description: `${form.username} has been added to your bots.` });
+  async function handleSaveBot() {
+    // if (!validateForm()) return;
+    try {
+      if (editingBot) {
+        const updated = bots.map((b) =>
+          b.id === editingBot.id ? { ...b, ...form } : b,
+        );
+        setBots(updated);
+        persistUserBots(updated);
+        toast.success("Bot updated", {
+          description: `${form.username} has been updated.`,
+        });
+      } else {
+        await api.bots.createBot(form);
+        await api.bots.getBotProfiles().then(setBots);
+        toast.success("Bot created", {
+          description: `${form.username} has been added to your bots.`,
+        });
+      }
+      setDialogOpen(false);
+    } catch (err: any) {
+      if (Array.isArray(err)) {
+        console.log("Validation errors:", err);
+        const mapped: Partial<CreateBotDto> = {};
+        for (const error of err) {
+          const key =
+            error.propertyName.charAt(0).toLowerCase() +
+            error.propertyName.slice(1);
+          if (!mapped[key as keyof CreateBotDto]) {
+            mapped[key as keyof CreateBotDto] =
+              error.errorMessage;
+          }
+        }
+        setFormErrors(mapped);
+      } else {
+        toast.error("Failed to save bot", { description: err?.message });
+        console.log(err);
+      }
     }
-    setDialogOpen(false);
   }
 
   function handleDeleteBot() {
@@ -127,7 +192,9 @@ export default function Bots() {
     const updated = bots.filter((b) => b.id !== deletingBot.id);
     setBots(updated);
     persistUserBots(updated);
-    toast.success("Bot deleted", { description: `${deletingBot.username} has been removed.` });
+    toast.success("Bot deleted", {
+      description: `${deletingBot.username} has been removed.`,
+    });
     setDeletingBot(null);
   }
 
@@ -144,7 +211,10 @@ export default function Bots() {
             Browse AI opponents or create your own custom bots
           </p>
         </div>
-        <Button onClick={openCreateDialog} className="bg-amber-600 hover:bg-amber-700 text-white font-bold gap-2">
+        <Button
+          onClick={openCreateDialog}
+          className="bg-amber-600 hover:bg-amber-700 text-white font-bold gap-2"
+        >
           <Plus className="w-4 h-4" />
           Create Bot
         </Button>
@@ -160,7 +230,7 @@ export default function Bots() {
               "px-5 py-2 rounded-lg text-sm font-semibold transition-all",
               activeTab === tab
                 ? "bg-amber-500/10 text-amber-500 border border-amber-500/20"
-                : "text-gray-400 hover:text-gray-100"
+                : "text-gray-400 hover:text-gray-100",
             )}
           >
             {tab === "all" ? "All Bots" : "My Bots"}
@@ -194,8 +264,12 @@ export default function Bots() {
                 skillFilter === level
                   ? level === "All"
                     ? "bg-gray-700 text-white border-gray-600"
-                    : cn(skillStyle[level].bg, skillStyle[level].text, skillStyle[level].border)
-                  : "bg-transparent text-gray-500 border-gray-800 hover:border-gray-600 hover:text-gray-300"
+                    : cn(
+                        skillStyle[level].bg,
+                        skillStyle[level].text,
+                        skillStyle[level].border,
+                      )
+                  : "bg-transparent text-gray-500 border-gray-800 hover:border-gray-600 hover:text-gray-300",
               )}
             >
               {level}
@@ -207,8 +281,11 @@ export default function Bots() {
       {/* Bots Grid */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="rounded-xl border border-gray-800 p-5 bg-gray-900/40 space-y-3">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="rounded-xl border border-gray-800 p-5 bg-gray-900/40 space-y-3"
+            >
               <div className="flex items-center gap-3">
                 <Skeleton className="w-10 h-10 rounded-xl bg-gray-800" />
                 <div className="space-y-2">
@@ -230,10 +307,15 @@ export default function Bots() {
           <Cpu className="w-12 h-12 text-gray-700 mb-4" />
           <p className="text-gray-500 font-medium">No bots found</p>
           <p className="text-gray-600 text-sm mt-1">
-            {activeTab === "mine" ? "Create your first custom bot to get started." : "Try adjusting your filters."}
+            {activeTab === "mine"
+              ? "Create your first custom bot to get started."
+              : "Try adjusting your filters."}
           </p>
           {activeTab === "mine" && (
-            <Button onClick={openCreateDialog} className="mt-4 bg-amber-600 hover:bg-amber-700 text-white gap-2">
+            <Button
+              onClick={openCreateDialog}
+              className="mt-4 bg-amber-600 hover:bg-amber-700 text-white gap-2"
+            >
               <Plus className="w-4 h-4" />
               Create Bot
             </Button>
@@ -251,12 +333,27 @@ export default function Bots() {
                 {/* Top row */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0", style.bg, style.text)}>
+                    <div
+                      className={cn(
+                        "w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0",
+                        style.bg,
+                        style.text,
+                      )}
+                    >
                       {getInitials(bot.username)}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-semibold text-white truncate">{bot.username}</p>
-                      <span className={cn("text-xs font-medium px-2 py-0.5 rounded-full border mt-0.5 inline-block", style.bg, style.text, style.border)}>
+                      <p className="font-semibold text-white truncate">
+                        {bot.username}
+                      </p>
+                      <span
+                        className={cn(
+                          "text-xs font-medium px-2 py-0.5 rounded-full border mt-0.5 inline-block",
+                          style.bg,
+                          style.text,
+                          style.border,
+                        )}
+                      >
                         {bot.skillLevel}
                       </span>
                     </div>
@@ -289,12 +386,17 @@ export default function Bots() {
                 {/* Footer */}
                 <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-800/60">
                   <span className="text-xs text-gray-600 font-medium">
-                    Style: <span className="text-gray-400">{bot.playStyle}</span>
+                    Style:{" "}
+                    <span className="text-gray-400">{bot.playStyle}</span>
                   </span>
                   {bot.isUserCreated ? (
-                    <span className="text-xs text-amber-500/70 font-medium">Custom</span>
+                    <span className="text-xs text-amber-500/70 font-medium">
+                      Custom
+                    </span>
                   ) : (
-                    <span className="text-xs text-gray-600 font-medium">System</span>
+                    <span className="text-xs text-gray-600 font-medium">
+                      System
+                    </span>
                   )}
                 </div>
               </div>
@@ -321,49 +423,73 @@ export default function Bots() {
           <div className="space-y-4 py-2">
             {/* Username */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-300">Username</label>
+              <label className="text-sm font-medium text-gray-300">
+                Username
+              </label>
               <Input
                 value={form.username}
-                onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, username: e.target.value }))
+                }
                 placeholder="e.g. BluffMaster"
                 maxLength={20}
                 className="bg-gray-900/60 border-gray-700 text-gray-100 placeholder:text-gray-600 focus-visible:ring-amber-500/30"
               />
-              {formErrors.username && <p className="text-xs text-red-400">{formErrors.username}</p>}
+              {formErrors.username && (
+                <p className="text-xs text-red-400">{formErrors.username}</p>
+              )}
               <p className="text-xs text-gray-600">{form.username.length}/20</p>
             </div>
 
             {/* Description */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-300">Description</label>
+              <label className="text-sm font-medium text-gray-300">
+                Description
+              </label>
               <Input
                 value={form.description}
-                onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, description: e.target.value }))
+                }
                 placeholder="e.g. Expert at bluffing opponents"
                 maxLength={50}
                 className="bg-gray-900/60 border-gray-700 text-gray-100 placeholder:text-gray-600 focus-visible:ring-amber-500/30"
               />
-              {formErrors.description && <p className="text-xs text-red-400">{formErrors.description}</p>}
-              <p className="text-xs text-gray-600">{form.description.length}/50</p>
+              {formErrors.description && (
+                <p className="text-xs text-red-400">{formErrors.description}</p>
+              )}
+              <p className="text-xs text-gray-600">
+                {form.description.length}/50
+              </p>
             </div>
 
             {/* Play Style */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-300">Play Style</label>
+              <label className="text-sm font-medium text-gray-300">
+                Play Style
+              </label>
               <Input
                 value={form.playStyle}
-                onChange={(e) => setForm((f) => ({ ...f, playStyle: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, playStyle: e.target.value }))
+                }
                 placeholder="e.g. Aggressive, Bluffer, Passive"
                 maxLength={15}
                 className="bg-gray-900/60 border-gray-700 text-gray-100 placeholder:text-gray-600 focus-visible:ring-amber-500/30"
               />
-              {formErrors.playStyle && <p className="text-xs text-red-400">{formErrors.playStyle}</p>}
-              <p className="text-xs text-gray-600">{form.playStyle.length}/15</p>
+              {formErrors.playStyle && (
+                <p className="text-xs text-red-400">{formErrors.playStyle}</p>
+              )}
+              <p className="text-xs text-gray-600">
+                {form.playStyle.length}/15
+              </p>
             </div>
 
             {/* Skill Level */}
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-gray-300">Skill Level</label>
+              <label className="text-sm font-medium text-gray-300">
+                Skill Level
+              </label>
               <div className="grid grid-cols-2 gap-2">
                 {SKILL_LEVELS.map((level) => {
                   const style = skillStyle[level];
@@ -371,12 +497,14 @@ export default function Bots() {
                   return (
                     <button
                       key={level}
-                      onClick={() => setForm((f) => ({ ...f, skillLevel: level }))}
+                      onClick={() =>
+                        setForm((f) => ({ ...f, skillLevel: level }))
+                      }
                       className={cn(
                         "px-3 py-2 rounded-lg text-sm font-semibold border transition-all",
                         isSelected
                           ? cn(style.bg, style.text, style.border)
-                          : "bg-gray-900/40 text-gray-500 border-gray-800 hover:border-gray-600 hover:text-gray-300"
+                          : "bg-gray-900/40 text-gray-500 border-gray-800 hover:border-gray-600 hover:text-gray-300",
                       )}
                     >
                       {level}
@@ -387,10 +515,17 @@ export default function Bots() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="ghost" onClick={() => setDialogOpen(false)} className="text-gray-400 hover:text-white hover:bg-gray-800">
+            <Button
+              variant="ghost"
+              onClick={() => setDialogOpen(false)}
+              className="text-gray-400 hover:text-white hover:bg-gray-800"
+            >
               Cancel
             </Button>
-            <Button onClick={handleSaveBot} className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
+            <Button
+              onClick={handleSaveBot}
+              className="bg-amber-600 hover:bg-amber-700 text-white font-bold"
+            >
               {editingBot ? "Save Changes" : "Create Bot"}
             </Button>
           </DialogFooter>
@@ -398,20 +533,31 @@ export default function Bots() {
       </Dialog>
 
       {/* Delete Confirmation */}
-      <AlertDialog open={!!deletingBot} onOpenChange={(open) => !open && setDeletingBot(null)}>
+      <AlertDialog
+        open={!!deletingBot}
+        onOpenChange={(open) => !open && setDeletingBot(null)}
+      >
         <AlertDialogContent className="bg-gray-950 border-gray-800 text-gray-100">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">Delete Bot</AlertDialogTitle>
+            <AlertDialogTitle className="text-white">
+              Delete Bot
+            </AlertDialogTitle>
             <AlertDialogDescription className="text-gray-400">
               Are you sure you want to delete{" "}
-              <span className="text-white font-semibold">{deletingBot?.username}</span>? This action cannot be undone.
+              <span className="text-white font-semibold">
+                {deletingBot?.username}
+              </span>
+              ? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-transparent border-gray-700 text-gray-400 hover:bg-gray-800 hover:text-white">
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteBot} className="bg-red-600 hover:bg-red-700 text-white font-bold">
+            <AlertDialogAction
+              onClick={handleDeleteBot}
+              className="bg-red-600 hover:bg-red-700 text-white font-bold"
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

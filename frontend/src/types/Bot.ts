@@ -9,4 +9,11 @@ export interface BotEntry {
   isUserCreated: boolean;
 }
 
+export interface CreateBotDto {
+  username: string;
+  description: string;
+  playStyle: string;
+  skillLevel: SkillLevel;
+}
+
 export type BotTabId = "all" | "mine";

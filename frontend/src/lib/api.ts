@@ -1,3 +1,4 @@
+import type { CreateBotDto } from "@/types/Bot";
 import axios from "axios";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -195,6 +196,18 @@ export const api = {
           throw err.response?.data || 'Failed to fetch bot profiles';
         }
         throw 'An error occurred while fetching bot profiles';
+      }
+    },
+
+    async createBot(bot: CreateBotDto) {
+      try {
+        const response = await apiClient.post(`/bot`, bot);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to create bot';
+        }
+        throw 'An error occurred while creating bot';
       }
     }
   },
