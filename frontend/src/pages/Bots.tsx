@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { BotEntry, BotTabId, SkillLevel } from "@/types/Bot";
 import { api } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const SKILL_LEVELS: SkillLevel[] = ["Beginner", "Intermediate", "Pro", "Elite"];
 
@@ -204,7 +205,27 @@ export default function Bots() {
       </div>
 
       {/* Bots Grid */}
-      {displayBots.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="rounded-xl border border-gray-800 p-5 bg-gray-900/40 space-y-3">
+              <div className="flex items-center gap-3">
+                <Skeleton className="w-10 h-10 rounded-xl bg-gray-800" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-28 rounded bg-gray-800" />
+                  <Skeleton className="h-3 w-16 rounded-full bg-gray-800" />
+                </div>
+              </div>
+              <Skeleton className="h-3 w-full rounded bg-gray-800" />
+              <Skeleton className="h-3 w-3/4 rounded bg-gray-800" />
+              <div className="pt-2 border-t border-gray-800/60 flex justify-between">
+                <Skeleton className="h-3 w-24 rounded bg-gray-800" />
+                <Skeleton className="h-3 w-12 rounded bg-gray-800" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : displayBots.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <Cpu className="w-12 h-12 text-gray-700 mb-4" />
           <p className="text-gray-500 font-medium">No bots found</p>
