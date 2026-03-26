@@ -61,4 +61,10 @@ public class BotController : Controller
 
         return Ok();
     }
+
+    [HttpPut("{botId}")]
+    public async Task<IActionResult> UpdateBotAsync([FromRoute] int botId, [FromBody] UpdateBotDto bot)
+    {
+        return Ok();
+    }
 }
