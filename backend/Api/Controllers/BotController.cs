@@ -81,4 +81,18 @@ public class BotController : Controller
         
         return Ok();
     }
+
+    [HttpDelete("{botId}")]
+    public async Task<IActionResult> DeleteBotAsync([FromRoute] int botId)
+    {
+        var userId = _userService.GetLoggedInUserId(User);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "No user found" });
+        
+        var result = await _botService.DeleteBotAsync(botId);
+        if (result.IsFailed)
+            return BadRequest(new {message = "Failed to delete bot"});
+
+        return Ok();
+    }
 }
