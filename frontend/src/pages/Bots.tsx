@@ -66,17 +66,6 @@ const EMPTY_FORM: CreateBotDto = {
   skillLevel: "Beginner",
 };
 
-function persistUserBots(bots: BotEntry[]) {
-  try {
-    localStorage.setItem(
-      "userBots",
-      JSON.stringify(bots.filter((b) => b.isUserCreated)),
-    );
-  } catch {
-    /* ignore */
-  }
-}
-
 function getInitials(username: string) {
   return username.slice(0, 2).toUpperCase();
 }
@@ -190,14 +179,19 @@ export default function Bots() {
     }
   }
 
-  function handleDeleteBot() {
+  async function handleDeleteBot() {
     if (!deletingBot) return;
-    const updated = bots.filter((b) => b.id !== deletingBot.id);
-    setBots(updated);
-    persistUserBots(updated);
-    toast.success("Bot deleted", {
-      description: `${deletingBot.username} has been removed.`,
-    });
+    try {
+        await api.bots.deleteBot(deletingBot.id);
+        const updated = bots.filter((b) => b.id !== deletingBot.id);
+        setBots(updated);
+        toast.success("Bot deleted", {
+          description: `${deletingBot.username} has been removed from your bots.`,
+        });
+    } catch (err: any) {
+      toast.error("Failed to delete bot", { description: err?.message });
+      console.log(err);
+    }    
     setDeletingBot(null);
   }
 
