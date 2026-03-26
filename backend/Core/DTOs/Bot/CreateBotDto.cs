@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Core.Models;
 
 namespace Core.DTOs.Bot;

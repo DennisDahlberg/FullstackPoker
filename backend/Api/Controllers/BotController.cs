@@ -1,4 +1,5 @@
 using Application.Services;
+using Core.DTOs.Bot;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -41,8 +42,14 @@ public class BotController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateBotAsync()
+    public async Task<IActionResult> CreateBotAsync([FromBody]  CreateBotDto bot)
     {
+        var userId = _userService.GetLoggedInUserId(User);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "No user found" });
         
+        
+
+        return Ok();
     }
 }
