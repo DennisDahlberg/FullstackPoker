@@ -1,5 +1,5 @@
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Bot, Plus, Search, Pencil, Trash2, Cpu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -23,6 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { BotEntry, BotTabId, SkillLevel } from "@/types/Bot";
+import { api } from "@/lib/api";
 
 const SKILL_LEVELS: SkillLevel[] = ["Beginner", "Intermediate", "Pro", "Elite"];
 
@@ -33,28 +34,7 @@ const skillStyle: Record<SkillLevel, { text: string; bg: string; border: string 
   Elite: { text: "text-red-400", bg: "bg-red-500/10", border: "border-red-500/20" },
 };
 
-const SYSTEM_BOTS: BotEntry[] = [
-  { id: 1, username: "BluffMaster", description: "Expert at making opponents fold with pure pressure", playStyle: "Bluffer", skillLevel: "Pro", isUserCreated: false },
-  { id: 2, username: "TightTony", description: "Only plays premium starting hands, rarely bluffs", playStyle: "Conservative", skillLevel: "Intermediate", isUserCreated: false },
-  { id: 3, username: "RecklessRob", description: "Goes all-in at every opportunity, unpredictable", playStyle: "Aggressive", skillLevel: "Beginner", isUserCreated: false },
-  { id: 4, username: "QuantumQuinn", description: "Uses advanced game theory optimal strategies", playStyle: "Balanced", skillLevel: "Elite", isUserCreated: false },
-  { id: 5, username: "SteadySam", description: "Consistent and patient, waits for the perfect hand", playStyle: "Passive", skillLevel: "Intermediate", isUserCreated: false },
-  { id: 6, username: "WildWendy", description: "Loose and aggressive, puts constant pressure on table", playStyle: "Aggressive", skillLevel: "Pro", isUserCreated: false },
-  { id: 7, username: "NoviceNate", description: "Still learning the basics, makes predictable mistakes", playStyle: "Passive", skillLevel: "Beginner", isUserCreated: false },
-  { id: 8, username: "EliteEdge", description: "Near-perfect GTO play, exploits every opponent leak", playStyle: "Balanced", skillLevel: "Elite", isUserCreated: false },
-];
-
 const EMPTY_FORM = { username: "", description: "", playStyle: "", skillLevel: "Beginner" as SkillLevel };
-
-function loadBots(): BotEntry[] {
-  try {
-    const stored = localStorage.getItem("userBots");
-    const userBots: BotEntry[] = stored ? JSON.parse(stored) : [];
-    return [...SYSTEM_BOTS, ...userBots];
-  } catch {
-    return [...SYSTEM_BOTS];
-  }
-}
 
 function persistUserBots(bots: BotEntry[]) {
   try {
@@ -67,7 +47,8 @@ function getInitials(username: string) {
 }
 
 export default function Bots() {
-  const [bots, setBots] = useState<BotEntry[]>(loadBots);
+  const [bots, setBots] = useState<BotEntry[]>([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<BotTabId>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [skillFilter, setSkillFilter] = useState<SkillLevel | "All">("All");
@@ -92,6 +73,13 @@ export default function Bots() {
       return true;
     });
   }, [bots, activeTab, skillFilter, searchQuery]);
+
+  useEffect(() => {
+    api.bots.getBotProfiles()
+        .then(setBots)
+        .catch(() => toast.error("Failed to load bots"))
+        .finally(() => setLoading(false));
+  }, []);
 
   function openCreateDialog() {
     setEditingBot(null);
