@@ -74,4 +74,23 @@ public class BotRepository : IBotRepository
             return Result.Fail(ex.Message);
         }
     }
+
+    public async Task<Result> DeleteBotAsync(int botId)
+    {
+        try
+        {
+            var botToDelete = await _context.Bots.FirstOrDefaultAsync(b => b.Id == botId);
+            if (botToDelete == null)
+                return Result.Fail("Bot not found");
+
+            _context.Bots.Remove(botToDelete);
+            await _context.SaveChangesAsync();
+            
+            return Result.Ok();
+        }
+        catch (Exception ex)
+        {
+            return Result.Fail(ex.Message);
+        }
+    }
 }

@@ -10,4 +10,5 @@ public interface IBotRepository
     Task<Bot?> GetBotByIdAsync(int botId);
     Task<Result> CreateBotAsync(Bot bot);
     Task<Result> UpdateBotAsync(Bot bot);
+    Task<Result> DeleteBotAsync(int botId);
 }
