@@ -76,6 +76,9 @@ public class BotService : IBotService
 
     public async Task<Result> UpdateBotAsync(UpdateBotDto botDto)
     {
-        
+        var bot = botDto.Adapt<Bot>();
+
+        var result = await _botRepository.UpdateBotAsync(bot);
+        return result;
     }
 }

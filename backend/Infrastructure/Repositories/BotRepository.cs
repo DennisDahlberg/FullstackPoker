@@ -66,6 +66,8 @@ public class BotRepository : IBotRepository
             
             _context.Bots.Update(botToUpdate);
             await _context.SaveChangesAsync();
+
+            return Result.Ok();
         }
         catch (Exception ex)
         {
