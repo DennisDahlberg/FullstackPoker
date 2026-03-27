@@ -76,8 +76,7 @@ namespace Api
             //Blob storage
             builder.Services.AddAzureClients(clientBuilder =>
             {
-                clientBuilder.AddBlobServiceClient(new Uri(builder.Configuration["AzureStorage:ServiceUri"]!))
-                    .WithCredential(new DefaultAzureCredential());
+                clientBuilder.AddBlobServiceClient(builder.Configuration.GetConnectionString("AzureStorage"));
             });
 
             //Session
