@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Bot, Plus, Search, Pencil, Trash2, Cpu } from "lucide-react";
+import { Bot, Plus, Search, Pencil, Trash2, Cpu, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -145,6 +145,7 @@ export default function Bots() {
   }
 
   async function handleSaveBot() {
+    if (formLoading) return;
     if (!validateForm()) return;
     setFormLoading(true);
     try {
@@ -187,16 +188,16 @@ export default function Bots() {
   async function handleDeleteBot() {
     if (!deletingBot) return;
     try {
-        await api.bots.deleteBot(deletingBot.id);
-        const updated = bots.filter((b) => b.id !== deletingBot.id);
-        setBots(updated);
-        toast.success("Bot deleted", {
-          description: `${deletingBot.username} has been removed from your bots.`,
-        });
+      await api.bots.deleteBot(deletingBot.id);
+      const updated = bots.filter((b) => b.id !== deletingBot.id);
+      setBots(updated);
+      toast.success("Bot deleted", {
+        description: `${deletingBot.username} has been removed from your bots.`,
+      });
     } catch (err: any) {
       toast.error("Failed to delete bot", { description: err?.message });
       console.log(err);
-    }    
+    }
     setDeletingBot(null);
   }
 
@@ -526,9 +527,11 @@ export default function Bots() {
             </Button>
             <Button
               onClick={handleSaveBot}
-              className="bg-amber-600 hover:bg-amber-700 text-white font-bold"
+              className="bg-amber-600 hover:bg-amber-700 text-white font-bold flex gap-2 items-center"
+              disabled={formLoading}
             >
-              {editingBot ? "Save Changes" : "Create Bot"}
+              {formLoading && <Loader2 className="animate-spin" size={18} />}
+              {editingBot ? "Update Bot" : "Create Bot"}
             </Button>
           </DialogFooter>
         </DialogContent>
