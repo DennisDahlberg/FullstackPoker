@@ -23,6 +23,7 @@ export interface UpdateBotDto {
   description: string;
   playStyle: string;
   skillLevel: SkillLevel;
+  profileImage?: File | null;
 }
 
 export type BotTabId = "all" | "mine";

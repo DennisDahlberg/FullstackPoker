@@ -3,6 +3,8 @@ import { Bot, Plus, Search, Pencil, Trash2, Cpu, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import Cropper from "react-easy-crop";
+import { getCroppedImage } from "@/lib/getCroppedImage";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -85,6 +87,11 @@ export default function Bots() {
   const [formLoading, setFormLoading] = useState(false);
   const [formErrors, setFormErrors] = useState<Partial<CreateBotDto>>({});
 
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+
   const [deletingBot, setDeletingBot] = useState<BotEntry | null>(null);
 
   const myBotsCount = bots.filter((b) => b.isUserCreated).length;
@@ -133,6 +140,31 @@ export default function Bots() {
     setFormErrors({});
     setDialogOpen(true);
   }
+
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const reader = new FileReader();
+      reader.addEventListener("load", () =>
+        setImageSrc(reader.result as string),
+      );
+      reader.readAsDataURL(e.target.files[0]);
+    }
+  };
+
+  const handleCropComplete = async () => {
+    try {
+      const croppedBlob = await getCroppedImage(imageSrc!, croppedAreaPixels);
+      const file = new File([croppedBlob], "profile.jpg", {
+        type: "image/jpeg",
+      });
+
+      setForm((f) => ({ ...f, profileImage: file }));
+      setImageSrc(null);
+      toast.success("Image cropped!");
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   function validateForm(): boolean {
     const errors: Partial<typeof EMPTY_FORM> = {};
@@ -425,6 +457,30 @@ export default function Bots() {
               {editingBot ? "Edit Bot" : "Create Bot"}
             </DialogTitle>
           </DialogHeader>
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-gray-300">
+              Profile Image
+            </label>
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-14 rounded-xl bg-gray-900 border border-gray-700 flex items-center justify-center overflow-hidden">
+                {form.profileImage ? (
+                  <img
+                    src={URL.createObjectURL(form.profileImage)}
+                    className="w-full h-full object-cover"
+                    alt="Preview"
+                  />
+                ) : (
+                  <Bot className="w-8 h-8 text-gray-700" />
+                )}
+              </div>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={onFileChange}
+                className="bg-gray-900/60 border-gray-700 text-gray-100 file:text-amber-500 file:font-bold file:bg-transparent file:border-0"
+              />
+            </div>
+          </div>
           <div className="space-y-4 py-2">
             {/* Username */}
             <div className="space-y-1.5">
@@ -534,6 +590,31 @@ export default function Bots() {
             >
               {formLoading && <Loader2 className="animate-spin" size={18} />}
               {editingBot ? "Update Bot" : "Create Bot"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cropper Modal */}
+      <Dialog open={!!imageSrc} onOpenChange={() => setImageSrc(null)}>
+        <DialogContent className="max-w-2xl h-[500px] bg-gray-950">
+          <div className="relative w-full h-80 mt-4">
+            <Cropper
+              image={imageSrc!}
+              crop={crop}
+              zoom={zoom}
+              aspect={1}
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={(_, pixels) => setCroppedAreaPixels(pixels)}
+            />
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setImageSrc(null)} variant="ghost">
+              Cancel
+            </Button>
+            <Button onClick={handleCropComplete} className="bg-amber-600">
+              Save Crop
             </Button>
           </DialogFooter>
         </DialogContent>
