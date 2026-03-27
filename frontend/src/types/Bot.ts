@@ -7,6 +7,7 @@ export interface BotEntry {
   playStyle: string;
   skillLevel: SkillLevel;
   isUserCreated: boolean;
+  profileImageUrl?: string;
 }
 
 export interface CreateBotDto {

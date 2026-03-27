@@ -372,12 +372,20 @@ export default function Bots() {
                   <div className="flex items-center gap-3">
                     <div
                       className={cn(
-                        "w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0",
+                        "w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm shrink-0 overflow-hidden",
                         style.bg,
                         style.text,
                       )}
                     >
-                      {getInitials(bot.username)}
+                      {bot.profileImageUrl ? (
+                        <img
+                          src={bot.profileImageUrl}
+                          alt={bot.username}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        getInitials(bot.username)
+                      )}
                     </div>
                     <div className="min-w-0">
                       <p className="font-semibold text-white truncate">
