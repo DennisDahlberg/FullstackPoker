@@ -48,7 +48,8 @@ public class BotController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateBotAsync([FromBody]  CreateBotDto bot)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> CreateBotAsync([FromForm] CreateBotDto bot, IFormFile? profileImage)
     {
         var userId = _userService.GetLoggedInUserId(User);
         if (string.IsNullOrEmpty(userId))
