@@ -46,7 +46,7 @@ Example response with errors:
   ""ValidationErrors"": [
     {{
       ""PropertyName"": ""Description"",
-      ""ErrorMessage"": ""Description instructs the bot to fold with strong hands, which is not allowed.""
+      ""ErrorMessage"": ""Instructing the bot to fold with strong hands is not allowed.""
     }}
   ]
 }}

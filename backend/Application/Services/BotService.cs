@@ -73,10 +73,6 @@ public class BotService : IBotService
     {
         var bot =  botDto.Adapt<Bot>();
         bot.IsUserCreated = true;
-
-        var validation = await ValidateBotAsync(botDto.Adapt<BotValidationDto>());
-        if (validation.IsFailed)
-            return Result.Fail<BotValidationResultDto>("Validation failed").WithValue(validation.Value);
         
         var result = await _botRepository.CreateBotAsync(bot);
         return result;

@@ -2,6 +2,7 @@ using Application.Services;
 using Core.DTOs.Bot;
 using Core.Interfaces;
 using FluentValidation;
+using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -56,6 +57,10 @@ public class BotController : Controller
         var validationResult = await _createValidator.ValidateAsync(bot);
         if (!validationResult.IsValid)
             return BadRequest(validationResult.Errors);
+        
+        var aiValidationResult = await _botService.ValidateBotAsync(bot.Adapt<BotValidationDto>());
+        if (aiValidationResult.ValidationErrors?.Count > 0)
+            return BadRequest(aiValidationResult.ValidationErrors);
 
         var result = await _botService.CreateBotAsync(bot);
         if (result.IsSuccess)

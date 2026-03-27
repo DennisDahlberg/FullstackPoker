@@ -11,4 +11,5 @@ public interface IBotService
     Task<Result<BotValidationResultDto>> CreateBotAsync(CreateBotDto botDto);
     Task<Result> UpdateBotAsync(UpdateBotDto botDto);
     Task<Result> DeleteBotAsync(int botId);
+    Task<BotValidationResultDto> ValidateBotAsync(BotValidationDto bot);
 }
