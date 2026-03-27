@@ -63,6 +63,14 @@ public class BotController : Controller
         if (aiValidationResult.ValidationErrors?.Count > 0)
             return BadRequest(aiValidationResult.ValidationErrors);
 
+        if (profileImage != null && profileImage.Length > 0)
+        {
+            bot.ImageType = profileImage.ContentType;
+            using var memoryStream = new MemoryStream();
+            await profileImage.CopyToAsync(memoryStream);
+            bot.ProfileImageData = memoryStream.ToArray();
+        }
+
         var result = await _botService.CreateBotAsync(bot);
         if (result.IsSuccess)
             return Ok();
