@@ -30,6 +30,7 @@ import type {
 } from "@/types/Bot";
 import { api } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { set } from "date-fns";
 
 const SKILL_LEVELS: SkillLevel[] = ["Beginner", "Intermediate", "Pro", "Elite"];
 
@@ -80,6 +81,7 @@ export default function Bots() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBot, setEditingBot] = useState<BotEntry | null>(null);
   const [form, setForm] = useState<CreateBotDto | UpdateBotDto>(EMPTY_FORM);
+  const [formLoading, setFormLoading] = useState(false);
   const [formErrors, setFormErrors] = useState<Partial<CreateBotDto>>({});
 
   const [deletingBot, setDeletingBot] = useState<BotEntry | null>(null);
@@ -144,6 +146,7 @@ export default function Bots() {
 
   async function handleSaveBot() {
     if (!validateForm()) return;
+    setFormLoading(true);
     try {
       if (editingBot) {
         await api.bots.updateBot(form as UpdateBotDto);
@@ -159,7 +162,9 @@ export default function Bots() {
         });
       }
       setDialogOpen(false);
+      setFormLoading(false);
     } catch (err: any) {
+      setFormLoading(false);
       if (Array.isArray(err)) {
         console.log("Validation errors:", err);
         const mapped: Partial<CreateBotDto> = {};
