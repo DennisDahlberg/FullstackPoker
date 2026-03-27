@@ -201,7 +201,20 @@ export const api = {
 
     async createBot(bot: CreateBotDto) {
       try {
-        const response = await apiClient.post(`/bot`, bot);
+        const formData = new FormData();
+        formData.append('username', bot.username);
+        formData.append('description', bot.description);
+        formData.append('playStyle', bot.playStyle);
+        formData.append('skillLevel', bot.skillLevel);
+        if (bot.profileImage) {
+          formData.append('profileImage', bot.profileImage);
+        }
+
+        const response = await apiClient.post(`/bot`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
         return response.data;
       } catch (err) {
         if (axios.isAxiosError(err)) {

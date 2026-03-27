@@ -14,6 +14,7 @@ export interface CreateBotDto {
   description: string;
   playStyle: string;
   skillLevel: SkillLevel;
+  profileImage?: File | null;
 }
 
 export interface UpdateBotDto {

@@ -65,6 +65,7 @@ const EMPTY_FORM: CreateBotDto = {
   description: "",
   playStyle: "",
   skillLevel: "Beginner",
+  profileImage: null,
 };
 
 function getInitials(username: string) {
@@ -127,6 +128,7 @@ export default function Bots() {
       description: bot.description,
       playStyle: bot.playStyle,
       skillLevel: bot.skillLevel,
+      profileImage: null,
     });
     setFormErrors({});
     setDialogOpen(true);
