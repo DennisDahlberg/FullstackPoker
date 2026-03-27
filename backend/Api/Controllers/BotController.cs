@@ -85,6 +85,10 @@ public class BotController : Controller
         if (!validationResult.IsValid)
             return BadRequest(validationResult.Errors);
         
+        var aiValidationResult = await _botService.ValidateBotAsync(bot.Adapt<BotValidationDto>());
+        if (aiValidationResult.ValidationErrors?.Count > 0)
+            return BadRequest(aiValidationResult.ValidationErrors);
+        
         var result = await _botService.UpdateBotAsync(bot);
         if (result.IsFailed)
             return BadRequest(new {message = "Failed to update bot"});
