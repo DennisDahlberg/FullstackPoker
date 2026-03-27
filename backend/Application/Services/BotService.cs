@@ -69,12 +69,14 @@ public class BotService : IBotService
         return Result.Ok(bots);
     }
 
-    public async Task<Result> CreateBotAsync(CreateBotDto botDto)
+    public async Task<Result<BotValidationResultDto>> CreateBotAsync(CreateBotDto botDto)
     {
         var bot =  botDto.Adapt<Bot>();
         bot.IsUserCreated = true;
 
-        await ValidateBotAsync(botDto.Adapt<BotValidationDto>());
+        var validation = await ValidateBotAsync(botDto.Adapt<BotValidationDto>());
+        if (validation.IsFailed)
+            return Result.Fail<BotValidationResultDto>("Validation failed").WithValue(validation.Value);
         
         var result = await _botRepository.CreateBotAsync(bot);
         return result;
@@ -94,25 +96,25 @@ public class BotService : IBotService
         return await _botRepository.DeleteBotAsync(botId);
     }
 
-    public async Task<Result<BotValidationResultDto>> ValidateBotAsync(BotValidationDto bot)
+    public async Task<BotValidationResultDto> ValidateBotAsync(BotValidationDto bot)
     {
         try
         {
             var result = await _botAiService.ValidateBotAsync(bot);
             if (string.IsNullOrEmpty(result))
             {
-                return Result.Ok();
+                return new BotValidationResultDto();
             }
 
             var validation = JsonSerializer.Deserialize<BotValidationResultDto>(result);
             if (validation == null || validation.ValidationErrors.Count == 0)
-                return Result.Ok();
+                return new BotValidationResultDto();
 
-            return Result.Fail<BotValidationResultDto>("Validation failed").WithValue(validation);
+            return validation;
         }
         catch (Exception ex)
         {
-            return Result.Ok();
+            return new BotValidationResultDto();
         }
     }
     

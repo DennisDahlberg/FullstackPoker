@@ -58,10 +58,15 @@ public class BotController : Controller
             return BadRequest(validationResult.Errors);
 
         var result = await _botService.CreateBotAsync(bot);
-        if (result.IsFailed)
-            return BadRequest(new {message = "Failed to create bot"});
+        if (result.IsSuccess)
+            return Ok();
 
-        return Ok();
+        if (result.Value != null && result.Value.ValidationErrors?.Count > 0)
+        {
+            return BadRequest(result.Value);
+        }
+        
+        return BadRequest(new {message = "Failed to create bot"});
     }
 
     [HttpPut("{botId}")]
