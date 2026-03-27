@@ -15,6 +15,8 @@ using Infrastructure.Repositories;
 using StackExchange.Redis;
 using FluentValidation;
 using Application.Validators;
+using Azure.Identity;
+using Microsoft.Extensions.Azure;
 
 
 namespace Api
@@ -69,6 +71,13 @@ namespace Api
             })
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
+            
+            //Blob storage
+            builder.Services.AddAzureClients(clientBuilder =>
+            {
+                clientBuilder.AddBlobServiceClient(new Uri(builder.Configuration["AzureStorage:ServiceUri"]!))
+                    .WithCredential(new DefaultAzureCredential());
+            });
 
             //Session
             builder.Services.AddDistributedMemoryCache();
