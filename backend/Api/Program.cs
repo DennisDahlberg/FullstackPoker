@@ -39,6 +39,7 @@ namespace Api
             builder.Services.AddTransient<DataInitializer>();
             builder.Services.AddTransient<JwtTokenService>();
             builder.Services.AddTransient<IUserService, UserService>();
+            builder.Services.AddTransient<IBlobService, BlobService>();
             builder.Services.AddTransient<IGameService, GameService>();
             builder.Services.AddTransient<BotAiService>();
             builder.Services.AddTransient<FriendsRepository>();
