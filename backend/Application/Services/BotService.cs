@@ -12,12 +12,14 @@ namespace Application.Services;
 public class BotService : IBotService
 {
     private readonly IBotRepository _botRepository;
+    private readonly IBlobService _blobService;
     private readonly BotAiService _botAiService;
 
-    public BotService(IBotRepository botRepository, BotAiService botAiService)
+    public BotService(IBotRepository botRepository, BotAiService botAiService, IBlobService blobService)
     {
         _botRepository = botRepository;
         _botAiService = botAiService;
+        _blobService = blobService;
     }
 
     public async Task<List<BotDto>> GetAllBotsAsync()
@@ -73,6 +75,14 @@ public class BotService : IBotService
     {
         var bot =  botDto.Adapt<Bot>();
         bot.IsUserCreated = true;
+
+        if (botDto.ProfileImageData != null && !string.IsNullOrEmpty(botDto.ImageType))
+        {
+            using var stream = new MemoryStream(botDto.ProfileImageData);
+            string extension = botDto.ImageType == "image/png" ? ".png" : ".jpg";
+            string fileName = $"{Guid.NewGuid()}{extension}";
+            await _blobService.UploadImage(stream, fileName, botDto.ImageType);
+        }
         
         var result = await _botRepository.CreateBotAsync(bot);
         return result;
