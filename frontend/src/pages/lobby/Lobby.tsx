@@ -371,7 +371,9 @@ export default function Lobby() {
               >
                 <Avatar className="h-8 w-8 border border-gray-700">
                   <AvatarImage src={bot?.image ?? ""} />
-                  <AvatarFallback className="bg-gray-800 text-gray-300">{bot?.name?.[0] ?? "B"}</AvatarFallback>
+                  <AvatarFallback className="bg-gray-800 text-gray-300">
+                    {bot?.name?.[0] ?? "B"}
+                  </AvatarFallback>
                 </Avatar>
                 <span className="font-bold text-gray-200">
                   {bot?.name ?? `Bot #${botId}`}
@@ -479,9 +481,10 @@ export default function Lobby() {
                             : "border-gray-800 group-hover:border-gray-600",
                         )}
                       >
-                        <div className="flex h-full w-full items-center justify-center bg-gray-900 text-lg font-bold text-gray-200">
-                          {bot.name[0]}
-                        </div>
+                        <AvatarImage src={bot?.image ?? ""} />
+                        <AvatarFallback className="bg-gray-900 text-lg font-bold text-gray-200">
+                          {bot?.name?.[0] ?? "B"}
+                        </AvatarFallback>
                       </Avatar>
                       {isInLobby && (
                         <div className="absolute -top-1 -right-1 bg-amber-500 text-black rounded-full p-0.5 shadow-sm">
