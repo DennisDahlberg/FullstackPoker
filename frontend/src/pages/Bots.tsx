@@ -32,7 +32,6 @@ import type {
 } from "@/types/Bot";
 import { api } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
-import { set } from "date-fns";
 
 const SKILL_LEVELS: SkillLevel[] = ["Beginner", "Intermediate", "Pro", "Elite"];
 
@@ -129,13 +128,13 @@ export default function Bots() {
 
   function openEditDialog(bot: BotEntry) {
     setEditingBot(bot);
+    console.log(bot);
     setForm({
       id: bot.id,
       username: bot.username,
       description: bot.description,
       playStyle: bot.playStyle,
       skillLevel: bot.skillLevel,
-      profileImage: null,
     });
     setFormErrors({});
     setDialogOpen(true);
@@ -476,6 +475,12 @@ export default function Bots() {
                     src={URL.createObjectURL(form.profileImage)}
                     className="w-full h-full object-cover"
                     alt="Preview"
+                  />
+                ) : editingBot?.profileImageUrl ? (
+                  <img
+                    src={editingBot.profileImageUrl}
+                    className="w-full h-full object-cover"
+                    alt={editingBot.username}
                   />
                 ) : (
                   <Bot className="w-8 h-8 text-gray-700" />
