@@ -77,13 +77,7 @@ public class BotService : IBotService
         bot.IsUserCreated = true;
 
         if (botDto.ProfileImageData != null && !string.IsNullOrEmpty(botDto.ImageType))
-        {
-            using var stream = new MemoryStream(botDto.ProfileImageData);
-            var extension = botDto.ImageType == "image/png" ? ".png" : ".jpg";
-            var fileName = $"{Guid.NewGuid()}{extension}";
-            var imageUrl = await _blobService.UploadImage(stream, fileName, botDto.ImageType);
-            bot.ProfileImageUrl = imageUrl;
-        }
+            bot.ProfileImageUrl = await UploadBotImageToBlob(botDto.ProfileImageData, botDto.ImageType);
         
         var result = await _botRepository.CreateBotAsync(bot);
         return result;
@@ -95,13 +89,7 @@ public class BotService : IBotService
         bot.IsUserCreated = true;
 
         if (botDto.ProfileImageData != null && !string.IsNullOrEmpty(botDto.ImageType))
-        {
-            using var stream = new MemoryStream(botDto.ProfileImageData);
-            var extension = botDto.ImageType == "image/png" ? ".png" : ".jpg";
-            var fileName = $"{Guid.NewGuid()}{extension}";
-            var imageUrl = await _blobService.UploadImage(stream, fileName, botDto.ImageType);
-            bot.ProfileImageUrl = imageUrl;
-        }
+            bot.ProfileImageUrl = await UploadBotImageToBlob(botDto.ProfileImageData, botDto.ImageType);
         
         var result = await _botRepository.UpdateBotAsync(bot);
         return result;
@@ -133,6 +121,15 @@ public class BotService : IBotService
             return new BotValidationResultDto();
         }
     }
-    
+
+    public async Task<string> UploadBotImageToBlob(byte[] imageData, string imageType)
+    {
+        using var stream = new MemoryStream(imageData);
+        var extension = imageType == "image/png" ? ".png" : ".jpg";
+        var fileName = $"{Guid.NewGuid()}{extension}";
+        var imageUrl = await _blobService.UploadImage(stream, fileName, imageType);
+        
+        return imageUrl;
+    }
     
 }
