@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useLobbyStore } from "@/stores/useLobbyStore";
 import { api } from "@/lib/api";
-import { Avatar } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   Users,
@@ -40,17 +40,23 @@ export default function Lobby() {
 
   const [bots, setBots] = useState<BotProfile[]>([]);
   const [loadingBots, setLoadingBots] = useState(true);
-  const [activeBotTab, setActiveBotTab] = useState<"standard" | "custom">("standard");
-  const [skillFilter, setSkillFilter] = useState<"All" | "Beginner" | "Intermediate" | "Pro" | "Elite">("All");
+  const [activeBotTab, setActiveBotTab] = useState<"standard" | "custom">(
+    "standard",
+  );
+  const [skillFilter, setSkillFilter] = useState<
+    "All" | "Beginner" | "Intermediate" | "Pro" | "Elite"
+  >("All");
 
-  const [friends, setFriends] = useState<{ id: string; username: string; isOnline: boolean }[]>([]);
+  const [friends, setFriends] = useState<
+    { id: string; username: string; isOnline: boolean }[]
+  >([]);
   const [loadingFriends, setLoadingFriends] = useState(true);
   const [showInvitePanel, setShowInvitePanel] = useState(false);
   const [invitingId, setInvitingId] = useState<string | null>(null);
   const [invitedIds, setInvitedIds] = useState<Set<string>>(new Set());
 
-  const standardBots = bots.filter(b => !b.isUserCreated);
-  const userBots = bots.filter(b => b.isUserCreated);
+  const standardBots = bots.filter((b) => !b.isUserCreated);
+  const userBots = bots.filter((b) => b.isUserCreated);
 
   // Navigate to game when it starts
   useEffect(() => {
@@ -84,6 +90,7 @@ export default function Lobby() {
       try {
         setLoadingBots(true);
         const data = await api.bots.getBotProfiles();
+        console.log(data);
         const mappedBots: BotProfile[] = data.map((b: any) => ({
           id: b.id,
           name: b.username,
@@ -150,7 +157,7 @@ export default function Lobby() {
     navigate("/lobby/create");
   };
 
-  const canStartGame = lobby && (lobby.players.length + lobby.botIds.length) >= 2;
+  const canStartGame = lobby && lobby.players.length + lobby.botIds.length >= 2;
 
   // Loading state
   if (loading && !lobby) {
@@ -191,17 +198,25 @@ export default function Lobby() {
             Lobby
           </h1>
           <p className="text-gray-400 mt-1">
-            Lobby ID: <span className="font-mono text-gray-500">{lobby.lobbyId.slice(0, 8)}...</span>
-            {" · "}Host: <span className="text-amber-500 font-bold">{lobby.hostUsername}</span>
+            Lobby ID:{" "}
+            <span className="font-mono text-gray-500">
+              {lobby.lobbyId.slice(0, 8)}...
+            </span>
+            {" · "}Host:{" "}
+            <span className="text-amber-500 font-bold">
+              {lobby.hostUsername}
+            </span>
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className={cn(
-            "text-sm font-bold px-3 py-1.5 rounded-full border",
-            totalCount >= 8
-              ? "bg-red-500/10 border-red-500/20 text-red-500"
-              : "bg-gray-900 border-gray-800 text-gray-400"
-          )}>
+          <span
+            className={cn(
+              "text-sm font-bold px-3 py-1.5 rounded-full border",
+              totalCount >= 8
+                ? "bg-red-500/10 border-red-500/20 text-red-500"
+                : "bg-gray-900 border-gray-800 text-gray-400",
+            )}
+          >
             {totalCount} / 8 seats
           </span>
           <Button
@@ -209,7 +224,7 @@ export default function Lobby() {
             size="sm"
             onClick={() => setShowInvitePanel(!showInvitePanel)}
             className={cn(
-              showInvitePanel && "border-amber-500/50 text-amber-500"
+              showInvitePanel && "border-amber-500/50 text-amber-500",
             )}
           >
             <UserPlus className="w-4 h-4 mr-1" />
@@ -251,7 +266,7 @@ export default function Lobby() {
                       "flex items-center justify-between gap-3 p-3 rounded-lg border transition-all",
                       inLobby
                         ? "bg-green-500/5 border-green-500/20"
-                        : "bg-gray-900/60 border-gray-800"
+                        : "bg-gray-900/60 border-gray-800",
                     )}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -264,7 +279,7 @@ export default function Lobby() {
                         <div
                           className={cn(
                             "absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-gray-950",
-                            friend.isOnline ? "bg-green-500" : "bg-gray-600"
+                            friend.isOnline ? "bg-green-500" : "bg-gray-600",
                           )}
                         />
                       </div>
@@ -276,8 +291,8 @@ export default function Lobby() {
                           {inLobby
                             ? "In lobby"
                             : friend.isOnline
-                            ? "Online"
-                            : "Offline"}
+                              ? "Online"
+                              : "Offline"}
                         </p>
                       </div>
                     </div>
@@ -295,7 +310,7 @@ export default function Lobby() {
                         onClick={() => handleInviteFriend(friend.id)}
                         className={cn(
                           "h-8 text-xs shrink-0",
-                          invited && "border-amber-500/30 text-amber-500"
+                          invited && "border-amber-500/30 text-amber-500",
                         )}
                       >
                         {isInviting ? (
@@ -338,7 +353,9 @@ export default function Lobby() {
               <div>
                 <span className="font-bold text-gray-200">{p.username}</span>
                 {p.isHost && (
-                  <span className="ml-2 text-xs text-amber-500 font-bold">HOST</span>
+                  <span className="ml-2 text-xs text-amber-500 font-bold">
+                    HOST
+                  </span>
                 )}
               </div>
             </div>
@@ -346,16 +363,15 @@ export default function Lobby() {
 
           {/* Show bots in lobby */}
           {lobby.botIds.map((botId) => {
-            const bot = bots.find(b => Number(b.id) === botId);
+            const bot = bots.find((b) => Number(b.id) === botId);
             return (
               <div
                 key={`bot-${botId}`}
                 className="flex items-center gap-3 bg-gray-900/60 border border-gray-800 rounded-lg px-4 py-3 group"
               >
                 <Avatar className="h-8 w-8 border border-gray-700">
-                  <div className="flex h-full w-full items-center justify-center bg-gray-800 text-sm font-bold text-gray-200">
-                    <Cpu className="w-4 h-4" />
-                  </div>
+                  <AvatarImage src={bot?.image ?? ""} />
+                  <AvatarFallback className="bg-gray-800 text-gray-300">{bot?.name?.[0] ?? "B"}</AvatarFallback>
                 </Avatar>
                 <span className="font-bold text-gray-200">
                   {bot?.name ?? `Bot #${botId}`}
@@ -388,7 +404,7 @@ export default function Lobby() {
                   "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-bold transition-all",
                   activeBotTab === "standard"
                     ? "bg-gray-800 text-amber-500 shadow-sm"
-                    : "text-gray-400 hover:text-gray-200"
+                    : "text-gray-400 hover:text-gray-200",
                 )}
               >
                 <Cpu className="w-3 h-3" />
@@ -400,7 +416,7 @@ export default function Lobby() {
                   "flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-bold transition-all",
                   activeBotTab === "custom"
                     ? "bg-gray-800 text-amber-500 shadow-sm"
-                    : "text-gray-400 hover:text-gray-200"
+                    : "text-gray-400 hover:text-gray-200",
                 )}
               >
                 <Users className="w-3 h-3" />
@@ -412,20 +428,22 @@ export default function Lobby() {
 
         {/* Skill Filter */}
         <div className="flex flex-wrap gap-2">
-          {(["All", "Beginner", "Intermediate", "Pro", "Elite"] as const).map((skill) => (
-            <button
-              key={skill}
-              onClick={() => setSkillFilter(skill)}
-              className={cn(
-                "text-xs px-3 py-1.5 rounded-full border transition-all font-medium",
-                skillFilter === skill
-                  ? "bg-amber-500/10 border-amber-500 text-amber-500"
-                  : "bg-gray-900/50 border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-300"
-              )}
-            >
-              {skill}
-            </button>
-          ))}
+          {(["All", "Beginner", "Intermediate", "Pro", "Elite"] as const).map(
+            (skill) => (
+              <button
+                key={skill}
+                onClick={() => setSkillFilter(skill)}
+                className={cn(
+                  "text-xs px-3 py-1.5 rounded-full border transition-all font-medium",
+                  skillFilter === skill
+                    ? "bg-amber-500/10 border-amber-500 text-amber-500"
+                    : "bg-gray-900/50 border-gray-800 text-gray-400 hover:border-gray-700 hover:text-gray-300",
+                )}
+              >
+                {skill}
+              </button>
+            ),
+          )}
         </div>
 
         {loadingBots ? (
@@ -435,7 +453,9 @@ export default function Lobby() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
             {(activeBotTab === "standard" ? standardBots : userBots)
-              .filter(bot => skillFilter === "All" || bot.skill === skillFilter)
+              .filter(
+                (bot) => skillFilter === "All" || bot.skill === skillFilter,
+              )
               .map((bot) => {
                 const isInLobby = isBotInLobby(bot.id);
                 return (
@@ -447,14 +467,18 @@ export default function Lobby() {
                       "hover:bg-gray-900/60",
                       isInLobby
                         ? "bg-gray-900/80 border-amber-500/50"
-                        : "bg-gray-900/20 border-gray-800 hover:border-gray-700"
+                        : "bg-gray-900/20 border-gray-800 hover:border-gray-700",
                     )}
                   >
                     <div className="relative">
-                      <Avatar className={cn(
-                        "h-12 w-12 border-2 transition-colors",
-                        isInLobby ? "border-amber-500" : "border-gray-800 group-hover:border-gray-600"
-                      )}>
+                      <Avatar
+                        className={cn(
+                          "h-12 w-12 border-2 transition-colors",
+                          isInLobby
+                            ? "border-amber-500"
+                            : "border-gray-800 group-hover:border-gray-600",
+                        )}
+                      >
                         <div className="flex h-full w-full items-center justify-center bg-gray-900 text-lg font-bold text-gray-200">
                           {bot.name[0]}
                         </div>
@@ -467,22 +491,28 @@ export default function Lobby() {
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <h4 className={cn(
-                        "font-bold truncate transition-colors",
-                        isInLobby ? "text-amber-500" : "text-gray-200"
-                      )}>
+                      <h4
+                        className={cn(
+                          "font-bold truncate transition-colors",
+                          isInLobby ? "text-amber-500" : "text-gray-200",
+                        )}
+                      >
                         {bot.name}
                       </h4>
                       <div className="flex items-center gap-2 text-xs">
                         <span className="text-gray-500">{bot.style}</span>
                         <span className="text-gray-800">·</span>
-                        <span className={cn(
-                          "font-bold",
-                          bot.skill === "Beginner" && "text-green-500",
-                          bot.skill === "Intermediate" && "text-blue-500",
-                          bot.skill === "Pro" && "text-amber-500",
-                          bot.skill === "Elite" && "text-red-500",
-                        )}>{bot.skill}</span>
+                        <span
+                          className={cn(
+                            "font-bold",
+                            bot.skill === "Beginner" && "text-green-500",
+                            bot.skill === "Intermediate" && "text-blue-500",
+                            bot.skill === "Pro" && "text-amber-500",
+                            bot.skill === "Elite" && "text-red-500",
+                          )}
+                        >
+                          {bot.skill}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -507,7 +537,7 @@ export default function Lobby() {
             "h-14 px-8 rounded-full text-lg font-bold shadow-2xl transition-all",
             canStartGame && !loading
               ? "bg-amber-500 hover:bg-amber-400 text-black hover:scale-105 shadow-amber-900/50"
-              : "bg-gray-800 text-gray-500 cursor-not-allowed"
+              : "bg-gray-800 text-gray-500 cursor-not-allowed",
           )}
         >
           {loading ? (
