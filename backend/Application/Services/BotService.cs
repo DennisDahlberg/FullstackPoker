@@ -94,6 +94,15 @@ public class BotService : IBotService
         var bot = botDto.Adapt<Bot>();
         bot.IsUserCreated = true;
 
+        if (botDto.ProfileImageData != null && !string.IsNullOrEmpty(botDto.ImageType))
+        {
+            using var stream = new MemoryStream(botDto.ProfileImageData);
+            var extension = botDto.ImageType == "image/png" ? ".png" : ".jpg";
+            var fileName = $"{Guid.NewGuid()}{extension}";
+            var imageUrl = await _blobService.UploadImage(stream, fileName, botDto.ImageType);
+            bot.ProfileImageUrl = imageUrl;
+        }
+        
         var result = await _botRepository.UpdateBotAsync(bot);
         return result;
     }
