@@ -226,7 +226,22 @@ export const api = {
 
     async updateBot(bot: UpdateBotDto) {
       try {
-        const response = await apiClient.put(`/bot/${bot.id}`, bot);
+        const formData = new FormData();
+        formData.append('id', bot.id.toString());
+        formData.append('username', bot.username);
+        formData.append('description', bot.description);
+        formData.append('playStyle', bot.playStyle);
+        formData.append('skillLevel', bot.skillLevel);
+        if (bot.profileImage) {
+          formData.append('profileImage', bot.profileImage);
+        }
+
+
+        const response = await apiClient.put(`/bot/${bot.id}`, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
         return response.data;
       } catch (err) {
         if (axios.isAxiosError(err)) {

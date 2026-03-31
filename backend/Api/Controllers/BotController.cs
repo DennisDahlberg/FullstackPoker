@@ -84,7 +84,8 @@ public class BotController : Controller
     }
 
     [HttpPut("{botId}")]
-    public async Task<IActionResult> UpdateBotAsync([FromRoute] int botId, [FromBody] UpdateBotDto bot)
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> UpdateBotAsync([FromRoute] int botId, [FromForm] UpdateBotDto bot, IFormFile? profileImage)
     {
         var userId = _userService.GetLoggedInUserId(User);
         if (string.IsNullOrEmpty(userId))
