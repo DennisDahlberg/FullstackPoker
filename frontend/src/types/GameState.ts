@@ -16,6 +16,7 @@ export interface Player {
     lastAction?: string;
     lastActionAmount?: number;
     userId?: string | null;
+    profileImageUrl?: string | null;
 }
 
 export interface GameState {
