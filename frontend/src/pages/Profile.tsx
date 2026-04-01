@@ -1,12 +1,29 @@
 import { useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
-import { User, Mail, Shield, Lock, Save, Camera, Trophy, Loader2 } from "lucide-react";
+import {
+  User,
+  Mail,
+  Shield,
+  Lock,
+  Save,
+  Camera,
+  Trophy,
+  Loader2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { api } from "@/lib/api";
 
 export default function Profile() {
   const { data } = useAuthContext();
@@ -42,12 +59,25 @@ export default function Profile() {
       toast.error("New passwords do not match");
       return;
     }
-    setIsLoadingPassword(true);
-    setTimeout(() => {
-      setIsLoadingPassword(false);
-      setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    try {
+      setIsLoadingPassword(true);
+      await api.auth.updatePassword(
+        passwords.currentPassword,
+        passwords.newPassword,
+        passwords.confirmPassword,
+      );
       toast.success("Password updated successfully");
-    }, 1000);
+      setPasswords({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (err: any) {
+      console.log(err);
+      toast.error(err.message || "Failed to update password");
+    } finally {
+      setIsLoadingPassword(false);
+    }
   };
 
   return (
@@ -82,14 +112,19 @@ export default function Profile() {
             </div>
             <div className="flex-1 space-y-4">
               <div>
-                <h3 className="text-2xl font-bold text-white tracking-tight">{profileData.username}</h3>
+                <h3 className="text-2xl font-bold text-white tracking-tight">
+                  {profileData.username}
+                </h3>
                 <p className="text-gray-400 mt-1">{profileData.email}</p>
               </div>
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3">
-                <Badge variant="outline" className="bg-amber-500/10 border-amber-500/20 text-amber-400 font-medium px-3 py-1 gap-1.5 text-sm">
+                <Badge
+                  variant="outline"
+                  className="bg-amber-500/10 border-amber-500/20 text-amber-400 font-medium px-3 py-1 gap-1.5 text-sm"
+                >
                   <Trophy className="w-4 h-4" />
                   {profileData.rank}
-                </Badge>                
+                </Badge>
               </div>
             </div>
           </CardContent>
@@ -101,8 +136,12 @@ export default function Profile() {
           <Card className="bg-gray-900/40 border-gray-800">
             <form onSubmit={handleProfileUpdate}>
               <CardHeader>
-                <CardTitle className="text-white text-xl">General Information</CardTitle>
-                <CardDescription className="text-gray-400">Update your basic profile details.</CardDescription>
+                <CardTitle className="text-white text-xl">
+                  General Information
+                </CardTitle>
+                <CardDescription className="text-gray-400">
+                  Update your basic profile details.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2 text-left">
@@ -110,9 +149,14 @@ export default function Profile() {
                     <User className="w-4 h-4 text-gray-500" />
                     Username
                   </label>
-                  <Input 
+                  <Input
                     value={profileData.username}
-                    onChange={(e) => setProfileData({...profileData, username: e.target.value})}
+                    onChange={(e) =>
+                      setProfileData({
+                        ...profileData,
+                        username: e.target.value,
+                      })
+                    }
                     placeholder="Enter your username"
                     className="bg-gray-950 border-gray-700 text-white focus-visible:ring-amber-500"
                     required
@@ -123,10 +167,12 @@ export default function Profile() {
                     <Mail className="w-4 h-4 text-gray-500" />
                     Email
                   </label>
-                  <Input 
+                  <Input
                     type="email"
                     value={profileData.email}
-                    onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                    onChange={(e) =>
+                      setProfileData({ ...profileData, email: e.target.value })
+                    }
                     placeholder="Enter your email address"
                     className="bg-gray-950 border-gray-700 text-white focus-visible:ring-amber-500"
                     required
@@ -134,15 +180,20 @@ export default function Profile() {
                 </div>
               </CardContent>
               <CardFooter className="bg-gray-900 border-t border-gray-800 p-6 rounded-b-xl flex justify-end">
-                <Button 
-                  type="submit" 
-                  disabled={isLoadingProfile} 
+                <Button
+                  type="submit"
+                  disabled={isLoadingProfile}
                   className="bg-amber-600 hover:bg-amber-700 text-white min-w-36"
                 >
                   {isLoadingProfile ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Saving...</>
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />{" "}
+                      Saving...
+                    </>
                   ) : (
-                    <><Save className="w-4 h-4 mr-2" /> Save Changes</>
+                    <>
+                      <Save className="w-4 h-4 mr-2" /> Save Changes
+                    </>
                   )}
                 </Button>
               </CardFooter>
@@ -151,13 +202,18 @@ export default function Profile() {
 
           {/* Security Form */}
           <Card className="bg-gray-900/40 border-gray-800 flex flex-col">
-            <form onSubmit={handlePasswordUpdate} className="flex flex-col h-full">
+            <form
+              onSubmit={handlePasswordUpdate}
+              className="flex flex-col h-full"
+            >
               <CardHeader>
                 <CardTitle className="text-white text-xl flex items-center gap-2">
                   <Shield className="w-5 h-5 text-red-500" />
                   Security Settings
                 </CardTitle>
-                <CardDescription className="text-gray-400">Manage your password to keep your account secure.</CardDescription>
+                <CardDescription className="text-gray-400">
+                  Manage your password to keep your account secure.
+                </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2 text-left">
@@ -165,10 +221,15 @@ export default function Profile() {
                     <Lock className="w-4 h-4 text-gray-500" />
                     Current Password
                   </label>
-                  <Input 
+                  <Input
                     type="password"
                     value={passwords.currentPassword}
-                    onChange={(e) => setPasswords({...passwords, currentPassword: e.target.value})}
+                    onChange={(e) =>
+                      setPasswords({
+                        ...passwords,
+                        currentPassword: e.target.value,
+                      })
+                    }
                     placeholder="••••••••"
                     className="bg-gray-950 border-gray-700 text-white focus-visible:ring-amber-500"
                     required
@@ -176,22 +237,36 @@ export default function Profile() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2 text-left">
-                    <label className="text-sm font-medium text-gray-300">New Password</label>
-                    <Input 
+                    <label className="text-sm font-medium text-gray-300">
+                      New Password
+                    </label>
+                    <Input
                       type="password"
                       value={passwords.newPassword}
-                      onChange={(e) => setPasswords({...passwords, newPassword: e.target.value})}
+                      onChange={(e) =>
+                        setPasswords({
+                          ...passwords,
+                          newPassword: e.target.value,
+                        })
+                      }
                       placeholder="••••••••"
                       className="bg-gray-950 border-gray-700 text-white focus-visible:ring-amber-500"
                       required
                     />
                   </div>
                   <div className="space-y-2 text-left">
-                    <label className="text-sm font-medium text-gray-300">Confirm New Password</label>
-                    <Input 
+                    <label className="text-sm font-medium text-gray-300">
+                      Confirm New Password
+                    </label>
+                    <Input
                       type="password"
                       value={passwords.confirmPassword}
-                      onChange={(e) => setPasswords({...passwords, confirmPassword: e.target.value})}
+                      onChange={(e) =>
+                        setPasswords({
+                          ...passwords,
+                          confirmPassword: e.target.value,
+                        })
+                      }
                       placeholder="••••••••"
                       className="bg-gray-950 border-gray-700 text-white focus-visible:ring-amber-500"
                       required
@@ -200,21 +275,29 @@ export default function Profile() {
                 </div>
               </CardContent>
               <CardFooter className="bg-gray-900 border-t border-gray-800 p-6 rounded-b-xl flex justify-end mt-auto">
-                <Button 
-                  type="submit" 
-                  disabled={isLoadingPassword || !passwords.currentPassword || !passwords.newPassword} 
+                <Button
+                  type="submit"
+                  disabled={
+                    isLoadingPassword ||
+                    !passwords.currentPassword ||
+                    !passwords.newPassword
+                  }
                   className="bg-gray-800 hover:bg-gray-700 text-white border border-gray-700 hover:border-gray-600 min-w-44"
                 >
                   {isLoadingPassword ? (
-                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Updating...</>
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />{" "}
+                      Updating...
+                    </>
                   ) : (
-                    <><Lock className="w-4 h-4 mr-2" /> Update Password</>
+                    <>
+                      <Lock className="w-4 h-4 mr-2" /> Update Password
+                    </>
                   )}
                 </Button>
               </CardFooter>
             </form>
           </Card>
-
         </div>
       </div>
     </div>
