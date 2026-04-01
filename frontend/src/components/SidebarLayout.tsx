@@ -170,11 +170,11 @@ export default function SidebarLayout() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-gray-800" />
-                <DropdownMenuItem className="focus:bg-gray-900 focus:text-white cursor-pointer">
+                <DropdownMenuItem className="focus:bg-gray-900 focus:text-white cursor-pointer" onClick={() => navigate("/profile")}>
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem className="focus:bg-gray-900 focus:text-white cursor-pointer">
+                <DropdownMenuItem className="focus:bg-gray-900 focus:text-white cursor-pointer" onClick={() => navigate("/settings")}>
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </DropdownMenuItem>
