@@ -86,5 +86,14 @@ namespace Infrastructure.Services
             
             return Result.Ok();
         }
+
+        public async Task<IdentityResult> UpdatePasswordAsync(string userId, string currentPassword, string newPassword)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return IdentityResult.Failed();
+
+            return await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+        }
     }
 }

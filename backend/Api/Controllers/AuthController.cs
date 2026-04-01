@@ -5,9 +5,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using Core.DTOs.User;
 using Core.Interfaces;
 
-namespace backend.Controllers
+namespace Api.Controllers
 {
     public class RefreshRequest
     {
@@ -72,7 +73,7 @@ namespace backend.Controllers
 
         [Authorize]
         [HttpPut("password")]
-        public async Task<IActionResult> UpdatePasswordAsync()
+        public async Task<IActionResult> UpdatePasswordAsync([FromBody] PasswordUpdateDto newPassword)
         {
             
             

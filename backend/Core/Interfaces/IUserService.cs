@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Core.DTOs;
 using Core.Models;
 using FluentResults;
+using Microsoft.AspNetCore.Identity;
 
 namespace Core.Interfaces;
 
@@ -14,4 +15,5 @@ public interface IUserService
     Task<ApplicationUser?> GetUserByUsername(string username);
     List<ApplicationUser> FindUsersAsync(string query, string currentUserId);
     Task<Result> UpdateUserBalanceAsync(string userId, decimal balance);
+    Task<IdentityResult> UpdatePasswordAsync(string userId, string currentPassword, string newPassword);
 }
