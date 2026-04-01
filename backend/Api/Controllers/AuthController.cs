@@ -75,7 +75,13 @@ namespace Api.Controllers
         [HttpPut("password")]
         public async Task<IActionResult> UpdatePasswordAsync([FromBody] PasswordUpdateDto newPassword)
         {
+            var userId = _userService.GetLoggedInUserId(User);
+            if (userId is null)
+                return Unauthorized("Invalid user");
             
+            var result = await _userService.UpdatePasswordAsync(userId, newPassword);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
             
             return Ok();
         }

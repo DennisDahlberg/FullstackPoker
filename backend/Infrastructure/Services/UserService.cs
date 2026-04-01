@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using Core.DTOs;
+using Core.DTOs.User;
 using Core.Interfaces;
 using Core.Models;
 using FluentResults;
@@ -87,13 +88,13 @@ namespace Infrastructure.Services
             return Result.Ok();
         }
 
-        public async Task<IdentityResult> UpdatePasswordAsync(string userId, string currentPassword, string newPassword)
+        public async Task<IdentityResult> UpdatePasswordAsync(string userId, PasswordUpdateDto dto)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user is null)
                 return IdentityResult.Failed();
 
-            return await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            return await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.CurrentPassword);
         }
     }
 }
