@@ -345,6 +345,21 @@ export const api = {
           throw 'An error occurred during registration';
         }
     },
+    async updatePassword(currentPassword:string, newPassword:string, newPasswordConfirmation: string) {
+      try {
+        const response = await apiClient.put(`/auth/password`, {
+          currentPassword,
+          newPassword,
+          newPasswordConfirmation
+        });
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || 'Failed to update password';
+        }
+        throw 'An error occurred while updating password';
+      }
+    },
     async getProfile() {
       try {
         const response = await apiClient.get(`${backendUrl}/auth/profile`);
