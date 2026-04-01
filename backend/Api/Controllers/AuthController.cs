@@ -70,6 +70,15 @@ namespace backend.Controllers
             return Ok(new { token, refreshToken });
         }
 
+        [Authorize]
+        [HttpPut("password")]
+        public async Task<IActionResult> UpdatePasswordAsync()
+        {
+            
+            
+            return Ok();
+        }
+
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
         {
