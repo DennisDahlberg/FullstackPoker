@@ -29,7 +29,8 @@ export default function Profile() {
   const { data } = useAuthContext();
   const user = data?.user;
 
-  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
+  const [isLoadingUsername, setIsLoadingUsername] = useState(false);
+  const [isLoadingEmail, setIsLoadingEmail] = useState(false);
   const [isLoadingPassword, setIsLoadingPassword] = useState(false);
 
   const [profileData, setProfileData] = useState({
@@ -44,12 +45,21 @@ export default function Profile() {
     confirmPassword: "",
   });
 
-  const handleProfileUpdate = async (e: React.FormEvent) => {
+  const handleUsernameUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoadingProfile(true);
+    setIsLoadingUsername(true);
     setTimeout(() => {
-      setIsLoadingProfile(false);
-      toast.success("Profile updated successfully");
+      setIsLoadingUsername(false);
+      toast.success("Username updated successfully");
+    }, 1000);
+  };
+
+  const handleEmailUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoadingEmail(true);
+    setTimeout(() => {
+      setIsLoadingEmail(false);
+      toast.success("Email updated successfully");
     }, 1000);
   };
 
@@ -131,73 +141,90 @@ export default function Profile() {
         </Card>
 
         {/* Forms Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* General Info Form */}
-          <Card className="bg-gray-900/40 border-gray-800">
-            <form onSubmit={handleProfileUpdate}>
-              <CardHeader>
-                <CardTitle className="text-white text-xl">
-                  General Information
-                </CardTitle>
-                <CardDescription className="text-gray-400">
-                  Update your basic profile details.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+          <Card className="bg-gray-900/40 border-gray-800 flex flex-col h-full">
+            <CardHeader>
+              <CardTitle className="text-white text-xl">
+                General Information
+              </CardTitle>
+              <CardDescription className="text-gray-400">
+                Update your basic profile details.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Username Update */}
+              <form onSubmit={handleUsernameUpdate} className="space-y-4">
                 <div className="space-y-2 text-left">
                   <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
                     <User className="w-4 h-4 text-gray-500" />
                     Username
                   </label>
-                  <Input
-                    value={profileData.username}
-                    onChange={(e) =>
-                      setProfileData({
-                        ...profileData,
-                        username: e.target.value,
-                      })
-                    }
-                    placeholder="Enter your username"
-                    className="bg-gray-950 border-gray-700 text-white focus-visible:ring-amber-500"
-                    required
-                  />
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Input
+                      value={profileData.username}
+                      onChange={(e) =>
+                        setProfileData({
+                          ...profileData,
+                          username: e.target.value,
+                        })
+                      }
+                      placeholder="Enter your username"
+                      className="bg-gray-950 border-gray-700 text-white focus-visible:ring-amber-500 w-full"
+                      required
+                    />
+                    <Button
+                      type="submit"
+                      disabled={isLoadingUsername}
+                      className="bg-amber-600 hover:bg-amber-700 text-white sm:w-26"
+                    >
+                      {isLoadingUsername ? (
+                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                      ) : (
+                        <Save className="w-4 h-4 mr-1" />
+                      )}
+                      <span>{isLoadingUsername ? "Saving..." : "Update"}</span>
+                    </Button>
+                  </div>
                 </div>
+              </form>
+
+              <div className="border-t border-gray-800/60" />
+
+              {/* Email Update */}
+              <form onSubmit={handleEmailUpdate} className="space-y-4">
                 <div className="space-y-2 text-left">
                   <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
                     <Mail className="w-4 h-4 text-gray-500" />
                     Email
                   </label>
-                  <Input
-                    type="email"
-                    value={profileData.email}
-                    onChange={(e) =>
-                      setProfileData({ ...profileData, email: e.target.value })
-                    }
-                    placeholder="Enter your email address"
-                    className="bg-gray-950 border-gray-700 text-white focus-visible:ring-amber-500"
-                    required
-                  />
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Input
+                      type="email"
+                      value={profileData.email}
+                      onChange={(e) =>
+                        setProfileData({ ...profileData, email: e.target.value })
+                      }
+                      placeholder="Enter your email address"
+                      className="bg-gray-950 border-gray-700 text-white focus-visible:ring-amber-500 w-full"
+                      required
+                    />
+                    <Button
+                      type="submit"
+                      disabled={isLoadingEmail}
+                      className="bg-amber-600 hover:bg-amber-700 text-white sm:w-26"
+                    >
+                      {isLoadingEmail ? (
+                        <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                      ) : (
+                        <Save className="w-4 h-4 mr-1" />
+                      )}
+                      <span>{isLoadingEmail ? "Saving..." : "Update"}</span>
+                    </Button>
+                  </div>
                 </div>
-              </CardContent>
-              <CardFooter className="bg-gray-900 border-t border-gray-800 p-6 rounded-b-xl flex justify-end">
-                <Button
-                  type="submit"
-                  disabled={isLoadingProfile}
-                  className="bg-amber-600 hover:bg-amber-700 text-white min-w-36"
-                >
-                  {isLoadingProfile ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />{" "}
-                      Saving...
-                    </>
-                  ) : (
-                    <>
-                      <Save className="w-4 h-4 mr-2" /> Save Changes
-                    </>
-                  )}
-                </Button>
-              </CardFooter>
-            </form>
+              </form>
+            </CardContent>
           </Card>
 
           {/* Security Form */}
