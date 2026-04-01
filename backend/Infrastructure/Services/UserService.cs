@@ -94,7 +94,7 @@ namespace Infrastructure.Services
             if (user is null)
                 return IdentityResult.Failed();
 
-            return await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.CurrentPassword);
+            return await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
         }
     }
 }
