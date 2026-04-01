@@ -285,14 +285,15 @@ export default function Profile() {
                   className="bg-gray-800 hover:bg-gray-700 text-white border border-gray-700 hover:border-gray-600 min-w-44"
                 >
                   {isLoadingPassword ? (
-                    <>
+                    <div className="flex items-center">
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />{" "}
                       Updating...
-                    </>
+                    </div>
                   ) : (
-                    <>
-                      <Lock className="w-4 h-4 mr-2" /> Update Password
-                    </>
+                    <div className="flex items-center">
+                      <Lock className="w-4 h-4 mr-2" />
+                      <span>Update Password</span> 
+                    </div>
                   )}
                 </Button>
               </CardFooter>
