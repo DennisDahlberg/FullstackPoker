@@ -14,6 +14,7 @@ import CreateLobby from "./pages/lobby/CreateLobby";
 import Lobby from "./pages/lobby/Lobby";
 import Statistics from "./pages/Statistics";
 import Bots from "./pages/Bots";
+import Profile from "./pages/Profile";
 
 
 function App() {
@@ -32,6 +33,7 @@ function App() {
           <Route path="/lobby/create" element={<CreateLobby />} />
           <Route path="/statistics" element={<Statistics />} />
           <Route path="/bots" element={<Bots />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<div className="pt-20 text-center text-4xl">404 - Not Found</div>} />
         </Route>
 
