@@ -105,5 +105,14 @@ namespace Infrastructure.Services
 
             return await _userManager.SetUserNameAsync(user, username);
         }
+
+        public async Task<IdentityResult> UpdateEmailAsync(string userId, string email)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return IdentityResult.Failed();
+            
+            return await _userManager.SetEmailAsync(user, email);
+        }
     }
 }
