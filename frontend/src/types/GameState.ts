@@ -15,6 +15,7 @@ export interface Player {
     isDealer: boolean;
     lastAction?: string;
     lastActionAmount?: number;
+    comment?: string;
     userId?: string | null;
     profileImageUrl?: string | null;
 }

@@ -101,6 +101,7 @@ namespace Application.Services
             player.HasActedThisRound = false;
             player.LastAction = null;
             player.LastActionAmount = null;
+            player.Comment = null;
             GetStartingHand(player, gameState.Deck);
             player.RoundStartingChips = player.Chips;
         }
@@ -348,6 +349,17 @@ namespace Application.Services
 
         try
         {
+            botActionJson = botActionJson.Trim();
+            if (botActionJson.StartsWith("```json", StringComparison.OrdinalIgnoreCase))
+                botActionJson = botActionJson.Substring(7);
+            else if (botActionJson.StartsWith("```"))
+                botActionJson = botActionJson.Substring(3);
+
+            if (botActionJson.EndsWith("```"))
+                botActionJson = botActionJson.Substring(0, botActionJson.Length - 3);
+
+            botActionJson = botActionJson.Trim();
+
             var botAction = JsonSerializer.Deserialize<BotAction>(botActionJson, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
@@ -397,6 +409,7 @@ namespace Application.Services
             player.HasActedThisRound = false;
             player.LastAction = null;
             player.LastActionAmount = null;
+            player.Comment = null;
         }
 
         state.CurrentPlayerIndex = state.DealerPosition;

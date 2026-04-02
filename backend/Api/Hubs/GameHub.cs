@@ -63,6 +63,7 @@ public class GameHub : Hub
                 IsDealer = p.IsDealer,
                 LastAction = p.LastAction,
                 LastActionAmount = p.LastActionAmount,
+                Comment = p.Comment,
             };
 
             bool isMe = p.UserId == viewerUserId;
