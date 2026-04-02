@@ -58,6 +58,7 @@ namespace Application.Services
                 ProfileImageUrl = bot.ProfileImageUrl,
                 PlayStyle = bot.PlayStyle,
                 SkillLevel = bot.SkillLevel,
+                Description = bot.Description,
                 SeatNumber = allPlayers.Count
             });
         }
