@@ -32,7 +32,8 @@ namespace Infrastructure.Services
                 Email = user.Email!,
                 Balance = user.Balance,
                 Rank = user.Rank,
-                Username = user.UserName!
+                Username = user.UserName!,
+                ProfileImageUrl =  user.ProfileImageUrl,
             };
 
             return userDTO;
@@ -134,6 +135,7 @@ namespace Infrastructure.Services
                 return Result.Fail("Image upload failed");
 
             user.ProfileImageUrl = imageUrl;
+            await _userManager.UpdateAsync(user);
             return Result.Ok();
         }
     }

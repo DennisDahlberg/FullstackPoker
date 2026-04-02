@@ -8,6 +8,7 @@ export interface ContextData {
         email: string;
         rank: string;
         balance?: number;
+        profileImageUrl?: string;
     } | null;
 }
 

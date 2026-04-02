@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
+import Cropper from "react-easy-crop";
+import { getCroppedImage } from "@/lib/getCroppedImage";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import {
   User,
   Mail,
@@ -32,6 +35,48 @@ export default function Profile() {
   const [isLoadingUsername, setIsLoadingUsername] = useState(false);
   const [isLoadingEmail, setIsLoadingEmail] = useState(false);
   const [isLoadingPassword, setIsLoadingPassword] = useState(false);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedAreaPixels, setCroppedAreaPixels] = useState(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const onFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const reader = new FileReader();
+      reader.addEventListener("load", () =>
+        setImageSrc(reader.result as string),
+      );
+      reader.readAsDataURL(e.target.files[0]);
+    }
+    // reset to allow selecting same file again if aborted
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const handleCropComplete = async () => {
+    try {
+      setIsUploadingImage(true);
+      const croppedBlob = await getCroppedImage(imageSrc!, croppedAreaPixels);
+      const file = new File([croppedBlob], "profile.jpg", {
+        type: "image/jpeg",
+      });
+
+      await api.auth.updateProfileImage(file);
+      toast.success("Profile image updated successfully!");
+      setImageSrc(null);
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (err: any) {
+      toast.error(err.response?.data?.message || err.message || "Failed to crop or upload image");
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   const [profileData, setProfileData] = useState({
     username: user?.name || "Player123",
@@ -121,15 +166,26 @@ export default function Profile() {
         {/* Profile Overview Banner */}
         <Card className="bg-gray-900/40 border-gray-800">
           <CardContent className="p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8 text-center sm:text-left">
-            <div className="relative group cursor-pointer shrink-0">
+            <div className="relative group cursor-pointer shrink-0" onClick={handleImageClick}>
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                onChange={onFileChange}
+                className="hidden"
+              />
               <Avatar className="h-28 w-28 border-4 border-gray-900 bg-gray-800 shadow-xl">
-                <AvatarImage src="" alt="User avatar" />
+                <AvatarImage src={user?.profileImageUrl || ""} alt="User avatar" />
                 <AvatarFallback className="text-3xl text-gray-400 font-bold">
                   {profileData.username.substring(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                <Camera className="w-8 h-8 text-white" />
+                {isUploadingImage ? (
+                  <Loader2 className="w-8 h-8 text-white animate-spin" />
+                ) : (
+                  <Camera className="w-8 h-8 text-white" />
+                )}
               </div>
             </div>
             <div className="flex-1 space-y-4">
@@ -340,6 +396,45 @@ export default function Profile() {
           </Card>
         </div>
       </div>
+
+      {/* Cropper Modal */}
+      <Dialog open={!!imageSrc} onOpenChange={() => setImageSrc(null)}>
+        <DialogContent className="max-w-2xl h-[500px] bg-gray-950 text-white border-gray-800">
+          <div className="relative w-full h-80 mt-4">
+            {imageSrc && (
+              <Cropper
+                image={imageSrc}
+                crop={crop}
+                zoom={zoom}
+                aspect={1}
+                onCropChange={setCrop}
+                onZoomChange={setZoom}
+                onCropComplete={(_, pixels) => setCroppedAreaPixels(pixels as any)}
+              />
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => setImageSrc(null)}
+              variant="ghost"
+              disabled={isUploadingImage}
+              className="text-gray-400 hover:text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCropComplete}
+              disabled={isUploadingImage}
+              className="bg-amber-600 hover:bg-amber-700 text-white"
+            >
+              {isUploadingImage ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : null}
+              {isUploadingImage ? "Saving..." : "Save Profile Image"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

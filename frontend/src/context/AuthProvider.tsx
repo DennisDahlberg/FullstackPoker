@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AuthContext, type ContextData } from "./AuthContext";
 import { api } from "@/lib/api";
+import { User } from "lucide-react";
 
 export function AuthProvider({children}: {children: React.ReactNode}) {
     const [data, setData] = useState<ContextData | null>(null);
@@ -25,9 +26,11 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
                         name: profile.username,
                         email: profile.email,
                         rank: profile.rank,
-                        balance: profile.balance
-                    }
+                        balance: profile.balance,
+                        profileImageUrl: profile.profileImageUrl
+                    }                    
                 });
+                console.log(profile);
             } catch (err) {
                 setError("Error fetching profile: " + (err as Error).message);
             } finally {
