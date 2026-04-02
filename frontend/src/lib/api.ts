@@ -399,6 +399,24 @@ export const api = {
         throw "An error occurred while updating email";
       }
     },
+    async updateProfileImage(profileImage: File) {
+      try {
+        const formData = new FormData();
+        formData.append("profileImage", profileImage);
+
+        const response = await apiClient.put(`/auth/profile-image`, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        });
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || "Failed to update profile image";
+        }
+        throw "An error occurred while updating profile image";
+      }
+    },
     async getProfile() {
       try {
         const response = await apiClient.get(`${backendUrl}/auth/profile`);

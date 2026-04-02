@@ -144,6 +144,11 @@ namespace Api.Controllers
             if (profileImage == null || profileImage.Length == 0)
                 return BadRequest();
 
+            var imageType = profileImage.ContentType;
+            using var memoryStream = new MemoryStream();
+            await profileImage.CopyToAsync(memoryStream);
+            var result = await _userService.UpdateProfileImage(userId, memoryStream.ToArray(),  imageType);
+            
             return Ok();
         }
 
