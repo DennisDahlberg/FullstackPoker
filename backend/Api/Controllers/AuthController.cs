@@ -95,6 +95,8 @@ namespace Api.Controllers
                 return Unauthorized("Invalid user");
 
             var result = await _userService.UpdateUsernameAsync(userId, username);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
             
             return Ok();
         }
