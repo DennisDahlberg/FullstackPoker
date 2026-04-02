@@ -78,7 +78,8 @@ export default function PlayerSeat({
           </div>
           <img
             src={
-              player?.profileImageUrl ?? (player.isPlayer ? fallbackImages.user : fallbackImages.robot)
+              player?.profileImageUrl ??
+              (player.isPlayer ? fallbackImages.user : fallbackImages.robot)
             }
             className={`z-15 absolute -left-12 -bottom-3 h-16 w-16 rounded-full object-cover border-4 ${isCurrentPlayer ? "border-yellow-400" : "border-gray-700"}`}
             alt=""
@@ -101,7 +102,9 @@ export default function PlayerSeat({
             </div>
           )}
           {player.comment && (
-            <div className="absolute bottom-20 z-50 -left-16 w-48 rounded-2xl bg-white p-3 text-sm text-gray-900 shadow-2xl transition-all duration-300 before:absolute before:-bottom-2 before:left-12 before:h-4 before:w-4 before:rotate-45 before:bg-white before:content-['']">
+            <div
+              className={`absolute z-50 w-48 rounded-2xl bg-white p-3 text-sm text-gray-900 shadow-2xl transition-all duration-300 before:absolute before:h-4 before:w-4 before:rotate-45 before:bg-white before:content-[''] top-18 -left-14 before:-top-2 before:left-7`}
+            >
               {player.comment}
             </div>
           )}
