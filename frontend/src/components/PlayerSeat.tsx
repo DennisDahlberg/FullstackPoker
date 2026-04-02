@@ -100,6 +100,11 @@ export default function PlayerSeat({
               D
             </div>
           )}
+          {player.comment && (
+            <div className="absolute bottom-20 z-50 -left-16 w-48 rounded-2xl bg-white p-3 text-sm text-gray-900 shadow-2xl transition-all duration-300 before:absolute before:-bottom-2 before:left-12 before:h-4 before:w-4 before:rotate-45 before:bg-white before:content-['']">
+              {player.comment}
+            </div>
+          )}
           <span
             className={`absolute -bottom-7 bg-gray-900 w-full rounded text-md text-center ${getActionMessage(player.lastAction, player.lastActionAmount).className}`}
           >
