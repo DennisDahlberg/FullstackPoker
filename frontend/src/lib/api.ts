@@ -386,6 +386,19 @@ export const api = {
         throw "An error occurred while updating username";
       }
     },
+    async updateEmail(email: string) {
+      try {
+        const response = await apiClient.put(`/auth/email`, 
+          JSON.stringify(email),
+        );
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || "Failed to update email";
+        }
+        throw "An error occurred while updating email";
+      }
+    },
     async getProfile() {
       try {
         const response = await apiClient.get(`${backendUrl}/auth/profile`);
