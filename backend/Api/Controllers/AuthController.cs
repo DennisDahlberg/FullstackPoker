@@ -133,6 +133,19 @@ namespace Api.Controllers
             });
         }
 
+        [HttpPut("profile-image")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UpdateProfileImage(IFormFile? profileImage)
+        {
+            var userId = _userService.GetLoggedInUserId(User);
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("Invalid user");
+
+            if (profileImage == null || profileImage.Length == 0)
+                return BadRequest();
+
+            return Ok();
+        }
 
         [Authorize]
         [HttpGet("profile")]
