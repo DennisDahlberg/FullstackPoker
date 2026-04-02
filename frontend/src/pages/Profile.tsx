@@ -48,10 +48,16 @@ export default function Profile() {
   const handleUsernameUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoadingUsername(true);
-    setTimeout(() => {
-      setIsLoadingUsername(false);
+    
+    try {
+      await api.auth.updateUsername(profileData.username);
       toast.success("Username updated successfully");
-    }, 1000);
+    } catch (err: any) {
+      console.log(err);
+      toast.error(err[0]?.description || "Failed to update username");
+    } finally {
+      setIsLoadingUsername(false);
+    }
   };
 
   const handleEmailUpdate = async (e: React.FormEvent) => {

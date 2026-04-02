@@ -373,11 +373,11 @@ export const api = {
         throw "An error occurred while updating password";
       }
     },
-    async updateUsername(newUsername: string) {
+    async updateUsername(username: string) {
       try {
-        const response = await apiClient.put(`/auth/username`, {
-          newUsername,
-        });
+        const response = await apiClient.put(`/auth/username`, 
+          JSON.stringify(username),
+        );
         return response.data;
       } catch (err) {
         if (axios.isAxiosError(err)) {
