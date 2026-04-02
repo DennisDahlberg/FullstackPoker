@@ -113,14 +113,19 @@ Take your Profile into account when deciding your actions. If your play style is
 - Stage: {botPayload.Stage}
 - Players left in the game: {botPayload.PlayersLeft}
 
+**Speech / Comments:**
+- Occasionally (about 20-30% of the time, not too often), you can include a ""comment"" in your JSON response. 
+- This represents a chat message or speech bubble your bot says out loud to the table.
+- The comment MUST strongly reflect your Description, Play Style, and Skill Level. Make it unique to your bot's personality.
+
 **Example responses:**
-{{ ""action"": ""raise"", ""amount"": 100 }}
+{{ ""action"": ""raise"", ""amount"": 100, ""comment"": ""Let's see if you can handle this raise, rookie!"" }}
 {{ ""action"": ""call"", ""amount"": 0 }}
-{{ ""action"": ""fold"", ""amount"": 0 }}
+{{ ""action"": ""fold"", ""amount"": 0, ""comment"": ""Too rich for my blood..."" }}
 {{ ""action"": ""check"", ""amount"": 0 }}
 
 Respond ONLY with a JSON object in this format: 
-{{ ""action"": ""fold|call|check|raise"", ""amount"": number (if action is raise, otherwise 0) }}
+{{ ""action"": ""fold|call|check|raise"", ""amount"": number (if action is raise, otherwise 0), ""comment"": ""optional string or omit entirely"" }}
 
 Now, what is your action?
 ";
