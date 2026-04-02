@@ -15,6 +15,7 @@
         public bool HasActedThisRound { get; set; } = false;
         public string? LastAction { get; set; }
         public int? LastActionAmount { get; set; }
+        public string? Comment { get; set; }
         public string? UserId { get; set; }
         public int SeatNumber { get; set; }
         

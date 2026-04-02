@@ -307,6 +307,8 @@ namespace Application.Services
         }
 
         currentPlayer.HasActedThisRound = true;
+        if (!string.IsNullOrEmpty(actionRequest.Comment))
+            currentPlayer.Comment = actionRequest.Comment;
 
         if (state.Players.Count(p => p.IsActive) == 1)
         {
@@ -354,9 +356,10 @@ namespace Application.Services
             var actionRequest = new PlayerActionRequest
             {
                 Action = botAction.Action,
-                Amount = botAction.Amount
+                Amount = botAction.Amount,
+                Comment = botAction.Comment,
             };
-
+        
             await HandlePlayerAction(actionRequest, gameState);
         }
         catch (Exception err)
