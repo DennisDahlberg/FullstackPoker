@@ -88,13 +88,13 @@ namespace Api.Controllers
 
         [Authorize]
         [HttpPut("username")]
-        public async Task<IActionResult> UpdateUsernameAsync()
+        public async Task<IActionResult> UpdateUsernameAsync([FromBody] string username)
         {
             var userId = _userService.GetLoggedInUserId(User);
             if (userId is null)
                 return Unauthorized("Invalid user");
-            
-            
+
+            var result = await _userService.UpdateUsernameAsync(userId, username);
             
             return Ok();
         }
