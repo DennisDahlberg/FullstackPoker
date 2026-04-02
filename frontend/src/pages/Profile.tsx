@@ -63,10 +63,16 @@ export default function Profile() {
   const handleEmailUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoadingEmail(true);
-    setTimeout(() => {
-      setIsLoadingEmail(false);
+    
+    try {
+      await api.auth.updateEmail(profileData.email);
       toast.success("Email updated successfully");
-    }, 1000);
+    } catch (err: any) {
+      console.log(err);
+      toast.error(err[0]?.description || "Failed to update email");
+    } finally {
+      setIsLoadingEmail(false);
+    }
   };
 
   const handlePasswordUpdate = async (e: React.FormEvent) => {
