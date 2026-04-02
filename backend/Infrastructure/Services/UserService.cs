@@ -96,5 +96,14 @@ namespace Infrastructure.Services
 
             return await _userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
         }
+
+        public async Task<IdentityResult> UpdateUsernameAsync(string userId, string username)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return IdentityResult.Failed();
+
+            return await _userManager.SetUserNameAsync(user, username);
+        }
     }
 }

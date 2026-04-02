@@ -32,7 +32,7 @@ namespace Api
                 .AddJsonOptions(options =>
                 {
                     options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                });;
+                });
             builder.Services.AddOpenApi();
             builder.Services.AddHttpContextAccessor();
 

@@ -86,6 +86,19 @@ namespace Api.Controllers
             return Ok();
         }
 
+        [Authorize]
+        [HttpPut("username")]
+        public async Task<IActionResult> UpdateUsernameAsync()
+        {
+            var userId = _userService.GetLoggedInUserId(User);
+            if (userId is null)
+                return Unauthorized("Invalid user");
+            
+            
+            
+            return Ok();
+        }
+
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
         {

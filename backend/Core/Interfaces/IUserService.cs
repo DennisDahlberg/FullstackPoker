@@ -17,4 +17,5 @@ public interface IUserService
     List<ApplicationUser> FindUsersAsync(string query, string currentUserId);
     Task<Result> UpdateUserBalanceAsync(string userId, decimal balance);
     Task<IdentityResult> UpdatePasswordAsync(string userId, PasswordUpdateDto dto);
+    Task<IdentityResult> UpdateUsernameAsync(string userId, string username);
 }
