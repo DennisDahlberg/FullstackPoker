@@ -29,7 +29,7 @@ import { Badge } from "@/components/ui/badge";
 import { api } from "@/lib/api";
 
 export default function Profile() {
-  const { data } = useAuthContext();
+  const { data, refetch } = useAuthContext();
   const user = data?.user;
 
   const [isLoadingUsername, setIsLoadingUsername] = useState(false);
@@ -55,7 +55,6 @@ export default function Profile() {
       );
       reader.readAsDataURL(e.target.files[0]);
     }
-    // reset to allow selecting same file again if aborted
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
@@ -70,7 +69,7 @@ export default function Profile() {
       await api.auth.updateProfileImage(file);
       toast.success("Profile image updated successfully!");
       setImageSrc(null);
-      setTimeout(() => window.location.reload(), 1000);
+      await refetch();
     } catch (err: any) {
       toast.error(err.response?.data?.message || err.message || "Failed to crop or upload image");
     } finally {

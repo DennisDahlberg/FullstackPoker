@@ -8,6 +8,26 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
+    const refetch = async () => {
+        try {
+            const profile =  await api.auth.getProfile();
+            setData({
+                token: localStorage.getItem("token"),
+                user: {
+                    id: profile.id,
+                    name: profile.username,
+                    email: profile.email,
+                    rank: profile.rank,
+                    balance: profile.balance,
+                    profileImageUrl: profile.profileImageUrl
+                }                    
+            });
+            console.log(profile);
+        } catch (err) {
+            setError("Error fetching profile: " + (err as Error).message);
+        }
+    };
+
     useEffect(() => {        
         async function load() {
             const token = localStorage.getItem("token");
@@ -17,60 +37,21 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
                 return;
             }
 
-            try {
-                const profile =  await api.auth.getProfile();
-                setData({
-                    token: localStorage.getItem("token"),
-                    user: {
-                        id: profile.id,
-                        name: profile.username,
-                        email: profile.email,
-                        rank: profile.rank,
-                        balance: profile.balance,
-                        profileImageUrl: profile.profileImageUrl
-                    }                    
-                });
-                console.log(profile);
-            } catch (err) {
-                setError("Error fetching profile: " + (err as Error).message);
-            } finally {
-                setLoading(false);
-            }
+            await refetch();
+            setLoading(false);
         }
 
         load();        
-        
-        
     },[])
 
     const login = async (email: string, password: string) => {
         await api.auth.login(email, password);
-        const profile = await api.auth.getProfile();
-
-        setData({
-            token: localStorage.getItem("token"),
-            user: {
-                id: profile.id,
-                name: profile.username,
-                email: profile.email,
-                rank: profile.rank
-            }
-        });
+        await refetch();
     }
     
    const register = async (email: string, username: string, password: string) => {
         await api.auth.register(email, username, password);
-        const profile = await api.auth.getProfile();
-
-        setData({
-            token: localStorage.getItem("token"),
-            user: {
-                id: profile.id,
-                name: profile.username,
-                email: profile.email,
-                rank: profile.rank
-            }
-        });
+        await refetch();
     }
 
     const logout = () => {
@@ -81,7 +62,7 @@ export function AuthProvider({children}: {children: React.ReactNode}) {
     };
 
     return (
-        <AuthContext.Provider value={{data, loading, error, login, register, logout}}>
+        <AuthContext.Provider value={{data, loading, error, login, register, logout, refetch}}>
             {children}
         </AuthContext.Provider>
     )
