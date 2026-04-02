@@ -101,6 +101,21 @@ namespace Api.Controllers
             return Ok();
         }
 
+        [Authorize]
+        [HttpPut("email")]
+        public async Task<IActionResult> UpdateEmailAsync([FromBody] string email)
+        {
+            var userId = _userService.GetLoggedInUserId(User);
+            if (userId is null)
+                return Unauthorized("Invalid user");
+            
+            var result = await _userService.UpdateEmailAsync(userId, email);
+            if (!result.Succeeded)
+                return BadRequest(result.Errors);
+            
+            return Ok();
+        }
+
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
         {
