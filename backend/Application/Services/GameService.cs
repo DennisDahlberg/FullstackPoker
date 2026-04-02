@@ -344,24 +344,25 @@ namespace Application.Services
     {
         var botActionJson = await _botAiService.GetBotAction(gameState);
 
-        var botAction = JsonSerializer.Deserialize<BotAction>(botActionJson, new JsonSerializerOptions
+        try
         {
-            PropertyNameCaseInsensitive = true
-        });
+            var botAction = JsonSerializer.Deserialize<BotAction>(botActionJson, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+            
+            var actionRequest = new PlayerActionRequest
+            {
+                Action = botAction.Action,
+                Amount = botAction.Amount
+            };
 
-        if (botAction is null)
+            await HandlePlayerAction(actionRequest, gameState);
+        }
+        catch (Exception err)
         {
             await HandlePlayerAction(new PlayerActionRequest { Action = "call" }, gameState);
-            return;
         }
-
-        var actionRequest = new PlayerActionRequest
-        {
-            Action = botAction.Action,
-            Amount = botAction.Amount
-        };
-
-        await HandlePlayerAction(actionRequest, gameState);
     }
 
     public async Task HandleEndOfStage(GameState state)

@@ -84,6 +84,22 @@ Now, validate the bot profile and return the result as shown above.
                     .Count(p => p.IsFolded == false),               
             };
 
+            var random = new Random();
+            var randomNumber = random.Next(1, 11);
+            bool shouldComment = randomNumber >= 8;
+
+            string commentInstruction = shouldComment
+                ? "\n**Speech / Comments:**\n- You MUST include a \"comment\" in your JSON response representing a short chat message or speech bubble.\n- The comment MUST strongly reflect your Description, Play Style, and Skill Level.\n"
+                : "";
+
+            string exampleResponses = shouldComment
+                ? "{ \"action\": \"raise\", \"amount\": 100, \"comment\": \"Let's see if you can handle this raise, rookie!\" }\n{ \"action\": \"fold\", \"amount\": 0, \"comment\": \"Too rich for my blood...\" }"
+                : "{ \"action\": \"raise\", \"amount\": 100 }\n{ \"action\": \"call\", \"amount\": 0 }\n{ \"action\": \"fold\", \"amount\": 0 }\n{ \"action\": \"check\", \"amount\": 0 }";
+
+            string jsonFormat = shouldComment
+                ? "{ \"action\": \"fold|call|check|raise\", \"amount\": number (if action is raise, otherwise 0), \"comment\": \"string\" }"
+                : "{ \"action\": \"fold|call|check|raise\", \"amount\": number (if action is raise, otherwise 0) }";
+
             var prompt = $@"
 You are a competitive Texas Hold'em Poker bot playing a game. 
 Your goal is to maximize your chips by making smart decisions based on the game state and your specific personality and play style.
@@ -112,20 +128,12 @@ Take your Profile into account when deciding your actions. If your play style is
 - Pot: {botPayload.Pot}
 - Stage: {botPayload.Stage}
 - Players left in the game: {botPayload.PlayersLeft}
-
-**Speech / Comments:**
-- Occasionally (about 20-30% of the time, not too often), you can include a ""comment"" in your JSON response. 
-- This represents a chat message or speech bubble your bot says out loud to the table.
-- The comment MUST strongly reflect your Description, Play Style, and Skill Level. Make it unique to your bot's personality.
-
+{commentInstruction}
 **Example responses:**
-{{ ""action"": ""raise"", ""amount"": 100, ""comment"": ""Let's see if you can handle this raise, rookie!"" }}
-{{ ""action"": ""call"", ""amount"": 0 }}
-{{ ""action"": ""fold"", ""amount"": 0, ""comment"": ""Too rich for my blood..."" }}
-{{ ""action"": ""check"", ""amount"": 0 }}
+{exampleResponses}
 
 Respond ONLY with a JSON object in this format: 
-{{ ""action"": ""fold|call|check|raise"", ""amount"": number (if action is raise, otherwise 0), ""comment"": ""optional string or omit entirely"" }}
+{jsonFormat}
 
 Now, what is your action?
 ";

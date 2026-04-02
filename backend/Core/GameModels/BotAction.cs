@@ -10,5 +10,6 @@ namespace Core.GameModels
     {
         public string Action { get; set; } = null!;
         public int Amount { get; set; }
+        public string? Comment { get; set; }
     }
 }
