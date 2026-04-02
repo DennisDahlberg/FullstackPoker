@@ -12,10 +12,12 @@ namespace Infrastructure.Services
     public class UserService : IUserService
     {
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IBlobService _blobService;
 
-        public UserService(UserManager<ApplicationUser> userManager)
+        public UserService(UserManager<ApplicationUser> userManager, IBlobService blobService)
         {
             _userManager = userManager;
+            _blobService = blobService;
         }
 
         public async Task<Result<UserDTO>> GetUserDataAsync(string userId)
@@ -113,6 +115,26 @@ namespace Infrastructure.Services
                 return IdentityResult.Failed();
             
             return await _userManager.SetEmailAsync(user, email);
+        }
+
+        public async Task<Result> UpdateProfileImage(string userId, byte[] imageData, string imageType)
+        {
+            if (imageData is null || string.IsNullOrEmpty(imageType))
+                return Result.Fail("No image found");
+            
+            var user =  await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return  Result.Fail("User not found");
+
+            using var stream = new MemoryStream(imageData);
+            var extension = imageType == "image/png" ? ".png" : ".jpg";
+            var fileName = $"user_{Guid.NewGuid()}{extension}";
+            var imageUrl = await _blobService.UploadImage(stream, fileName ,imageType);
+            if (imageUrl is null)
+                return Result.Fail("Image upload failed");
+
+            user.ProfileImageUrl = imageUrl;
+            return Result.Ok();
         }
     }
 }

@@ -19,4 +19,5 @@ public interface IUserService
     Task<IdentityResult> UpdatePasswordAsync(string userId, PasswordUpdateDto dto);
     Task<IdentityResult> UpdateUsernameAsync(string userId, string username);
     Task<IdentityResult> UpdateEmailAsync(string userId, string email);
+    Task<Result> UpdateProfileImage(string userId, byte[] imageData, string imageType);
 }
