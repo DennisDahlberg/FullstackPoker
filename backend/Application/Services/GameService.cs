@@ -42,7 +42,8 @@ namespace Application.Services
                 RoundStartingChips = table.BuyIn,
                 IsPlayer = true,
                 CurrentBet = 0,
-                SeatNumber = allPlayers.Count 
+                SeatNumber = allPlayers.Count,
+                ProfileImageUrl = userData.ProfileImageUrl,
             });
         }
 
