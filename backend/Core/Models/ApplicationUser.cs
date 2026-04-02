@@ -8,5 +8,6 @@ namespace Core.Models
         public DateTime RefreshTokenExpires { get; set; }
         public string Rank { get; set; } = null!;
         public decimal Balance { get; set; }
+        public string? ProfileImageUrl { get; set; }
     }
 }
