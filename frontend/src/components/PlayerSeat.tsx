@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import PlayingCard from "./PlayingCard";
 import type { Player } from "@/types/GameState";
 
@@ -58,6 +59,16 @@ export default function PlayerSeat({
 
   const isEmpty = !player;
 
+  const [visibleComment, setVisibleComment] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (player?.comment) {
+      setVisibleComment(player.comment);
+      const timer = setTimeout(() => setVisibleComment(null), 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [player?.comment]);
+
   return (
     <div
       className={`absolute ${positions[position]} z-10 ${player.isFolded ? "opacity-50 grayscale" : ""}`}
@@ -101,11 +112,11 @@ export default function PlayerSeat({
               D
             </div>
           )}
-          {player.comment && (
+          {visibleComment && (
             <div
               className={`absolute z-50 w-48 rounded-2xl bg-white p-3 text-sm text-gray-900 shadow-2xl transition-all duration-300 before:absolute before:h-4 before:w-4 before:rotate-45 before:bg-white before:content-[''] top-18 -left-14 before:-top-2 before:left-7`}
             >
-              {player.comment}
+              {visibleComment}
             </div>
           )}
           <span
