@@ -27,6 +27,11 @@ namespace Api
     {
         public static async Task Main(string[] args)
         {
+            if (File.Exists("logs/backend.log"))
+            {
+                File.Delete("logs/backend.log");
+            }
+
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
                 .MinimumLevel.Override("Microsoft", Serilog.Events.LogEventLevel.Warning)
@@ -35,9 +40,8 @@ namespace Api
                 .WriteTo.Console(
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u}] {Message:lj}{NewLine}{Exception}",
                     theme: AnsiConsoleTheme.Code)
-                .WriteTo.File("logs/backend_.log", 
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u}] {Message:lj}{NewLine}{Exception}",
-                    rollingInterval: RollingInterval.Day) 
+                .WriteTo.File("logs/backend.log", 
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u}] {Message:lj}{NewLine}{Exception}") 
                 .CreateLogger();
 
             try
