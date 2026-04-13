@@ -148,7 +148,44 @@ Respond ONLY with a JSON object in this format:
 Now, what is your action?
 ";
 
-        return prompt;
+            return prompt;
+        }
+
+        public async Task<string> GetWinningBotComment(GameState gameState, Player winningBot)
+        {
+            var prompt = BuildWinningBotPrompt(gameState, winningBot);
+            var response = await _chatClient.CompleteChatAsync(prompt);
+            return response.Value.Content[0].Text.Trim('"', ' ', '\n', '\r');
+        }
+
+        public string BuildWinningBotPrompt(GameState gameState, Player winningBot)
+        {
+            var otherPlayersInfo = gameState.Players
+                .Where(p => p.Name != winningBot.Name)
+                .Select(p => p.Name);
+            
+            string otherPlayersStr = otherPlayersInfo.Any() ? string.Join(", ", otherPlayersInfo) : "None";
+
+            var prompt = $@"
+You are a competitive Texas Hold'em Poker bot. You have just won a pot of {gameState.Pot} chips!
+
+**Your Profile:**
+- Description: {winningBot.Description}
+- Play Style: {winningBot.PlayStyle}
+- Skill Level: {winningBot.SkillLevel}
+
+**Other Players at the Table:**
+- {otherPlayersStr}
+
+**Task:**
+Write a short chat message or speech bubble to say to the table as you collect your winnings.
+- The comment MUST strongly reflect your Description, Play Style, and Skill Level.
+- If your character is arrogant, you might gloat or talk trash. If humble, you might just say 'good game'.
+- You can address other players by name to rub it in or be polite, depending on your character.
+- Provide ONLY the text of the comment as your response, with NO quotation marks, NO JSON formatting, and NO extra text.
+";
+
+            return prompt;
         }
     }
 }
