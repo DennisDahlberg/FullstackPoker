@@ -64,7 +64,7 @@ export default function PlayerSeat({
   useEffect(() => {
     if (player?.comment) {
       setVisibleComment(player.comment);
-      const timer = setTimeout(() => setVisibleComment(null), 2500);
+      const timer = setTimeout(() => setVisibleComment(null), 3000);
       return () => clearTimeout(timer);
     }
   }, [player?.comment]);

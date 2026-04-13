@@ -457,6 +457,8 @@ namespace Application.Services
         {
             winner.Player.Chips += winAmount;
             state.WinnersPositions.Add(state.Players.IndexOf(winner.Player));
+            
+            winner.Player.Comment = await _botAiService.GetWinningBotComment(state,  winner.Player);
         }
 
         state.IsGameOver = true;
