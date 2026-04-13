@@ -155,7 +155,7 @@ Now, what is your action?
         {
             var prompt = BuildWinningBotPrompt(gameState, winningBot);
             var response = await _chatClient.CompleteChatAsync(prompt);
-            return response.Value.Content[0].Text.Trim('"', ' ', '\n', '\r');
+            return response.Value.Content[0].Text;
         }
 
         public string BuildWinningBotPrompt(GameState gameState, Player winningBot)

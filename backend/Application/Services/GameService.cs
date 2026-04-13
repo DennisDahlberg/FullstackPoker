@@ -409,7 +409,9 @@ namespace Application.Services
             player.HasActedThisRound = false;
             player.LastAction = null;
             player.LastActionAmount = null;
-            player.Comment = null;
+            
+            if (!state.IsGameOver)
+                player.Comment = null;
         }
 
         state.CurrentPlayerIndex = state.DealerPosition;
@@ -458,7 +460,10 @@ namespace Application.Services
             winner.Player.Chips += winAmount;
             state.WinnersPositions.Add(state.Players.IndexOf(winner.Player));
             
-            winner.Player.Comment = await _botAiService.GetWinningBotComment(state,  winner.Player);
+            if (!winner.Player.IsPlayer)
+            {
+                winner.Player.Comment = await _botAiService.GetWinningBotComment(state,  winner.Player);
+            }
         }
 
         state.IsGameOver = true;
