@@ -88,8 +88,14 @@ Now, validate the bot profile and return the result as shown above.
             var randomNumber = random.Next(1, 11);
             bool shouldComment = randomNumber >= 8;
 
+            var otherPlayersInfo = gameState.Players
+                .Where(p => p.Name != botPayload.Bot.Name && !p.IsFolded)
+                .Select(p => $"{p.Name}: {(string.IsNullOrEmpty(p.LastAction) ? "Hasn't acted yet" : $"{p.LastAction}{(p.LastActionAmount > 0 ? $" with {p.LastActionAmount} chips" : "")}")}");
+            
+            string otherPlayersStr = otherPlayersInfo.Any() ? string.Join("\n- ", otherPlayersInfo) : "None";
+
             string commentInstruction = shouldComment
-                ? "\n**Speech / Comments:**\n- You MUST include a \"comment\" in your JSON response representing a short chat message or speech bubble.\n- The comment MUST strongly reflect your Description, Play Style, and Skill Level.\n"
+                ? "\n**Speech / Comments:**\n- You MUST include a \"comment\" in your JSON response representing a short chat message or speech bubble.\n- The comment MUST strongly reflect your Description, Play Style, and Skill Level.\n- NEVER reveal your actual cards or exact secret hand in your comment, as other players can see it.\n- You can react to other players' recent actions or address them by name if it fits your character.\n"
                 : "";
 
             string exampleResponses = shouldComment
@@ -128,6 +134,10 @@ Take your Profile into account when deciding your actions. If your play style is
 - Pot: {botPayload.Pot}
 - Stage: {botPayload.Stage}
 - Players left in the game: {botPayload.PlayersLeft}
+
+**Other Players' Recent Actions:**
+- {otherPlayersStr}
+
 {commentInstruction}
 **Example responses:**
 {exampleResponses}
