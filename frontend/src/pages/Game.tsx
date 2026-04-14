@@ -603,10 +603,10 @@ export default function Game() {
             </p>
           </div>
 
-          <DialogFooter className="flex gap-2 sm:justify-between">
+          <DialogFooter className="flex gap-2 sm:justify-between w-full">
             <Button
               variant="outline"
-              className="w-full border-red-700 text-red-500 hover:bg-red-900/20 hover:text-red-400"
+              className="w-1/2 border-red-700 text-red-500 hover:bg-red-900/20 hover:text-red-400"
               onClick={() => {
                 submitRebuy(false);
                 setIsRebuyModalOpen(false);
@@ -615,7 +615,7 @@ export default function Game() {
               Leave Table
             </Button>
             <Button
-              className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+              className="w-1/2 bg-amber-600 hover:bg-amber-700 text-white"
               onClick={() => {
                 submitRebuy(true);
                 setIsRebuyModalOpen(false);
