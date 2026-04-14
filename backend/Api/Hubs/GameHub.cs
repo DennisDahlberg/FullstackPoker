@@ -14,15 +14,17 @@ public class GameHub : Hub
     private readonly IUserService _userService;
     private readonly IGameHistoryService _gameHistoryService;
     private readonly IGameService _gameService;
+    private readonly ILogger<GameHub> _logger;
 
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> _gameLocks = new();
 
-    public GameHub(IGameStateManager gameStateManager, IUserService userService, IGameHistoryService gameHistoryService, IGameService gameService)
+    public GameHub(IGameStateManager gameStateManager, IUserService userService, IGameHistoryService gameHistoryService, IGameService gameService, ILogger<GameHub> logger)
     {
         _gameStateManager = gameStateManager;
         _userService = userService;
         _gameHistoryService = gameHistoryService;
         _gameService = gameService;
+        _logger = logger;
     }
 
     private SemaphoreSlim GetGameLock(string gameId)
@@ -124,20 +126,27 @@ public class GameHub : Hub
     public async Task JoinGame()
     {
         var userId = _userService.GetLoggedInUserId(Context.User!);
+        _logger.LogInformation("User {UserId} attempting to join game", userId);
+        
         var gameId = await _gameStateManager.GetUserCurrentGameAsync(userId);
         if (gameId is null)
         {
+            _logger.LogWarning("Failed to join game for User {UserId}: No active game found", userId);
             await Clients.Caller.SendAsync("Error", "No active game found. Please start a new game from the lobby.");
             return;
         }
 
         var gameLock = GetGameLock(gameId);
+        _logger.LogDebug("User {UserId} waiting for lock on game {GameId} to join", userId, gameId);
         await gameLock.WaitAsync();
+        _logger.LogDebug("User {UserId} acquired lock on game {GameId} to join", userId, gameId);
+        
         try
         {
             var gameState = await _gameStateManager.GetGameStateAsync(gameId);
             if (gameState is null)
             {
+                _logger.LogError("Game state not found for game {GameId} during {UserId} join", gameId, userId);
                 await Clients.Caller.SendAsync("Error", "Game state not found");
                 return;
             }
@@ -150,34 +159,48 @@ public class GameHub : Hub
             var user = await _userService.GetUserById(userId);
             if (user is not null)
             {
+                _logger.LogInformation("User {UserName} successfully joined game {GameId}", user.UserName, gameId);
                 await Clients.OthersInGroup($"game_{gameId}").SendAsync("PlayerConnected", user.UserName);
             }
 
             await ProcessBotTurns(gameId, gameState);
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error while user {UserId} was joining game {GameId}", userId, gameId);
+            throw;
+        }
         finally
         {
             gameLock.Release();
+            _logger.LogDebug("User {UserId} released lock on game {GameId} after joining", userId, gameId);
         }
     }
 
     public async Task PlayerAction(string action, int? amount)
     {
         var userId = _userService.GetLoggedInUserId(Context.User!);
+        _logger.LogInformation("User {UserId} performing PlayerAction: {Action} (Amount: {Amount})", userId, action, amount);
+        
         var gameId = await _gameStateManager.GetUserCurrentGameAsync(userId);
         if (gameId is null)
         {
+            _logger.LogWarning("PlayerAction failed for User {UserId}: No active game found", userId);
             await Clients.Caller.SendAsync("Error", "No active game found");
             return;
         }
 
         var gameLock = GetGameLock(gameId);
+        _logger.LogDebug("User {UserId} waiting for lock on game {GameId} for PlayerAction", userId, gameId);
         await gameLock.WaitAsync();
+        _logger.LogDebug("User {UserId} acquired lock on game {GameId} for PlayerAction", userId, gameId);
+        
         try
         {
             var gameState = await _gameStateManager.GetGameStateAsync(gameId);
             if (gameState == null)
             {
+                _logger.LogWarning("PlayerAction failed for User {UserId} in game {GameId}: Game not found", userId, gameId);
                 await Clients.Caller.SendAsync("Error", "Game not found");
                 return;
             }
@@ -185,6 +208,7 @@ public class GameHub : Hub
             var currentPlayer = gameState.Players[gameState.CurrentPlayerIndex];
             if (currentPlayer.UserId != userId)
             {
+                _logger.LogWarning("PlayerAction out of turn for User {UserId} in game {GameId}. Expected User {ExpectedUserId}", userId, gameId, currentPlayer.UserId);
                 await Clients.Caller.SendAsync("Error", "Not your turn");
                 return;
             }
@@ -198,16 +222,20 @@ public class GameHub : Hub
             await _gameService.HandlePlayerAction(request, gameState);
             await _gameStateManager.SaveGameStateAsync(gameId, gameState);
             
+            _logger.LogInformation("User {UserId} completed PlayerAction {Action} successfully in game {GameId}", userId, action, gameId);
+            
             await BroadcastGameState(gameId, gameState);
             await ProcessBotTurns(gameId, gameState);
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error processing PlayerAction for User {UserId} in game {GameId}", userId, gameId);
             await Clients.Caller.SendAsync("Error", ex.Message);
         }
         finally
         {
             gameLock.Release();
+            _logger.LogDebug("User {UserId} released lock on game {GameId} after PlayerAction", userId, gameId);
         }
     }
 
@@ -216,9 +244,23 @@ public class GameHub : Hub
         while (!gameState.IsGameOver &&
                !gameState.Players[gameState.CurrentPlayerIndex].IsPlayer)
         {
-            await _gameService.HandleBotAction(gameState);
-            await _gameStateManager.SaveGameStateAsync(gameId, gameState);
-            await BroadcastGameState(gameId, gameState);
+            var botName = gameState.Players[gameState.CurrentPlayerIndex].Name;
+            _logger.LogInformation("Processing bot turn for {BotName} at index {Index} in game {GameId}", botName, gameState.CurrentPlayerIndex, gameId);
+            
+            try 
+            {
+                await _gameService.HandleBotAction(gameState);
+                await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+                
+                _logger.LogInformation("Successfully completed bot turn for {BotName} in game {GameId}", botName, gameId);
+
+                await BroadcastGameState(gameId, gameState);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing bot turn for {BotName} in game {GameId}", botName, gameId);
+                break;
+            }
         }
     }
 
