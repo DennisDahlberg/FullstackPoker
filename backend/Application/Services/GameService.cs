@@ -446,20 +446,6 @@ namespace Application.Services
             player.Hand[1].IsHidden = false;
         }
 
-        foreach (var player in state.Players)
-        {
-            player.BestHand =
-                HoldemHandEvaluator
-                    .GetHandCategory(
-                    player.Hand.Select(ConvertToHoldemPokerCard).Concat(board).ToArray()).
-                    ToString();
-            
-            if (player.Chips <= 0)
-            {
-                player.IsAwaitingRebuy = true;
-            }
-        }
-
         foreach (var winner in winners)
         {
             winner.Player.Chips += winAmount;
@@ -468,6 +454,20 @@ namespace Application.Services
             if (!winner.Player.IsPlayer)
             {
                 winner.Player.Comment = await _botAiService.GetWinningBotComment(state,  winner.Player);
+            }
+        }
+        
+        foreach (var player in state.Players)
+        {
+            player.BestHand =
+                HoldemHandEvaluator
+                    .GetHandCategory(
+                        player.Hand.Select(ConvertToHoldemPokerCard).Concat(board).ToArray()).
+                    ToString();
+            
+            if (player.Chips <= 0)
+            {
+                player.IsAwaitingRebuy = true;
             }
         }
 
