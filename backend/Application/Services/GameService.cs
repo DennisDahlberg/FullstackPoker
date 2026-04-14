@@ -453,6 +453,11 @@ namespace Application.Services
                     .GetHandCategory(
                     player.Hand.Select(ConvertToHoldemPokerCard).Concat(board).ToArray()).
                     ToString();
+            
+            if (player.Chips <= 0)
+            {
+                player.IsAwaitingRebuy = true;
+            }
         }
 
         foreach (var winner in winners)

@@ -24,5 +24,6 @@
         public string SkillLevel { get; set; } = null!;
         public string? ProfileImageUrl { get; set; }
         public string BestHand { get; set; } = null!;
+        public bool IsAwaitingRebuy { get; set; } = false;
     }
 }
