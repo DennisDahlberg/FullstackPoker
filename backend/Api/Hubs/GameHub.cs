@@ -3,6 +3,7 @@ using Core.GameModels;
 using Core.Interfaces;
 using HoldemPoker.Cards;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 
 namespace backend.Hubs;
@@ -263,6 +264,107 @@ public class GameHub : Hub
                 break;
             }
         }
+    }
+
+    public async Task SubmitRebuy(bool wantsToRebuy)
+    {
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+        
+        var gameId = await _gameStateManager.GetUserCurrentGameAsync(userId);
+        if (gameId is null)
+        {
+            _logger.LogWarning("Rebuy failed for User {UserId}: No active game found", userId);
+            await Clients.Caller.SendAsync("Error", "No active game found");
+            return;
+        }
+
+        var gameLock = GetGameLock(gameId);
+        _logger.LogDebug("User {UserId} waiting for lock on game {GameId} for Rebuy", userId, gameId);
+        await gameLock.WaitAsync();
+        _logger.LogDebug("User {UserId} acquired lock on game {GameId} for Rebuy", userId, gameId);
+
+        try
+        {
+            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+            if (gameState is null)
+            {
+                _logger.LogWarning("Rebuy failed for User {UserId}: No active game found", userId);
+                await Clients.Caller.SendAsync("Error", "Game not found");
+                return;
+            }
+
+            var player = gameState.Players.FirstOrDefault(p => p.UserId == userId);
+            if (player is null || !player.IsAwaitingRebuy)
+            {
+                _logger.LogWarning("Rebuy failed for User {UserId}: No rebuy pending", userId);
+                await Clients.Caller.SendAsync("Error", "No rebuy pending");
+                return;
+            }
+
+            if (wantsToRebuy)
+            {
+                var buyInAmount = player.GameStartingChips;
+                var balanceResult = await _userService.UpdateUserBalanceAsync(userId, -buyInAmount);
+                if (!balanceResult.IsSuccess)
+                {
+                    await Clients.Caller.SendAsync("Error", "Insufficient balance to rebuy");
+                    return;
+                }
+
+                player.Chips = buyInAmount;
+                player.IsAwaitingRebuy = false;
+                player.IsActive = true;
+                player.IsFolded = false;
+
+                await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+                await BroadcastGameState(gameId, gameState);
+            }
+            else
+            {
+                var session = _gameHistoryService.GetGameSessionForPlayer(player, gameState);
+
+                player.IsAwaitingRebuy = false;
+                player.IsFolded = true;
+                player.IsActive = false;
+                var leavingUserId = player.UserId;
+
+                await _gameStateManager.DeleteUserCurrentGameAsync(leavingUserId!);
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"game_{gameId}");
+                await Clients.Caller.SendAsync("GameLeft", session);
+
+                var remainingHumans = gameState.Players
+                    .Where(p => p.IsPlayer && p.UserId != null)
+                    .ToList();
+
+                if (remainingHumans.Count == 0)
+                {
+                    await _gameStateManager.DeleteGameStateAsync(gameId);
+                    _gameLocks.TryRemove(gameId, out _);
+                }
+                else
+                {
+                    await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+
+                    var user = await _userService.GetUserById(leavingUserId!);
+                    if (user != null)
+                        await Clients.Group($"game_{gameId}").SendAsync("PlayerDisconnected", user.UserName);
+
+                    await BroadcastGameState(gameId, gameState);
+                    await ProcessBotTurns(gameId, gameState);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing Rebuy for User {UserId} in game {GameId}", userId, gameId);
+            await Clients.Caller.SendAsync("Error", ex.Message);
+        }
+        finally
+        {
+            gameLock.Release();
+            _logger.LogDebug("User {UserId} released lock on game {GameId} after Rebuy", userId, gameId);
+        }
+        
     }
 
     public async Task StartNewRound()
