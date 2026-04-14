@@ -81,6 +81,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         set({ sessionSummary: summary, game: null, connection: null });
       });
 
+      connection.on("PlayerRebuy", (buyInAmount: string) => {
+        toast.success(`Successfully rebought with ${buyInAmount} chips`);
+      })
+
       connection.onreconnecting((error) => {
         console.warn("Reconnecting...", error);
         toast.warning("Connection lost. Reconnecting...");

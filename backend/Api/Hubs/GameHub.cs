@@ -310,16 +310,21 @@ public class GameHub : Hub
                     await Clients.Caller.SendAsync("Error", "Insufficient balance to rebuy");
                     return;
                 }
+                else
+                {
+                    player.Chips = buyInAmount;
+                    player.IsAwaitingRebuy = false;
+                    player.IsActive = true;
+                    player.IsFolded = false;
 
-                player.Chips = buyInAmount;
-                player.IsAwaitingRebuy = false;
-                player.IsActive = true;
-                player.IsFolded = false;
-
-                await _gameStateManager.SaveGameStateAsync(gameId, gameState);
-                await BroadcastGameState(gameId, gameState);
+                    await Clients.Caller.SendAsync("PlayerRebuy", buyInAmount);
+                    await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+                    await BroadcastGameState(gameId, gameState);
+                    return;
+                }
             }
-            else
+            
+            if (!wantsToRebuy)
             {
                 var session = _gameHistoryService.GetGameSessionForPlayer(player, gameState);
 
