@@ -1,6 +1,14 @@
 import { useNavigate } from "react-router-dom";
 import PlayerSeat from "@/components/PlayerSeat";
-import { Clock, LogOut, Minus, Settings, TrendingDown, TrendingUp, Trophy } from "lucide-react";
+import {
+  Clock,
+  LogOut,
+  Minus,
+  Settings,
+  TrendingDown,
+  TrendingUp,
+  Trophy,
+} from "lucide-react";
 import PlayingCard from "@/components/PlayingCard";
 import { useEffect, useState } from "react";
 import { useGameStore } from "@/stores/useGameStore";
@@ -34,15 +42,46 @@ export default function Game() {
   const connectToGame = useGameStore((s) => s.connectToGame);
   const disconnectFromGame = useGameStore((s) => s.disconnectFromGame);
   const playerAction = useGameStore((s) => s.playerAction);
+  const submitRebuy = useGameStore((s) => s.submitRebuy);
   const startNewRound = useGameStore((s) => s.startNewRound);
   const leaveGame = useGameStore((s) => s.leaveGame);
   const clearError = useGameStore((s) => s.clearError);
   const clearSessionSummary = useGameStore((s) => s.clearSessionSummary);
+  const [isRebuyModalOpen, setIsRebuyModalOpen] = useState(false);
 
   const [raiseValue, setRaiseValue] = useState(0);
   const [isRaiseModalOpen, setIsRaiseModalOpen] = useState(false);
   const [isLeaveWarningOpen, setIsLeaveWarningOpen] = useState(false);
+  const [rebuyTimeLeft, setRebuyTimeLeft] = useState(10);
   const minRaise = game ? game.smallBlind : 0;
+
+  const myUserId = game?.currentViewerUserId;
+  const player = game?.players.find((p) => p.userId === myUserId);
+
+  useEffect(() => {
+    console.log("Current player state:", player);
+  }, [player]);
+
+  useEffect(() => {
+    if (player?.isAwaitingRebuy) {
+      setIsRebuyModalOpen(true);
+      setRebuyTimeLeft(10);
+      const timer = setInterval(() => {
+        setRebuyTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timer);
+            submitRebuy(false);
+            setIsRebuyModalOpen(false);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(timer);
+    } else {
+      setIsRebuyModalOpen(false);
+    }
+  }, [player?.isAwaitingRebuy, submitRebuy]);
 
   useEffect(() => {
     connectToGame();
@@ -123,8 +162,6 @@ export default function Game() {
 
   if (!game && !sessionSummary) return <div>Loading...</div>;
 
-  const myUserId = game?.currentViewerUserId;
-  const player = game?.players.find((p) => p.userId === myUserId);
   const myPlayerIndex = game?.players.findIndex((p) => p.userId === myUserId);
   const isMyTurn = myPlayerIndex === game?.currentPlayerIndex;
   const hasPenalty = game ? !game.isGameOver && game.penaltyAmount > 0 : false;
@@ -135,10 +172,14 @@ export default function Game() {
       <div className="h-14 bg-gray-900/80 border-b border-gray-800 flex items-center justify-between px-4">
         <div className="flex items-center gap-2 text-sm text-gray-400">
           {isMyTurn && (
-            <span className="text-amber-500 font-bold animate-pulse">Your turn</span>
+            <span className="text-amber-500 font-bold animate-pulse">
+              Your turn
+            </span>
           )}
           {!isMyTurn && !game?.isGameOver && (
-            <span>Waiting for {game?.players[game.currentPlayerIndex]?.name}...</span>
+            <span>
+              Waiting for {game?.players[game.currentPlayerIndex]?.name}...
+            </span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -297,9 +338,7 @@ export default function Game() {
               <Button
                 variant="outline"
                 onClick={() =>
-                  setRaiseValue(
-                    Math.floor(((player?.chips ?? 0) * 3) / 4),
-                  )
+                  setRaiseValue(Math.floor(((player?.chips ?? 0) * 3) / 4))
                 }
               >
                 3/4 Pot
@@ -307,9 +346,7 @@ export default function Game() {
               <Button
                 variant="outline"
                 className="border-purple-500"
-                onClick={() =>
-                  setRaiseValue(player?.chips ?? 0)
-                }
+                onClick={() => setRaiseValue(player?.chips ?? 0)}
               >
                 All-In
               </Button>
@@ -336,8 +373,10 @@ export default function Game() {
       >
         <AlertDialogContent className="bg-gray-900 text-white border-gray-700">
           <AlertDialogHeader>
-            <AlertDialogTitle className={`text-xl ${hasPenalty ? 'text-red-400' : 'text-yellow-400'}`}>
-              {hasPenalty ? 'Leave Game Early?' : 'Leave Game?'}
+            <AlertDialogTitle
+              className={`text-xl ${hasPenalty ? "text-red-400" : "text-yellow-400"}`}
+            >
+              {hasPenalty ? "Leave Game Early?" : "Leave Game?"}
             </AlertDialogTitle>
             <AlertDialogDescription className="text-gray-300 space-y-3">
               {hasPenalty ? (
@@ -364,12 +403,15 @@ export default function Game() {
                   </div>
 
                   <p className="text-sm text-gray-400">
-                    Are you sure you want to leave? This action cannot be undone.
+                    Are you sure you want to leave? This action cannot be
+                    undone.
                   </p>
                 </>
               ) : (
                 <>
-                  <p>The current round has ended. You can leave without penalty.</p>
+                  <p>
+                    The current round has ended. You can leave without penalty.
+                  </p>
 
                   <div className="bg-black/30 p-4 rounded-lg space-y-2 my-4">
                     <div className="flex justify-between text-lg">
@@ -389,11 +431,15 @@ export default function Game() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel className="bg-gray-800 hover:bg-gray-700">
-              {hasPenalty ? 'Stay in Game' : 'Cancel'}
+              {hasPenalty ? "Stay in Game" : "Cancel"}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmLeave}
-              className={hasPenalty ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'}
+              className={
+                hasPenalty
+                  ? "bg-red-600 hover:bg-red-700"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }
             >
               Leave Game
             </AlertDialogAction>
@@ -402,7 +448,12 @@ export default function Game() {
       </AlertDialog>
 
       {/* Session Summary Dialog */}
-      <Dialog open={!!sessionSummary} onOpenChange={(open) => { if (!open) handleSessionSummaryClose(); }}>
+      <Dialog
+        open={!!sessionSummary}
+        onOpenChange={(open) => {
+          if (!open) handleSessionSummaryClose();
+        }}
+      >
         <DialogContent className="sm:max-w-lg bg-gray-900 text-white border-gray-700">
           <DialogHeader>
             <DialogTitle className="text-2xl text-center">
@@ -430,7 +481,8 @@ export default function Game() {
                         : "text-gray-400"
                   }`}
                 >
-                  {sessionSummary.profit >= 0 ? "+" : ""}${sessionSummary.profit.toLocaleString()}
+                  {sessionSummary.profit >= 0 ? "+" : ""}$
+                  {sessionSummary.profit.toLocaleString()}
                 </span>
                 <span className="text-sm text-gray-400">
                   {sessionSummary.profit > 0
@@ -450,7 +502,9 @@ export default function Game() {
                 </div>
                 <div className="bg-black/30 p-4 rounded-lg text-center">
                   <Trophy className="w-5 h-5 mx-auto mb-1 text-amber-400" />
-                  <p className="text-lg font-bold">{sessionSummary.roundsPlayed}</p>
+                  <p className="text-lg font-bold">
+                    {sessionSummary.roundsPlayed}
+                  </p>
                   <p className="text-xs text-gray-500">Rounds Played</p>
                 </div>
               </div>
@@ -459,20 +513,29 @@ export default function Game() {
               <div className="bg-black/30 p-4 rounded-lg space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Starting chips</span>
-                  <span className="font-medium">${sessionSummary.startingChips.toLocaleString()}</span>
+                  <span className="font-medium">
+                    ${sessionSummary.startingChips.toLocaleString()}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-400">Final chips</span>
-                  <span className="font-medium">${sessionSummary.finalChips.toLocaleString()}</span>
+                  <span className="font-medium">
+                    ${sessionSummary.finalChips.toLocaleString()}
+                  </span>
                 </div>
-                {sessionSummary.wasEarlyLeave && sessionSummary.penaltyAmount > 0 && (
-                  <div className="flex justify-between text-sm text-red-400">
-                    <span>Early leave penalty</span>
-                    <span className="font-medium">-${sessionSummary.penaltyAmount.toLocaleString()}</span>
-                  </div>
-                )}
+                {sessionSummary.wasEarlyLeave &&
+                  sessionSummary.penaltyAmount > 0 && (
+                    <div className="flex justify-between text-sm text-red-400">
+                      <span>Early leave penalty</span>
+                      <span className="font-medium">
+                        -${sessionSummary.penaltyAmount.toLocaleString()}
+                      </span>
+                    </div>
+                  )}
                 <div className="border-t border-gray-700 pt-2 flex justify-between">
-                  <span className="text-gray-300 font-medium">Balance returned</span>
+                  <span className="text-gray-300 font-medium">
+                    Balance returned
+                  </span>
                   <span className="font-bold text-amber-400">
                     ${sessionSummary.balanceReturned.toLocaleString()}
                   </span>
@@ -487,6 +550,78 @@ export default function Game() {
               onClick={handleSessionSummaryClose}
             >
               Back to Dashboard
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isRebuyModalOpen}
+        onOpenChange={() => {}} // prevent closing by clicking outside
+      >
+        <DialogContent
+          className="sm:max-w-md bg-gray-900 text-white border-gray-700"
+          onInteractOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-center">
+              You are out of chips!
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex flex-col items-center justify-center py-6 space-y-6">
+            <div className="relative flex items-center justify-center w-32 h-32">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  fill="transparent"
+                  className="text-gray-700"
+                />
+                <circle
+                  cx="64"
+                  cy="64"
+                  r="56"
+                  stroke="currentColor"
+                  strokeWidth="8"
+                  fill="transparent"
+                  strokeDasharray={2 * Math.PI * 56}
+                  strokeDashoffset={2 * Math.PI * 56 * (1 - rebuyTimeLeft / 10)}
+                  className="text-amber-500 transition-all duration-1000 ease-linear"
+                />
+              </svg>
+              <div className="absolute flex items-center justify-center w-full h-full">
+                <span className="text-3xl font-bold">{rebuyTimeLeft}</span>
+              </div>
+            </div>
+            <p className="text-gray-400 text-center">
+              Would you like to rebuy to continue playing or leave the table?
+            </p>
+          </div>
+
+          <DialogFooter className="flex gap-2 sm:justify-between">
+            <Button
+              variant="outline"
+              className="w-full border-red-700 text-red-500 hover:bg-red-900/20 hover:text-red-400"
+              onClick={() => {
+                submitRebuy(false);
+                setIsRebuyModalOpen(false);
+              }}
+            >
+              Leave Table
+            </Button>
+            <Button
+              className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+              onClick={() => {
+                submitRebuy(true);
+                setIsRebuyModalOpen(false);
+              }}
+            >
+              Rebuy (Buy-in)
             </Button>
           </DialogFooter>
         </DialogContent>

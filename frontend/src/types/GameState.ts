@@ -18,6 +18,7 @@ export interface Player {
     comment?: string;
     userId?: string | null;
     profileImageUrl?: string | null;
+    isAwaitingRebuy: boolean;
 }
 
 export interface GameState {

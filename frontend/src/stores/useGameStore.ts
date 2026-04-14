@@ -17,6 +17,7 @@ interface GameStore {
 
   setAnimating: (v: boolean) => void;
   playerAction: (action: string, payload?: GameActionPayload) => Promise<void>;
+  submitRebuy: (wantsToRebuy: boolean) => Promise<void>;
   startNewRound: () => Promise<void>;
   leaveGame: () => Promise<void>;
 
@@ -172,6 +173,24 @@ export const useGameStore = create<GameStore>((set, get) => ({
     } catch (error: any) {
       console.error("Failed to start new round:", error);
       toast.error(error.message || "Failed to start new round");
+    }
+  },
+
+  submitRebuy: async (wantsToRebuy: boolean) => {
+    const { connection } = get();
+    if (
+      !connection ||
+      connection.state !== signalR.HubConnectionState.Connected
+    ) {
+      toast.error("Not connected to game");
+      return;
+    }
+
+    try {
+      await connection.invoke("SubmitRebuy", wantsToRebuy);
+    } catch (error: any) {
+      console.error("Failed to submit rebuy:", error);
+      toast.error(error.message || "Failed to submit rebuy");
     }
   },
 

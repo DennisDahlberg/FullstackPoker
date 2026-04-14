@@ -66,6 +66,7 @@ public class GameHub : Hub
                 LastAction = p.LastAction,
                 LastActionAmount = p.LastActionAmount,
                 Comment = p.Comment,
+                IsAwaitingRebuy = p.IsAwaitingRebuy
             };
 
             bool isMe = p.UserId == viewerUserId;
