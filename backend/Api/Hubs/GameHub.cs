@@ -524,17 +524,28 @@ public class GameHub : Hub
             }
             else
             {
-                await _gameStateManager.SaveGameStateAsync(gameId, gameState);
-
+                if (gameState.IsGameOver &&
+                    remainingHumans.All(p => gameState.ReadyPlayerIds.Contains(p.UserId!)))
+                {
+                    gameState.ReadyPlayerIds.Clear();
+                    var newGameState = _gameService.NewRound(gameState);
+                    await _gameStateManager.SaveGameStateAsync(gameId, newGameState);
+                    await BroadcastGameState(gameId, newGameState);
+                    await ProcessBotTurns(gameId, newGameState);
+                }
+                else
+                {
+                    await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+                    await BroadcastGameState(gameId, gameState);
+                    await ProcessBotTurns(gameId, gameState);
+                }
+                
                 var user = await _userService.GetUserById(leavingUserId!);
                 if (user != null)
                 {
                     await Clients.Group($"game_{gameId}")
                         .SendAsync("PlayerDisconnected", user.UserName);
                 }
-
-                await BroadcastGameState(gameId, gameState);
-                await ProcessBotTurns(gameId, gameState);
             }
         }
         catch (Exception ex)
