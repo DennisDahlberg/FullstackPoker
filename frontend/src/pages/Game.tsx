@@ -33,6 +33,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { set } from "date-fns";
 
 export default function Game() {
   const navigate = useNavigate();
@@ -143,6 +144,12 @@ export default function Game() {
     if (!game || !player) return 0;
     return game.highestBet - (player.currentBet || 0);
   };
+
+  const handlePlayAnotherRound = async () => {
+    hasSubmittedReadyRef.current = true;
+    setHasSubmittedReady(true);
+    await submitReady();
+  }
 
   const getButtonConfig = (action: string) => {
     switch (action) {
