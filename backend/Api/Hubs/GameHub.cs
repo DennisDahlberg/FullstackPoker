@@ -5,6 +5,7 @@ using HoldemPoker.Cards;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.AI;
 
 namespace backend.Hubs;
 
@@ -459,104 +460,101 @@ public class GameHub : Hub
     }
 
     public async Task LeaveGame()
+{
+    var userId = _userService.GetLoggedInUserId(Context.User!);
+    var gameId = await _gameStateManager.GetUserCurrentGameAsync(userId);
+    if (gameId is null) return;
+
+    var gameLock = GetGameLock(gameId);
+    await gameLock.WaitAsync();
+    try
     {
-        var userId = _userService.GetLoggedInUserId(Context.User!);
-        var gameId = await _gameStateManager.GetUserCurrentGameAsync(userId);
-        if (gameId is null)
-            return;
+        var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+        if (gameState == null) return;
 
-        var gameLock = GetGameLock(gameId);
-        await gameLock.WaitAsync();
-        try
+        var leavingPlayer = gameState.Players.FirstOrDefault(p => p.UserId == userId);
+        if (leavingPlayer == null) return;
+
+        bool isEarlyLeave = !gameState.IsGameOver;
+        int payout = isEarlyLeave ? (int)(leavingPlayer.Chips * 0.9) : leavingPlayer.Chips;
+        var session = _gameHistoryService.GetGameSessionForPlayer(leavingPlayer, gameState);
+        var leavingUserId = leavingPlayer.UserId!;
+        var leavingIndex = gameState.Players.IndexOf(leavingPlayer);
+
+        leavingPlayer.IsFolded = true;
+        leavingPlayer.IsActive = false;
+        
+        if (!gameState.IsGameOver)
         {
-            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
-            if (gameState == null)
-                return;
-
-            var leavingPlayer = gameState.Players.FirstOrDefault(p => p.UserId == userId);
-            if (leavingPlayer == null) return;
-
-            bool isEarlyLeave = !gameState.IsGameOver;
-            int payout = isEarlyLeave
-                ? (int)(leavingPlayer.Chips * 0.9)
-                : leavingPlayer.Chips;
-            
-            var session = _gameHistoryService.GetGameSessionForPlayer(leavingPlayer, gameState);
-
-            leavingPlayer.IsFolded = true;
-            leavingPlayer.IsActive = false;
-            leavingPlayer.Chips = 0;
-            var leavingUserId = leavingPlayer.UserId;
-            leavingPlayer.UserId = null;
-
-            if (gameState.CurrentPlayerIndex >= 0 && 
-                gameState.CurrentPlayerIndex < gameState.Players.Count &&
-                gameState.Players[gameState.CurrentPlayerIndex] == leavingPlayer)
+            var remainingActive = gameState.Players.Count(p => p.IsActive);
+            if (remainingActive <= 1)
             {
-                var activePlayers = gameState.Players.Where(p => p.IsActive).ToList();
-                if (activePlayers.Count <= 1)
-                {
-                    leavingPlayer.IsFolded = true;
-                    leavingPlayer.IsActive = false;
-                    leavingPlayer.LastAction = "fold";
-                    leavingPlayer.HasActedThisRound = true;
-                }
-                else
-                {
-                    _gameService.HandleNextPlayer(gameState);
-                }
+                await _gameService.HandleEndOfRound(gameState); 
             }
-
-            await _userService.UpdateUserBalanceAsync(leavingUserId!, payout);
-            await _gameStateManager.DeleteUserCurrentGameAsync(leavingUserId!);
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"game_{gameId}");
-
-            await Clients.Caller.SendAsync("GameLeft", session);
-
-            var remainingHumans = gameState.Players
-                .Where(p => p.IsPlayer && p.UserId != null)
-                .ToList();
-
-            if (remainingHumans.Count == 0)
+            else if (gameState.Players[gameState.CurrentPlayerIndex] == leavingPlayer)
             {
-                await _gameStateManager.DeleteGameStateAsync(gameId);
-                _gameLocks.TryRemove(gameId, out _);
+                _gameService.HandleNextPlayer(gameState);
+            }
+        }
+
+        gameState.Players.RemoveAt(leavingIndex);
+
+        if (gameState.Players.Count > 0)
+        {
+            gameState.DealerPosition     = AdjustIndex(gameState.DealerPosition,     leavingIndex, gameState.Players.Count);
+            gameState.SmallBlindPosition = AdjustIndex(gameState.SmallBlindPosition, leavingIndex, gameState.Players.Count);
+            gameState.BigBlindPosition   = AdjustIndex(gameState.BigBlindPosition,   leavingIndex, gameState.Players.Count);
+            gameState.CurrentPlayerIndex = AdjustIndex(gameState.CurrentPlayerIndex, leavingIndex, gameState.Players.Count);
+        }
+
+        gameState.WinnersPositions = gameState.WinnersPositions
+            .Where(pos => pos != leavingIndex)
+            .Select(pos => pos > leavingIndex ? pos - 1 : pos)
+            .ToList();
+
+        await _userService.UpdateUserBalanceAsync(leavingUserId, payout);
+        await _gameStateManager.DeleteUserCurrentGameAsync(leavingUserId);
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"game_{gameId}");
+        await Clients.Caller.SendAsync("GameLeft", session);
+
+        var remainingHumans = gameState.Players.Where(p => p.IsPlayer && p.UserId != null).ToList();
+
+        if (remainingHumans.Count == 0)
+        {
+            await _gameStateManager.DeleteGameStateAsync(gameId);
+            _gameLocks.TryRemove(gameId, out _);
+        }
+        else
+        {
+            if (gameState.IsGameOver && remainingHumans.All(p => gameState.ReadyPlayerIds.Contains(p.UserId!)))
+            {
+                gameState.ReadyPlayerIds.Clear();
+                var newGameState = _gameService.NewRound(gameState);
+                await _gameStateManager.SaveGameStateAsync(gameId, newGameState);
+                await BroadcastGameState(gameId, newGameState);
+                await ProcessBotTurns(gameId, newGameState);
             }
             else
             {
-                if (gameState.IsGameOver &&
-                    remainingHumans.All(p => gameState.ReadyPlayerIds.Contains(p.UserId!)))
-                {
-                    gameState.ReadyPlayerIds.Clear();
-                    var newGameState = _gameService.NewRound(gameState);
-                    await _gameStateManager.SaveGameStateAsync(gameId, newGameState);
-                    await BroadcastGameState(gameId, newGameState);
-                    await ProcessBotTurns(gameId, newGameState);
-                }
-                else
-                {
-                    await _gameStateManager.SaveGameStateAsync(gameId, gameState);
-                    await BroadcastGameState(gameId, gameState);
-                    await ProcessBotTurns(gameId, gameState);
-                }
-                
-                var user = await _userService.GetUserById(leavingUserId!);
-                if (user != null)
-                {
-                    await Clients.Group($"game_{gameId}")
-                        .SendAsync("PlayerDisconnected", user.UserName);
-                }
+                await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+                await BroadcastGameState(gameId, gameState);
+                await ProcessBotTurns(gameId, gameState);
             }
-        }
-        catch (Exception ex)
-        {
-            await Clients.Caller.SendAsync("Error", ex.Message);
-        }
-        finally
-        {
-            gameLock.Release();
+
+            var user = await _userService.GetUserById(leavingUserId);
+            if (user != null)
+                await Clients.Group($"game_{gameId}").SendAsync("PlayerDisconnected", user.UserName);
         }
     }
+    catch (Exception ex)
+    {
+        await Clients.Caller.SendAsync("Error", ex.Message);
+    }
+    finally
+    {
+        gameLock.Release();
+    }
+}
 
     public override async Task OnDisconnectedAsync(Exception? exception)
     {
@@ -578,5 +576,12 @@ public class GameHub : Hub
         }
         
         await base.OnDisconnectedAsync(exception);
+    }
+    
+    private static int AdjustIndex(int index, int removedIndex, int newCount)
+    {
+        if (index > removedIndex) return index - 1;
+        if (index == removedIndex) return removedIndex % newCount;
+        return index;
     }
 }
