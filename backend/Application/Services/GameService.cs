@@ -84,6 +84,10 @@ namespace Application.Services
 
     public GameState NewRound(GameState gameState)
     {
+        gameState.Players.RemoveAll(p => !p.IsPlayer && p.Chips <= 0);
+        if (gameState.Players.Count > 0)
+            gameState.DealerPosition = gameState.DealerPosition % gameState.Players.Count;
+        
         gameState.Deck = InitializeDeck();
         gameState.CommunityCards.Clear();
         GetCommunityCards(gameState);
