@@ -10,7 +10,7 @@ import {
   Trophy,
 } from "lucide-react";
 import PlayingCard from "@/components/PlayingCard";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGameStore } from "@/stores/useGameStore";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -43,6 +43,7 @@ export default function Game() {
   const disconnectFromGame = useGameStore((s) => s.disconnectFromGame);
   const playerAction = useGameStore((s) => s.playerAction);
   const submitRebuy = useGameStore((s) => s.submitRebuy);
+  const submitReady = useGameStore((s) => s.submitReady);
   const startNewRound = useGameStore((s) => s.startNewRound);
   const leaveGame = useGameStore((s) => s.leaveGame);
   const clearError = useGameStore((s) => s.clearError);
@@ -54,6 +55,10 @@ export default function Game() {
   const [isLeaveWarningOpen, setIsLeaveWarningOpen] = useState(false);
   const [rebuyTimeLeft, setRebuyTimeLeft] = useState(10);
   const minRaise = game ? game.smallBlind : 0;
+
+  const [readyTimeLeft, setReadyTimeLeft] = useState(10);
+  const [hasSubmittedReady, setHasSubmittedReady] = useState(false);
+  const hasSubmittedReadyRef = useRef(false);
 
   const myUserId = game?.currentViewerUserId;
   const player = game?.players.find((p) => p.userId === myUserId);
