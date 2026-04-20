@@ -66,10 +66,10 @@ export default function Game() {
 
   useEffect(() => {
     if (!game?.isGameOver) {
-        hasSubmittedReadyRef.current = false;
-        setHasSubmittedReady(false);
-        setReadyTimeLeft(10);
-        return;
+      hasSubmittedReadyRef.current = false;
+      setHasSubmittedReady(false);
+      setReadyTimeLeft(10);
+      return;
     }
     hasSubmittedReadyRef.current = false;
     setHasSubmittedReady(false);
@@ -86,7 +86,7 @@ export default function Game() {
         }
         return prev - 1;
       });
-    }, 1000);   
+    }, 1000);
     return () => clearInterval(timer);
   }, [game?.isGameOver, leaveGame]);
 
@@ -149,7 +149,7 @@ export default function Game() {
     hasSubmittedReadyRef.current = true;
     setHasSubmittedReady(true);
     await submitReady();
-  }
+  };
 
   const getButtonConfig = (action: string) => {
     switch (action) {
@@ -280,16 +280,76 @@ export default function Game() {
       </div>
 
       {game?.isGameOver && (
-        <div className="w-full flex flex-col items-center justify-center">
-          <h1 className="text-4xl font-bold mb-6">
+        <div className="w-full flex flex-col items-center justify-center py-4 gap-3">
+          <h1 className="text-3xl font-bold">
             Winners:{" "}
             {game.winnersPositions
               .map((pos) => game.players[pos].name)
               .join(", ")}
           </h1>
-          <Button variant={"outline"} className="mb-2" onClick={startNewRound}>
-            Start New Round
-          </Button>
+
+          <div className="flex items-center gap-6">
+            {/* Circular countdown */}
+            <div className="relative flex items-center justify-center w-20 h-20">
+              <svg className="w-full h-full transform -rotate-90">
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="32"
+                  stroke="currentColor"
+                  strokeWidth="6"
+                  fill="transparent"
+                  className="text-gray-700"
+                />
+                <circle
+                  cx="40"
+                  cy="40"
+                  r="32"
+                  stroke="currentColor"
+                  strokeWidth="6"
+                  fill="transparent"
+                  strokeDasharray={2 * Math.PI * 32}
+                  strokeDashoffset={2 * Math.PI * 32 * (1 - readyTimeLeft / 10)}
+                  className="text-green-500 transition-all duration-1000 ease-linear"
+                />
+              </svg>
+              <span className="absolute text-xl font-bold">
+                {readyTimeLeft}
+              </span>
+            </div>
+
+            {hasSubmittedReady ? (
+              <span className="text-green-400 font-semibold">
+                You're ready!
+              </span>
+            ) : (
+              <Button
+                onClick={handlePlayAnotherRound}
+                className="bg-green-600 hover:bg-green-700 text-white"
+              >
+                Play Another Round
+              </Button>
+            )}
+          </div>
+
+          {/* Ready count + who's ready */}
+          <p className="text-gray-400 text-sm">
+            {game.readyPlayerIds.length} /{" "}
+            {game.players.filter((p) => p.isPlayer && p.userId).length} players
+            ready
+          </p>
+          <div className="flex gap-2 flex-wrap justify-center">
+            {game.players
+              .filter((p) => p.isPlayer && p.userId)
+              .map((p) => (
+                <span
+                  key={p.userId}
+                  className={`text-xs px-2 py-1 rounded-full ${game.readyPlayerIds.includes(p.userId!) ? "bg-green-700 text-white" : "bg-gray-700 text-gray-400"}`}
+                >
+                  {p.name} {game.readyPlayerIds.includes(p.userId!) ? "✓" : ""}
+                </span>
+              ))}
+          </div>
         </div>
       )}
 
