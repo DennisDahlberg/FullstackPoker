@@ -372,6 +372,61 @@ public class GameHub : Hub
         
     }
 
+    public async Task SubmitReady()
+    {
+        var userId = _userService.GetLoggedInUserId(Context.User!);
+        
+        var gameId = await _gameStateManager.GetUserCurrentGameAsync(userId);
+        if (gameId is null)
+        {
+            _logger.LogWarning("Rebuy failed for User {UserId}: No active game found", userId);
+            await Clients.Caller.SendAsync("Error", "No active game found");
+            return;
+        }
+
+        var gameLock = GetGameLock(gameId);
+        _logger.LogDebug("User {UserId} waiting for lock on game {GameId} for Submit", userId, gameId);
+        await gameLock.WaitAsync();
+        _logger.LogDebug("User {UserId} acquired lock on game {GameId} for Rebuy", userId, gameId);
+        try
+        {
+            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+            if (gameState is null || !gameState.IsGameOver) return;
+            
+            if (!gameState.ReadyPlayerIds.Contains(userId))
+                gameState.ReadyPlayerIds.Add(userId);
+
+            var humanPlayers = gameState.Players
+                .Where(p => p.IsPlayer && p.UserId != null)
+                .ToList();
+            var allReady = humanPlayers
+                .All(p => gameState.ReadyPlayerIds.Contains(p.UserId!));
+
+            if (allReady)
+            {
+                gameState.ReadyPlayerIds.Clear();
+                var newGameState = _gameService.NewRound(gameState);
+                await _gameStateManager.SaveGameStateAsync(gameId, newGameState);
+                await BroadcastGameState(gameId, newGameState);
+                await ProcessBotTurns(gameId, newGameState);
+            }
+            else
+            {
+                await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+                await BroadcastGameState(gameId, gameState);
+            }
+        }
+        catch (Exception ex)
+        {
+            await Clients.Caller.SendAsync("Error", ex.Message);
+            _logger.LogError(ex, "Error processing Ready up for User {UserId} in game {GameId}", userId, gameId);
+        }
+        finally
+        {
+            gameLock.Release();
+        }
+    }
+
     public async Task StartNewRound()
     {
         var userId = _userService.GetLoggedInUserId(Context.User!);
