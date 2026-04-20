@@ -40,6 +40,7 @@ export interface GameState {
     penaltyAmount: number;
     earlyLeavePayout: number;
     currentViewerUserId?: string | null;
+    readyPlayerIds: string[];
 }
 
 export interface GameSessionSummary {
