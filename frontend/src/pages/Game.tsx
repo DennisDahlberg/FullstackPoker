@@ -64,8 +64,30 @@ export default function Game() {
   const player = game?.players.find((p) => p.userId === myUserId);
 
   useEffect(() => {
-    console.log("Current player state:", player);
-  }, [player]);
+    if (!game?.isGameOver) {
+        hasSubmittedReadyRef.current = false;
+        setHasSubmittedReady(false);
+        setReadyTimeLeft(10);
+        return;
+    }
+    hasSubmittedReadyRef.current = false;
+    setHasSubmittedReady(false);
+    setReadyTimeLeft(10);
+
+    const timer = setInterval(() => {
+      setReadyTimeLeft((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          if (!hasSubmittedReadyRef.current) {
+            leaveGame();
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);   
+    return () => clearInterval(timer);
+  }, [game?.isGameOver, leaveGame]);
 
   useEffect(() => {
     if (player?.isAwaitingRebuy) {
