@@ -328,20 +328,32 @@ public class GameHub : Hub
             if (!wantsToRebuy)
             {
                 var session = _gameHistoryService.GetGameSessionForPlayer(player, gameState);
+                var leavingUserId = player.UserId!;
+                var leavingIndex = gameState.Players.IndexOf(player);
+                
+                gameState.Players.RemoveAt(leavingIndex);
 
-                player.IsAwaitingRebuy = false;
-                player.IsFolded = true;
-                player.IsActive = false;
-                var leavingUserId = player.UserId;
-
+                if (gameState.Players.Count > 0)
+                {
+                    gameState.DealerPosition     = AdjustIndex(gameState.DealerPosition,     leavingIndex, gameState.Players.Count);
+                    gameState.SmallBlindPosition = AdjustIndex(gameState.SmallBlindPosition, leavingIndex, gameState.Players.Count);
+                    gameState.BigBlindPosition   = AdjustIndex(gameState.BigBlindPosition,   leavingIndex, gameState.Players.Count);
+                    gameState.CurrentPlayerIndex = AdjustIndex(gameState.CurrentPlayerIndex, leavingIndex, gameState.Players.Count);
+                }
+                
+                gameState.WinnersPositions = gameState.WinnersPositions
+                    .Where(pos => pos != leavingIndex)
+                    .Select(pos => pos > leavingIndex ? pos - 1 : pos)
+                    .ToList();
+                
                 await _gameStateManager.DeleteUserCurrentGameAsync(leavingUserId!);
                 await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"game_{gameId}");
                 await Clients.Caller.SendAsync("GameLeft", session);
-
+                
                 var remainingHumans = gameState.Players
                     .Where(p => p.IsPlayer && p.UserId != null)
                     .ToList();
-
+                
                 if (remainingHumans.Count == 0)
                 {
                     await _gameStateManager.DeleteGameStateAsync(gameId);
@@ -349,14 +361,23 @@ public class GameHub : Hub
                 }
                 else
                 {
-                    await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+                    if (remainingHumans.All(p => gameState.ReadyPlayerIds.Contains(p.UserId!)))
+                    {
+                        gameState.ReadyPlayerIds.Clear();
+                        var newGameState = _gameService.NewRound(gameState);
+                        await _gameStateManager.SaveGameStateAsync(gameId, newGameState);
+                        await BroadcastGameState(gameId, newGameState);
+                        await ProcessBotTurns(gameId, newGameState);
+                    }
+                    else
+                    {
+                        await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+                        await BroadcastGameState(gameId, gameState);
+                    }
 
-                    var user = await _userService.GetUserById(leavingUserId!);
+                    var user = await _userService.GetUserById(leavingUserId);
                     if (user != null)
                         await Clients.Group($"game_{gameId}").SendAsync("PlayerDisconnected", user.UserName);
-
-                    await BroadcastGameState(gameId, gameState);
-                    await ProcessBotTurns(gameId, gameState);
                 }
             }
         }
