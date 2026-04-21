@@ -254,6 +254,8 @@ namespace Application.Services
             actions.Add("call");
         if (player.Chips >= callAmount && player.HasActedThisRound == false)
             actions.Add("raise");
+        if (callAmount > player.Chips)
+            actions.Add("all-in");
 
         actions.Add("fold");
 
