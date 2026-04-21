@@ -326,6 +326,7 @@ export default function Game() {
                 card1DealDelay={card1Delay}
                 card2DealDelay={card2Delay}
                 roundKey={roundKey}
+                dealerPosition={game.dealerPosition}
               />
             );
           })}

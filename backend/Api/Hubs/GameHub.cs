@@ -124,6 +124,7 @@ public class GameHub : Hub
             PenaltyAmount = penaltyAmount,
             EarlyLeavePayout = earlyLeavePayout,
             CurrentViewerUserId = viewerUserId,
+            DealerPosition = gameState.DealerPosition
         };
     }
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PlayingCard from "./PlayingCard";
 import type { Player } from "@/types/GameState";
-import { SEAT_DEAL_OFFSETS } from "@/lib/dealOffsets";
+import { getDynamicOffsets } from "@/lib/dealOffsets";
 
 export default function PlayerSeat({
   position,
@@ -13,6 +13,7 @@ export default function PlayerSeat({
   card1DealDelay = 0,
   card2DealDelay = 0,
   roundKey = 0,
+  dealerPosition = 0,
 }: {
   position: number;
   player: Player;
@@ -22,6 +23,7 @@ export default function PlayerSeat({
   card1DealDelay?: number;
   card2DealDelay?: number;
   roundKey?: number;
+  dealerPosition?: number;
 }) {
   const positions: Record<number, string> = {
     0: "bottom-3 left-1/2 -translate-x-1/2",
@@ -45,9 +47,18 @@ export default function PlayerSeat({
   > = {
     fold: () => ({ message: "Folded", className: "text-red-400" }),
     check: () => ({ message: "Checked", className: "text-gray-300" }),
-    call: (amount) => ({ message: `Called $${amount}`, className: "text-blue-400" }),
-    bet: (amount) => ({ message: `Bet $${amount}`, className: "text-yellow-400" }),
-    raise: (amount) => ({ message: `Raised $${amount}`, className: "text-green-400" }),
+    call: (amount) => ({
+      message: `Called $${amount}`,
+      className: "text-blue-400",
+    }),
+    bet: (amount) => ({
+      message: `Bet $${amount}`,
+      className: "text-yellow-400",
+    }),
+    raise: (amount) => ({
+      message: `Raised $${amount}`,
+      className: "text-green-400",
+    }),
     allin: () => ({ message: `All-In`, className: "text-purple-400" }),
     small: () => ({ message: "Small Blind", className: "text-gray-200" }),
     big: () => ({ message: "Big Blind", className: "text-gray-200" }),
@@ -74,7 +85,11 @@ export default function PlayerSeat({
     }
   }, [player?.comment]);
 
-  const [offsetX, offsetY] = SEAT_DEAL_OFFSETS[position] ?? [0, -220];
+  const offsets = getDynamicOffsets();
+  const [px, py] = offsets[position] ?? [0, -220];
+  const [dx, dy] = offsets[dealerPosition] ?? [0, -220];
+  const offsetX = px - dx;
+  const offsetY = py - dy;
 
   return (
     <motion.div
@@ -93,8 +108,12 @@ export default function PlayerSeat({
         <div className="relative flex flex-col">
           {/* Name / chips panel */}
           <div className="flex flex-col items-center z-10 bg-gray-900 rounded text-sm w-35">
-            <span className="w-full text-center border-b border-gray-700">{player?.name}</span>
-            <span className="self-end pr-2">${player?.chips.toLocaleString()}</span>
+            <span className="w-full text-center border-b border-gray-700">
+              {player?.name}
+            </span>
+            <span className="self-end pr-2">
+              ${player?.chips.toLocaleString()}
+            </span>
           </div>
 
           <motion.img
@@ -172,17 +191,26 @@ export default function PlayerSeat({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 400, damping: 22 }}
             className={`absolute -bottom-7 bg-gray-900 w-full rounded text-md text-center ${
-              getActionMessage(player.lastAction, player.lastActionAmount).className
+              getActionMessage(player.lastAction, player.lastActionAmount)
+                .className
             }`}
           >
-            {getActionMessage(player.lastAction, player.lastActionAmount).message}
+            {
+              getActionMessage(player.lastAction, player.lastActionAmount)
+                .message
+            }
           </motion.span>
 
           {isWinner && isGameOver && (
             <motion.div
               initial={{ scale: 0, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ type: "spring", stiffness: 500, damping: 14, delay: 0.3 }}
+              transition={{
+                type: "spring",
+                stiffness: 500,
+                damping: 14,
+                delay: 0.3,
+              }}
               className="absolute top-5.5 -left-8 right-0 flex justify-center z-30"
             >
               <span className="bg-amber-500 text-black text-xs font-bold px-2 py-0.5 rounded-full shadow-lg whitespace-nowrap">
