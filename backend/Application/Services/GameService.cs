@@ -324,7 +324,7 @@ namespace Application.Services
         if (!string.IsNullOrEmpty(actionRequest.Comment))
             currentPlayer.Comment = actionRequest.Comment;
 
-        if (state.Players.Count(p => p.IsActive) == 1)
+        if (state.Players.Count(p => !p.IsFolded) == 1)
         {
             await HandleEndOfRound(state);
             state.AvailableActions = GetAvailableActions(state);
@@ -434,56 +434,69 @@ namespace Application.Services
     public async Task HandleEndOfRound(GameState state)
     {
         var activePlayers = state.Players
-            .Where(p => p.IsFolded == false)
+            .Where(p => !p.IsFolded)
+            .OrderBy(p => p.CurrentBet)
             .ToList();
-
+        
         var board = state.CommunityCards
             .Select(ConvertToHoldemPokerCard)
             .ToArray();
 
-        var results = activePlayers.Select(p => new
-        {
-            Player = p,
-            Ranking = HoldemHandEvaluator.GetHandRanking(
-                p.Hand.Select(ConvertToHoldemPokerCard).Concat(board).ToArray()
-            )
-        }).ToList();
+        var rankings = activePlayers.ToDictionary(
+            p => p,
+            p => HoldemHandEvaluator.GetHandRanking(
+                p.Hand.Select(ConvertToHoldemPokerCard).Concat(board).ToArray())
+            );
 
-        var bestRanking = results.Min(r => r.Ranking);
-        var winners = results.Where(r => r.Ranking == bestRanking).ToList();
-
-        int winAmount = state.Pot / winners.Count;
         foreach (var player in activePlayers)
         {
             player.Hand[0].IsHidden = false;
             player.Hand[1].IsHidden = false;
         }
-
-        foreach (var winner in winners)
-        {
-            winner.Player.Chips += winAmount;
-            state.WinnersPositions.Add(state.Players.IndexOf(winner.Player));
-            
-            if (!winner.Player.IsPlayer)
-            {
-                winner.Player.Comment = await _botAiService.GetWinningBotComment(state,  winner.Player);
-            }
-        }
         
+        int alreadyDistributed = 0;
+
+        foreach (var pivotPLayer in activePlayers)
+        {
+            int cap = pivotPLayer.CurrentBet;
+
+            int potAmount = state.Players.Sum(p => Math.Min(p.CurrentBet, cap));
+            potAmount -= alreadyDistributed;
+            alreadyDistributed += potAmount;
+            
+            if (potAmount <= 0) continue;
+
+            var eligible = activePlayers.Where(p => p.CurrentBet >= cap).ToList();
+            
+            var bestRanking = eligible.Min(p => rankings[p]);
+            var winners = eligible.Where(p => rankings[p] == bestRanking).ToList();
+
+            int winAmount = potAmount / winners.Count;
+            int remainder = potAmount % winners.Count;
+            
+            foreach (var winner in winners)
+            {
+                winner.Chips += winAmount;
+                var idx = state.Players.IndexOf(winner);
+                if (!state.WinnersPositions.Contains(idx))
+                    state.WinnersPositions.Add(idx);
+            }
+
+            if (remainder > 0)
+                winners[0].Chips += remainder; 
+        }
+
         foreach (var player in state.Players)
         {
-            player.BestHand =
-                HoldemHandEvaluator
-                    .GetHandCategory(
-                        player.Hand.Select(ConvertToHoldemPokerCard).Concat(board).ToArray()).
-                    ToString();
-            
-            if (player.Chips <= 0)
-            {
-                player.IsAwaitingRebuy = true;
-            }
-        }
+            player.BestHand = HoldemHandEvaluator
+                .GetHandCategory(
+                    player.Hand.Select(ConvertToHoldemPokerCard).Concat(board).ToArray())
+                .ToString();
 
+            if (player.Chips <= 0)
+                player.IsAwaitingRebuy = true;
+        }
+        
         state.IsGameOver = true;
         state.PenaltyAmount = 0;
         state.RoundsPlayed++;
