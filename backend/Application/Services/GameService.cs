@@ -278,7 +278,7 @@ namespace Application.Services
                 currentPlayer.CurrentBet += callAmount;
                 currentPlayer.Chips -= callAmount;
                 state.Pot += actualCallAmount;
-                if (actualCallAmount < callAmount)
+                if (actualCallAmount >= currentPlayer.Chips)
                 {
                     currentPlayer.IsActive = false;
                 }
@@ -310,6 +310,13 @@ namespace Application.Services
                 currentPlayer.HasActedThisRound = true;
                 currentPlayer.LastAction = "raise";
                 currentPlayer.LastActionAmount = safeRaiseAmount;
+                break;
+            case "all-in":
+                currentPlayer.CurrentBet += currentPlayer.Chips;
+                state.Pot +=  currentPlayer.Chips;
+                currentPlayer.Chips = 0;
+                currentPlayer.LastAction = "all-in";
+                currentPlayer.IsActive = false;
                 break;
         }
 
