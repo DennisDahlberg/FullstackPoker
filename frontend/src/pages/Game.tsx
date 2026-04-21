@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import PlayerSeat from "@/components/PlayerSeat";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
   LogOut,
@@ -59,6 +60,11 @@ export default function Game() {
   const [hasSubmittedReady, setHasSubmittedReady] = useState(false);
   const hasSubmittedReadyRef = useRef(false);
 
+  const prevIsGameOverRef = useRef(false);
+  const [roundKey, setRoundKey] = useState(0);
+
+  const prevCommunityCardCountRef = useRef(0);
+
   const myUserId = game?.currentViewerUserId;
   const player = game?.players.find((p) => p.userId === myUserId);
 
@@ -110,6 +116,18 @@ export default function Game() {
   }, [player?.isAwaitingRebuy, submitRebuy]);
 
   useEffect(() => {
+    if (prevIsGameOverRef.current === true && game?.isGameOver === false) {
+      setRoundKey((k) => k + 1);
+      prevCommunityCardCountRef.current = 0;
+    }
+    prevIsGameOverRef.current = game?.isGameOver ?? false;
+  }, [game?.isGameOver]);
+
+  useEffect(() => {
+    prevCommunityCardCountRef.current = game?.communityCards.length ?? 0;
+  }, [game?.communityCards.length]);
+
+  useEffect(() => {
     connectToGame();
 
     return () => {
@@ -147,6 +165,14 @@ export default function Game() {
     hasSubmittedReadyRef.current = true;
     setHasSubmittedReady(true);
     await submitReady();
+  };
+
+  const getDealDelays = (playerIndex: number): [number, number] => {
+    if (!game) return [0, 0];
+    const count = game.players.length;
+    const dealOrder = (playerIndex - game.dealerPosition - 1 + count) % count;
+    const perCard = 0.15;
+    return [dealOrder * perCard, (count + dealOrder) * perCard];
   };
 
   const getButtonConfig = (action: string) => {
@@ -205,7 +231,11 @@ export default function Game() {
         <div className="flex items-center gap-2 text-sm text-gray-400">
           {game?.isGameOver && (
             <span className="text-amber-400 font-semibold">
-              🏆 {game.winnersPositions.map((pos) => game.players[pos].name).join(", ")} won!
+              🏆{" "}
+              {game.winnersPositions
+                .map((pos) => game.players[pos].name)
+                .join(", ")}{" "}
+              won!
             </span>
           )}
           {isMyTurn && !game?.isGameOver && (
@@ -251,35 +281,54 @@ export default function Game() {
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
               {/* Pot */}
               <div className="bg-black/40 px-6 py-2 rounded-full">
-                <span className="text-amber-400 font-bold text-lg md:text-xl">
+                <motion.span
+                  key={game?.pot}
+                  initial={{ scale: 1.25 }}
+                  animate={{ scale: 1 }}
+                  transition={{ duration: 0.25 }}
+                  className="text-amber-400 font-bold text-lg md:text-xl"
+                >
                   Pot: ${game?.pot.toLocaleString()}
-                </span>
+                </motion.span>
               </div>
 
               {/* Community Cards */}
               <div className="flex gap-2 md:gap-3">
-                {game?.communityCards.map((card, index) => (
-                  <PlayingCard
-                    key={index}
-                    value={`${card.rank}${card.suit}`}
-                    hidden={card.isHidden}
-                  />
-                ))}
+                {game?.communityCards.map((card, index) => {
+                  const prevCount = prevCommunityCardCountRef.current;
+                  const isNew = index >= prevCount;
+                  return (
+                    <PlayingCard
+                      key={`comm-${roundKey}-${index}`}
+                      value={`${card.rank}${card.suit}`}
+                      hidden={card.isHidden}
+                      dealDelay={isNew ? (index - prevCount) * 0.15 : 0}
+                      initialOffsetX={0}
+                      initialOffsetY={isNew ? -100 : 0}
+                    />
+                  );
+                })}
               </div>
             </div>
           </div>
 
           {/* Player Seats */}
-          {game?.players.map((p, index) => (
-            <PlayerSeat
-              key={index}
-              position={index}
-              player={p || undefined}
-              isCurrentPlayer={index === game?.currentPlayerIndex}
-              isWinner={game?.winnersPositions.includes(index)}
-              isGameOver={game?.isGameOver}
-            />
-          ))}
+          {game?.players.map((p, index) => {
+            const [card1Delay, card2Delay] = getDealDelays(index);
+            return (
+              <PlayerSeat
+                key={index}
+                position={index}
+                player={p}
+                isCurrentPlayer={index === game?.currentPlayerIndex}
+                isWinner={game?.winnersPositions.includes(index)}
+                isGameOver={game?.isGameOver}
+                card1DealDelay={card1Delay}
+                card2DealDelay={card2Delay}
+                roundKey={roundKey}
+              />
+            );
+          })}
         </div>
       </div>
 
@@ -290,49 +339,101 @@ export default function Game() {
             <div className="flex items-center gap-4">
               <div className="relative flex items-center justify-center w-10 h-10 shrink-0">
                 <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="3"
-                    fill="transparent" className="text-gray-700" />
-                  <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="3"
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="16"
+                    stroke="currentColor"
+                    strokeWidth="3"
+                    fill="transparent"
+                    className="text-gray-700"
+                  />
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="16"
+                    stroke="currentColor"
+                    strokeWidth="3"
                     fill="transparent"
                     strokeDasharray={2 * Math.PI * 16}
-                    strokeDashoffset={2 * Math.PI * 16 * (1 - readyTimeLeft / 20)}
-                    className="text-green-500 transition-all duration-1000 ease-linear" />
+                    strokeDashoffset={
+                      2 * Math.PI * 16 * (1 - readyTimeLeft / 20)
+                    }
+                    className="text-green-500 transition-all duration-1000 ease-linear"
+                  />
                 </svg>
-                <span className="absolute text-xs font-bold">{readyTimeLeft}</span>
+                <span className="absolute text-xs font-bold">
+                  {readyTimeLeft}
+                </span>
               </div>
               {hasSubmittedReady ? (
-                <span className="text-green-400 font-semibold text-sm">You're ready!</span>
+                <span className="text-green-400 font-semibold text-sm">
+                  You're ready!
+                </span>
               ) : (
-                <Button onClick={handlePlayAnotherRound}
-                  className="bg-green-600 hover:bg-green-700 text-white">
+                <Button
+                  onClick={handlePlayAnotherRound}
+                  className="bg-green-600 hover:bg-green-700 text-white"
+                >
                   Play Another Round
                 </Button>
               )}
-              <Button variant="outline"
+              <Button
+                variant="outline"
                 className="border-red-700 text-red-400 hover:bg-red-900/20 hover:text-red-300"
-                onClick={handleLeaveClick}>
+                onClick={handleLeaveClick}
+              >
                 Leave
               </Button>
               <span className="text-gray-500 text-sm">
-                {game.readyPlayerIds.length} / {game.players.filter((p) => p.isPlayer && p.userId).length} ready
+                {game.readyPlayerIds.length} /{" "}
+                {game.players.filter((p) => p.isPlayer && p.userId).length}{" "}
+                ready
               </span>
             </div>
           ) : isMyTurn && (game?.availableActions.length ?? 0) > 0 ? (
-            <div className="flex items-center gap-3">
-              {game?.availableActions.map((action) => {
-                const buttonConfig = getButtonConfig(action);
-                return (
-                  <Button
-                    key={action}
-                    variant="outline"
-                    className={buttonConfig?.className}
-                    onClick={buttonConfig?.onClick}
-                  >
-                    {buttonConfig?.label}
-                  </Button>
-                );
-              })}
-            </div>
+            <AnimatePresence mode="wait">
+              {isMyTurn && (game?.availableActions.length ?? 0) > 0 ? (
+                <motion.div
+                  key="actions"
+                  className="flex items-center gap-3"
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 16 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {game?.availableActions.map((action, i) => {
+                    const buttonConfig = getButtonConfig(action);
+                    return (
+                      <motion.div
+                        key={action}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.06 }}
+                      >
+                        <Button
+                          variant="outline"
+                          className={buttonConfig?.className}
+                          onClick={buttonConfig?.onClick}
+                        >
+                          {buttonConfig?.label}
+                        </Button>
+                      </motion.div>
+                    );
+                  })}
+                </motion.div>
+              ) : (
+                <motion.p
+                  key="waiting"
+                  className="text-gray-500 text-sm"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  Waiting for {game?.players[game?.currentPlayerIndex]?.name}...
+                </motion.p>
+              )}
+            </AnimatePresence>
           ) : (
             <p className="text-gray-500 text-sm">
               Waiting for {game?.players[game?.currentPlayerIndex]?.name}...
@@ -608,10 +709,7 @@ export default function Game() {
         </DialogContent>
       </Dialog>
 
-      <Dialog
-        open={isRebuyModalOpen}
-        onOpenChange={() => {}}
-      >
+      <Dialog open={isRebuyModalOpen} onOpenChange={() => {}}>
         <DialogContent
           className="sm:max-w-md bg-gray-900 text-white border-gray-700"
           onInteractOutside={(e) => e.preventDefault()}

@@ -1,6 +1,18 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import PlayingCard from "./PlayingCard";
 import type { Player } from "@/types/GameState";
+
+const SEAT_DEAL_OFFSETS: Record<number, [number, number]> = {
+  0: [0, -220],
+  1: [160, -150],
+  2: [210, 0],
+  3: [160, 150],
+  4: [0, 220],
+  5: [-160, 150],
+  6: [-210, 0],
+  7: [-160, -150],
+};
 
 export default function PlayerSeat({
   position,
@@ -8,13 +20,18 @@ export default function PlayerSeat({
   isCurrentPlayer,
   isWinner,
   isGameOver,
+  card1DealDelay = 0,
+  card2DealDelay = 0,
+  roundKey = 0,
 }: {
   position: number;
   player: Player;
   isCurrentPlayer: boolean;
   isWinner?: boolean;
   isGameOver?: boolean;
-
+  card1DealDelay?: number;
+  card2DealDelay?: number;
+  roundKey?: number;
 }) {
   const positions: Record<number, string> = {
     0: "bottom-3 left-1/2 -translate-x-1/2",
@@ -38,22 +55,10 @@ export default function PlayerSeat({
   > = {
     fold: () => ({ message: "Folded", className: "text-red-400" }),
     check: () => ({ message: "Checked", className: "text-gray-300" }),
-    call: (amount) => ({
-      message: `Called $${amount}`,
-      className: "text-blue-400",
-    }),
-    bet: (amount) => ({
-      message: `Bet $${amount}`,
-      className: "text-yellow-400",
-    }),
-    raise: (amount) => ({
-      message: `Raised $${amount}`,
-      className: "text-green-400",
-    }),
-    allin: () => ({
-      message: `All-In`,
-      className: "text-purple-400",
-    }),
+    call: (amount) => ({ message: `Called $${amount}`, className: "text-blue-400" }),
+    bet: (amount) => ({ message: `Bet $${amount}`, className: "text-yellow-400" }),
+    raise: (amount) => ({ message: `Raised $${amount}`, className: "text-green-400" }),
+    allin: () => ({ message: `All-In`, className: "text-purple-400" }),
     small: () => ({ message: "Small Blind", className: "text-gray-200" }),
     big: () => ({ message: "Big Blind", className: "text-gray-200" }),
   };
@@ -67,7 +72,6 @@ export default function PlayerSeat({
   };
 
   const isEmpty = !player;
-
   const [visibleComment, setVisibleComment] = useState<string | null>(null);
 
   useEffect(() => {
@@ -80,73 +84,142 @@ export default function PlayerSeat({
     }
   }, [player?.comment]);
 
+  const [offsetX, offsetY] = SEAT_DEAL_OFFSETS[position] ?? [0, -220];
+
   return (
-    <div
-      className={`absolute ${positions[position]} z-10 ${player.isFolded ? "opacity-50 grayscale" : ""}`}
+    <motion.div
+      className={`absolute ${positions[position]} z-10`}
+      animate={{
+        opacity: player?.isFolded ? 0.5 : 1,
+        filter: player?.isFolded ? "grayscale(1)" : "grayscale(0)",
+      }}
+      transition={{ duration: 0.4 }}
     >
       {isEmpty ? (
         <div className="w-24 h-24 rounded-full bg-gray-800 border-4 border-gray-700 flex items-center justify-center text-gray-600">
           <span>Empty</span>
         </div>
       ) : (
-        <div className={`relative flex flex-col`}>
+        <div className="relative flex flex-col">
+          {/* Name / chips panel */}
           <div className="flex flex-col items-center z-10 bg-gray-900 rounded text-sm w-35">
-            <span className="w-full text-center border-b border-gray-700">
-              {player?.name}
-            </span>
-            <span className="self-end pr-2">
-              ${player?.chips.toLocaleString()}
-            </span>
+            <span className="w-full text-center border-b border-gray-700">{player?.name}</span>
+            <span className="self-end pr-2">${player?.chips.toLocaleString()}</span>
           </div>
-          <img
+
+          <motion.img
             src={
               player?.profileImageUrl ??
               (player.isPlayer ? fallbackImages.user : fallbackImages.robot)
             }
-            className={`z-15 absolute -left-12 -bottom-3 h-16 w-16 rounded-full object-cover border-4 ${isCurrentPlayer ? "border-yellow-400" : "border-gray-700"}`}
+            className={`z-15 absolute -left-12 -bottom-3 h-16 w-16 rounded-full object-cover border-4 ${
+              isCurrentPlayer ? "border-yellow-400" : "border-gray-700"
+            }`}
             alt=""
+            animate={
+              isCurrentPlayer
+                ? {
+                    boxShadow: [
+                      "0 0 6px 1px rgba(250,204,21,0.4)",
+                      "0 0 18px 5px rgba(250,204,21,0.85)",
+                      "0 0 6px 1px rgba(250,204,21,0.4)",
+                    ],
+                  }
+                : { boxShadow: "0 0 0px 0px rgba(250,204,21,0)" }
+            }
+            transition={
+              isCurrentPlayer
+                ? { duration: 1.2, repeat: Infinity, ease: "easeInOut" }
+                : { duration: 0.3 }
+            }
           />
-          {player?.hand && (
+
+          {isCurrentPlayer && !player.isPlayer && (
+            <div className="absolute -top-6 left-0 flex gap-1 justify-center w-full">
+              {[0, 1, 2].map((i) => (
+                <motion.span
+                  key={i}
+                  className="w-1.5 h-1.5 bg-yellow-400 rounded-full"
+                  animate={{ y: [0, -5, 0] }}
+                  transition={{
+                    duration: 0.55,
+                    repeat: Infinity,
+                    delay: i * 0.15,
+                    ease: "easeInOut",
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
+          {player?.hand && player.hand.length >= 2 && (
             <div className="absolute bottom-7 left-1 z-5 flex gap-1">
               <PlayingCard
+                key={`${roundKey}-0`}
                 hidden={player.hand[0].isHidden}
                 value={`${player.hand[0].rank}${player.hand[0].suit}`}
+                dealDelay={card1DealDelay}
+                initialOffsetX={offsetX}
+                initialOffsetY={offsetY}
               />
               <PlayingCard
+                key={`${roundKey}-1`}
                 hidden={player.hand[1].isHidden}
                 value={`${player.hand[1].rank}${player.hand[1].suit}`}
+                dealDelay={card2DealDelay}
+                initialOffsetX={offsetX}
+                initialOffsetY={offsetY}
               />
             </div>
           )}
+
+          {/* Dealer button */}
           {player.isDealer && (
             <div className="absolute -top-3 -left-13 bg-yellow-400 text-black rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold border-2 border-gray-900 z-20">
               D
             </div>
           )}
-          {visibleComment && (
-            <div
-              className={`absolute z-50 w-48 rounded-2xl bg-white p-3 text-sm text-gray-900 shadow-2xl transition-all duration-300 before:absolute before:h-4 before:w-4 before:rotate-45 before:bg-white before:content-[''] top-18 -left-14 before:-top-2 before:left-7`}
-            >
-              {visibleComment}
-            </div>
-          )}
-          <span
-            className={`absolute -bottom-7 bg-gray-900 w-full rounded text-md text-center ${getActionMessage(player.lastAction, player.lastActionAmount).className}`}
+
+          <AnimatePresence>
+            {visibleComment && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.85, y: 4 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.85, y: 4 }}
+                transition={{ duration: 0.2 }}
+                className="absolute z-50 w-48 rounded-2xl bg-white p-3 text-sm text-gray-900 shadow-2xl before:absolute before:h-4 before:w-4 before:rotate-45 before:bg-white before:content-[''] top-18 -left-14 before:-top-2 before:left-7"
+              >
+                {visibleComment}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <motion.span
+            key={`${player.lastAction}-${player.lastActionAmount}`}
+            initial={{ opacity: 0, scale: 0.6, y: -6 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 400, damping: 22 }}
+            className={`absolute -bottom-7 bg-gray-900 w-full rounded text-md text-center ${
+              getActionMessage(player.lastAction, player.lastActionAmount).className
+            }`}
           >
-            {
-              getActionMessage(player.lastAction, player.lastActionAmount)
-                .message
-            }
-          </span>
+            {getActionMessage(player.lastAction, player.lastActionAmount).message}
+          </motion.span>
+
           {isWinner && isGameOver && (
-            <div className="absolute top-5.5 -left-8 right-0 flex justify-center z-30">
+            <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 500, damping: 14, delay: 0.3 }}
+              className="absolute top-5.5 -left-8 right-0 flex justify-center z-30"
+            >
               <span className="bg-amber-500 text-black text-xs font-bold px-2 py-0.5 rounded-full shadow-lg whitespace-nowrap">
                 +${(player.chips - player.roundStartingChips).toLocaleString()}
               </span>
-            </div>
+            </motion.div>
           )}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
