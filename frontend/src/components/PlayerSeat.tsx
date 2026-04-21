@@ -134,24 +134,6 @@ export default function PlayerSeat({
             }
           />
 
-          {isCurrentPlayer && !player.isPlayer && (
-            <div className="absolute -top-6 left-0 flex gap-1 justify-center w-full">
-              {[0, 1, 2].map((i) => (
-                <motion.span
-                  key={i}
-                  className="w-1.5 h-1.5 bg-yellow-400 rounded-full"
-                  animate={{ y: [0, -5, 0] }}
-                  transition={{
-                    duration: 0.55,
-                    repeat: Infinity,
-                    delay: i * 0.15,
-                    ease: "easeInOut",
-                  }}
-                />
-              ))}
-            </div>
-          )}
-
           {player?.hand && player.hand.length >= 2 && (
             <div className="absolute bottom-7 left-1 z-5 flex gap-1">
               <PlayingCard
