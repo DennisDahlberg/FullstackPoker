@@ -55,7 +55,7 @@ export default function Game() {
   const [rebuyTimeLeft, setRebuyTimeLeft] = useState(10);
   const minRaise = game ? game.smallBlind : 0;
 
-  const [readyTimeLeft, setReadyTimeLeft] = useState(10);
+  const [readyTimeLeft, setReadyTimeLeft] = useState(20);
   const [hasSubmittedReady, setHasSubmittedReady] = useState(false);
   const hasSubmittedReadyRef = useRef(false);
 
@@ -66,12 +66,12 @@ export default function Game() {
     if (!game?.isGameOver) {
       hasSubmittedReadyRef.current = false;
       setHasSubmittedReady(false);
-      setReadyTimeLeft(10);
+      setReadyTimeLeft(20);
       return;
     }
     hasSubmittedReadyRef.current = false;
     setHasSubmittedReady(false);
-    setReadyTimeLeft(10);
+    setReadyTimeLeft(20);
 
     const timer = setInterval(() => {
       setReadyTimeLeft((prev) => {
@@ -84,7 +84,7 @@ export default function Game() {
         }
         return prev - 1;
       });
-    }, 1000);
+    }, 2000);
     return () => clearInterval(timer);
   }, [game?.isGameOver, leaveGame]);
 
@@ -276,7 +276,8 @@ export default function Game() {
               position={index}
               player={p || undefined}
               isCurrentPlayer={index === game?.currentPlayerIndex}
-              isMe={p.userId === myUserId}
+              isWinner={game?.winnersPositions.includes(index)}
+              isGameOver={game?.isGameOver}
             />
           ))}
         </div>
@@ -294,7 +295,7 @@ export default function Game() {
                   <circle cx="20" cy="20" r="16" stroke="currentColor" strokeWidth="3"
                     fill="transparent"
                     strokeDasharray={2 * Math.PI * 16}
-                    strokeDashoffset={2 * Math.PI * 16 * (1 - readyTimeLeft / 10)}
+                    strokeDashoffset={2 * Math.PI * 16 * (1 - readyTimeLeft / 20)}
                     className="text-green-500 transition-all duration-1000 ease-linear" />
                 </svg>
                 <span className="absolute text-xs font-bold">{readyTimeLeft}</span>
@@ -609,7 +610,7 @@ export default function Game() {
 
       <Dialog
         open={isRebuyModalOpen}
-        onOpenChange={() => {}} // prevent closing by clicking outside
+        onOpenChange={() => {}}
       >
         <DialogContent
           className="sm:max-w-md bg-gray-900 text-white border-gray-700"

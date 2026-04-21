@@ -19,6 +19,7 @@ export interface Player {
     userId?: string | null;
     profileImageUrl?: string | null;
     isAwaitingRebuy: boolean;
+    roundStartingChips: number;
 }
 
 export interface GameState {

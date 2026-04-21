@@ -59,7 +59,8 @@ namespace Application.Services
                 PlayStyle = bot.PlayStyle,
                 SkillLevel = bot.SkillLevel,
                 Description = bot.Description,
-                SeatNumber = allPlayers.Count
+                SeatNumber = allPlayers.Count,
+                RoundStartingChips = table.BuyIn,
             });
         }
 

@@ -68,7 +68,8 @@ public class GameHub : Hub
                 LastAction = p.LastAction,
                 LastActionAmount = p.LastActionAmount,
                 Comment = p.Comment,
-                IsAwaitingRebuy = p.IsAwaitingRebuy
+                IsAwaitingRebuy = p.IsAwaitingRebuy,
+                RoundStartingChips = p.RoundStartingChips,
             };
 
             bool isMe = p.UserId == viewerUserId;

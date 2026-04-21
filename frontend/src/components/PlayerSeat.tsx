@@ -6,10 +6,15 @@ export default function PlayerSeat({
   position,
   player,
   isCurrentPlayer,
+  isWinner,
+  isGameOver,
 }: {
   position: number;
   player: Player;
   isCurrentPlayer: boolean;
+  isWinner?: boolean;
+  isGameOver?: boolean;
+
 }) {
   const positions: Record<number, string> = {
     0: "bottom-3 left-1/2 -translate-x-1/2",
@@ -133,6 +138,13 @@ export default function PlayerSeat({
                 .message
             }
           </span>
+          {isWinner && isGameOver && (
+            <div className="absolute top-5.5 -left-8 right-0 flex justify-center z-30">
+              <span className="bg-amber-500 text-black text-xs font-bold px-2 py-0.5 rounded-full shadow-lg whitespace-nowrap">
+                +${(player.chips - player.roundStartingChips).toLocaleString()}
+              </span>
+            </div>
+          )}
         </div>
       )}
     </div>
