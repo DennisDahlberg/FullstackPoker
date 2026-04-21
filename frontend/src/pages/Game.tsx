@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import PlayerSeat from "@/components/PlayerSeat";
+import { getDynamicOffsets } from "@/lib/dealOffsets";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Clock,
@@ -64,6 +65,8 @@ export default function Game() {
   const [roundKey, setRoundKey] = useState(0);
 
   const prevCommunityCardCountRef = useRef(0);
+  const visibleCommunityCards =
+    game?.communityCards.filter((c) => !c.isHidden) || [];
 
   const myUserId = game?.currentViewerUserId;
   const player = game?.players.find((p) => p.userId === myUserId);
@@ -124,8 +127,8 @@ export default function Game() {
   }, [game?.isGameOver]);
 
   useEffect(() => {
-    prevCommunityCardCountRef.current = game?.communityCards.length ?? 0;
-  }, [game?.communityCards.length]);
+    prevCommunityCardCountRef.current = visibleCommunityCards.length;
+  }, [visibleCommunityCards.length]);
 
   useEffect(() => {
     connectToGame();
@@ -220,6 +223,7 @@ export default function Game() {
 
   if (!game && !sessionSummary) return <div>Loading...</div>;
 
+  const activeDealerIndex = game?.players.findIndex((p) => p.isDealer) ?? 0;
   const myPlayerIndex = game?.players.findIndex((p) => p.userId === myUserId);
   const isMyTurn = myPlayerIndex === game?.currentPlayerIndex;
   const hasPenalty = game ? !game.isGameOver && game.penaltyAmount > 0 : false;
@@ -294,17 +298,21 @@ export default function Game() {
 
               {/* Community Cards */}
               <div className="flex gap-2 md:gap-3">
-                {game?.communityCards.map((card, index) => {
+                {visibleCommunityCards.map((card, index) => {
                   const prevCount = prevCommunityCardCountRef.current;
                   const isNew = index >= prevCount;
+                  
+                  const offsets = getDynamicOffsets();
+                  const [rawX, rawY] = offsets[activeDealerIndex] ?? [0, -220];
+
                   return (
                     <PlayingCard
                       key={`comm-${roundKey}-${index}`}
                       value={`${card.rank}${card.suit}`}
-                      hidden={card.isHidden}
+                      hidden={false} 
                       dealDelay={isNew ? (index - prevCount) * 0.15 : 0}
-                      initialOffsetX={0}
-                      initialOffsetY={isNew ? -100 : 0}
+                      initialOffsetX={isNew ? -rawX : 0}
+                      initialOffsetY={isNew ? -rawY : 0}
                     />
                   );
                 })}
