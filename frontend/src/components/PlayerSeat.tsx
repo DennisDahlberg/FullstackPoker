@@ -32,10 +32,10 @@ export default function PlayerSeat({
     (amount?: number) => { message: string; className: string }
   > = {
     fold: () => ({ message: "Folded", className: "text-red-400" }),
-    check: () => ({ message: "Checked", className: "text-blue-400" }),
+    check: () => ({ message: "Checked", className: "text-gray-300" }),
     call: (amount) => ({
       message: `Called $${amount}`,
-      className: "text-green-400",
+      className: "text-blue-400",
     }),
     bet: (amount) => ({
       message: `Bet $${amount}`,
@@ -43,6 +43,10 @@ export default function PlayerSeat({
     }),
     raise: (amount) => ({
       message: `Raised $${amount}`,
+      className: "text-green-400",
+    }),
+    allin: () => ({
+      message: `All-In`,
       className: "text-purple-400",
     }),
     small: () => ({ message: "Small Blind", className: "text-gray-200" }),

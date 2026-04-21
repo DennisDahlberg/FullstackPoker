@@ -315,7 +315,7 @@ namespace Application.Services
                 currentPlayer.CurrentBet += currentPlayer.Chips;
                 state.Pot +=  currentPlayer.Chips;
                 currentPlayer.Chips = 0;
-                currentPlayer.LastAction = "all-in";
+                currentPlayer.LastAction = "allin";
                 currentPlayer.IsActive = false;
                 break;
         }
