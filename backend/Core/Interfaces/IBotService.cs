@@ -8,7 +8,7 @@ public interface IBotService
     Task<List<BotDto>> GetAllBotsAsync();
     Task<List<BotDto>> GetAllUserCreatedBotsAsync(string userId);
     Task<Result<List<BotDto>>> GetBotsForGameAsync(List<int> botIds);
-    Task<Result<BotValidationResultDto>> CreateBotAsync(CreateBotDto botDto);
+    Task<Result<BotValidationResultDto>> CreateBotAsync(CreateBotDto botDto, string userId);
     Task<Result> UpdateBotAsync(UpdateBotDto botDto);
     Task<Result> DeleteBotAsync(int botId);
     Task<BotValidationResultDto> ValidateBotAsync(BotValidationDto bot);

@@ -24,8 +24,8 @@ public class BotService : IBotService
 
     public async Task<List<BotDto>> GetAllBotsAsync()
     {
-        var result = await _botRepository.GetAllBotsAsync();
-        var bots = result.Select(b => new BotDto
+        var mainBots = await _botRepository.GetAllBotsAsync();
+        var bots = mainBots.Select(b => new BotDto
         {
             Id = b.Id,
             Username =  b.Username,
@@ -71,10 +71,11 @@ public class BotService : IBotService
         return Result.Ok(bots);
     }
 
-    public async Task<Result<BotValidationResultDto>> CreateBotAsync(CreateBotDto botDto)
+    public async Task<Result<BotValidationResultDto>> CreateBotAsync(CreateBotDto botDto, string userId)
     {
         var bot =  botDto.Adapt<Bot>();
         bot.IsUserCreated = true;
+        bot.UserId = userId;
 
         if (botDto.ProfileImageData != null && !string.IsNullOrEmpty(botDto.ImageType))
             bot.ProfileImageUrl = await UploadBotImageToBlob(botDto.ProfileImageData, botDto.ImageType);

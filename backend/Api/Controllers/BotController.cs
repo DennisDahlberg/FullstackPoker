@@ -30,9 +30,16 @@ public class BotController : Controller
     [HttpGet]
     public async Task<IActionResult> GetAllBotsAsync()
     {
-        var result = await _botService.GetAllBotsAsync();
+        var userId = _userService.GetLoggedInUserId(User);
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized(new { message = "No user found" });
+        
+        var bots = await _botService.GetAllBotsAsync();
+        var userBots = await _botService.GetAllUserCreatedBotsAsync(userId);
+        
+        bots.AddRange(userBots);
 
-        return Ok(result);
+        return Ok(bots);
     }
 
     [HttpGet("user-created")]
@@ -71,7 +78,7 @@ public class BotController : Controller
             bot.ProfileImageData = memoryStream.ToArray();
         }
 
-        var result = await _botService.CreateBotAsync(bot);
+        var result = await _botService.CreateBotAsync(bot, userId);
         if (result.IsSuccess)
             return Ok();
 

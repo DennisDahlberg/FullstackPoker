@@ -19,7 +19,9 @@ public class BotRepository : IBotRepository
     
     public async Task<List<Bot>> GetAllBotsAsync()
     {
-        var bots = await _context.Bots.ToListAsync();
+        var bots = await _context.Bots
+            .Where(b => !b.IsUserCreated)
+            .ToListAsync();
         return bots;
     }
 
