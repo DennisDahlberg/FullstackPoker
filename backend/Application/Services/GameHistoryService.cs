@@ -34,19 +34,21 @@ public class GameHistoryService : IGameHistoryService
         
         var playerStats = GetPlayerStatsFromGame(gameState);
         
+        await UpdatePlayerRankAsync(gameState);
         await _gameRepository.SaveGameAsync(game,  playerStats);
     }
 
-    public async Task UpdatePlayerBalanceFromGame(GameState gameState)
+    private async Task UpdatePlayerRankAsync(GameState gameState)
     {
         foreach (var player in gameState.Players)
         {
             if (player.IsPlayer == false || string.IsNullOrWhiteSpace(player.UserId))
                 continue;
 
-            decimal balanceChange = !gameState.IsGameOver ? gameState.EarlyLeavePayout : player.Chips;
+            decimal currentChips = player.Chips;
+            var profit = currentChips - player.RoundStartingChips;
             
-            await _userService.UpdateUserBalanceAsync(player.UserId, balanceChange);
+            await _userService.UpdateUserRankAsync(player.UserId, profit);
         }
     }
 

@@ -7,6 +7,7 @@ namespace Core.Models
         public string RefreshToken { get; set; } = null!;
         public DateTime RefreshTokenExpires { get; set; }
         public string Rank { get; set; } = null!;
+        public int RankPoints { get; set; }
         public decimal Balance { get; set; }
         public string? ProfileImageUrl { get; set; }
     }
