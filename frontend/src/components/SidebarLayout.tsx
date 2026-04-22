@@ -12,7 +12,7 @@ import {
   CirclePlay,
   UserRound,
   ChartColumn,
-  Bot
+  Bot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "./ui/skeleton";
@@ -38,7 +38,7 @@ export default function SidebarLayout() {
     { icon: CirclePlay, label: "Game", href: "/lobby" },
     { icon: Bot, label: "Bots", href: "/bots" },
     { icon: UserRound, label: "Friends", href: "/friends" },
-    { icon: ChartColumn, label: "Statistics", href: "/statistics" },    
+    { icon: ChartColumn, label: "Statistics", href: "/statistics" },
   ];
 
   function handleLogOut() {
@@ -129,13 +129,24 @@ export default function SidebarLayout() {
                       <span className="truncate font-semibold">
                         {data?.user?.name || "Player One"}
                       </span>
-                      <span className={cn(
-                        "truncate text-xs text-gray-500",
-                        data?.user?.rank === "Beginner" && "text-green-500",
-                        data?.user?.rank === "Intermediate" && "text-blue-500",
-                        data?.user?.rank === "Pro" && "text-amber-500",
-                        data?.user?.rank === "Elite" && "text-red-500",
-                      )}>{data?.user?.rank}</span>
+                      <span
+                        className={cn(
+                          "truncate text-xs text-gray-500",
+                          data?.user?.rank === "Beginner" && "text-gray-400",
+                          data?.user?.rank === "Amateur" && "text-green-500",
+                          data?.user?.rank === "Intermediate" &&
+                            "text-emerald-400",
+                          data?.user?.rank === "Advanced" && "text-teal-400",
+                          data?.user?.rank === "Veteran" && "text-cyan-400",
+                          data?.user?.rank === "Expert" && "text-blue-500",
+                          data?.user?.rank === "Pro" && "text-indigo-400",
+                          data?.user?.rank === "Master" && "text-purple-500",
+                          data?.user?.rank === "Elite" && "text-red-500",
+                          data?.user?.rank === "Legend" && "text-amber-400",
+                        )}
+                      >
+                        {data?.user?.rank}
+                      </span>
                       <span className="truncate text-xs text-amber-400 flex items-center gap-1">
                         <Coins className="w-3 h-3" />
                         {data?.user?.balance?.toLocaleString()}
@@ -170,11 +181,17 @@ export default function SidebarLayout() {
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-gray-800" />
-                <DropdownMenuItem className="focus:bg-gray-900 focus:text-white cursor-pointer" onClick={() => navigate("/profile")}>
+                <DropdownMenuItem
+                  className="focus:bg-gray-900 focus:text-white cursor-pointer"
+                  onClick={() => navigate("/profile")}
+                >
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem className="focus:bg-gray-900 focus:text-white cursor-pointer" onClick={() => navigate("/settings")}>
+                <DropdownMenuItem
+                  className="focus:bg-gray-900 focus:text-white cursor-pointer"
+                  onClick={() => navigate("/settings")}
+                >
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
                 </DropdownMenuItem>
