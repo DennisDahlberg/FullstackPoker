@@ -96,6 +96,7 @@ namespace Application.Services
         gameState.CurrentPlayerIndex = (gameState.BigBlindPosition + 1) % gameState.Players.Count;
         gameState.IsGameOver = false;
         gameState.WinnersPositions.Clear();
+        gameState.StartedAt = DateTimeOffset.UtcNow;
         foreach (var player in gameState.Players)
         {
             player.Hand.Clear();
