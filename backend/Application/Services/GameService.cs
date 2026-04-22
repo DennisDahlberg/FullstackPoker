@@ -8,6 +8,7 @@ using Core.Models;
 using Microsoft.AspNetCore.Identity;
 using HoldemPoker.Cards;
 using HoldemPoker.Evaluator;
+using Microsoft.Extensions.Logging;
 
 namespace Application.Services
 {
@@ -18,13 +19,15 @@ namespace Application.Services
     private readonly IGameHistoryService _gameHistoryService;
     private readonly UserManager<ApplicationUser> _userManager;
     private static readonly Random _random = new Random();
+    private readonly ILogger<GameService> _logger;
 
     public GameService(BotAiService botAiService, UserManager<ApplicationUser> userManager,
-        IGameHistoryService gameHistoryService)
+        IGameHistoryService gameHistoryService, ILogger<GameService> logger)
     {
         _botAiService = botAiService;
         _userManager = userManager;
         _gameHistoryService = gameHistoryService;
+        _logger = logger;
     }
 
     public GameState InitializeGame(List<UserDTO> players, TableDto table, List<BotDto> bots)
@@ -348,6 +351,9 @@ namespace Application.Services
 
     public void HandleNextPlayer(GameState state)
     {
+        if (!state.Players.Any(p => p.IsActive))
+            return;
+        
         do
         {
             state.CurrentPlayerIndex++;
@@ -391,6 +397,7 @@ namespace Application.Services
         }
         catch (Exception err)
         {
+            _logger.LogWarning(err, "Bot returned invalid action format. Raw string: {Payload}", botActionJson);
             await HandlePlayerAction(new PlayerActionRequest { Action = "call" }, gameState);
         }
     }
