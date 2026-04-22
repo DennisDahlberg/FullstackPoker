@@ -270,6 +270,7 @@ namespace Application.Services
     public async Task HandlePlayerAction(PlayerActionRequest actionRequest, GameState state)
     {
         var currentPlayer = state.Players[state.CurrentPlayerIndex];
+        
         switch (actionRequest.Action)
         {
             case "fold":
@@ -367,6 +368,7 @@ namespace Application.Services
     public async Task HandleBotAction(GameState gameState)
     {
         var botActionJson = await _botAiService.GetBotAction(gameState);
+        var currentPlayer = gameState.Players[gameState.CurrentPlayerIndex];
 
         try
         {
@@ -385,15 +387,30 @@ namespace Application.Services
             {
                 PropertyNameCaseInsensitive = true
             });
-            
-            var actionRequest = new PlayerActionRequest
+
+            if (botAction.Action == "fold" &&
+                currentPlayer.CurrentBet >= gameState.HighestBet)
             {
-                Action = botAction.Action,
-                Amount = botAction.Amount,
-                Comment = botAction.Comment,
-            };
-        
-            await HandlePlayerAction(actionRequest, gameState);
+                var actionRequest = new PlayerActionRequest
+                {
+                    Action = "check",
+                    Comment = botAction.Comment,
+                };
+                
+                await HandlePlayerAction(actionRequest, gameState);
+            }
+            else
+            {
+                var actionRequest = new PlayerActionRequest
+                {
+                    Action = botAction.Action,
+                    Amount = botAction.Amount,
+                    Comment = botAction.Comment,
+                };
+                
+                await HandlePlayerAction(actionRequest, gameState);
+            }
+            
         }
         catch (Exception err)
         {
