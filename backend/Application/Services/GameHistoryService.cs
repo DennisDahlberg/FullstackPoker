@@ -47,7 +47,8 @@ public class GameHistoryService : IGameHistoryService
 
             decimal currentChips = player.Chips;
             var profit = currentChips - player.RoundStartingChips;
-            
+
+            player.RankProfit += (int)profit;
             await _userService.UpdateUserRankAsync(player.UserId, profit);
         }
     }
