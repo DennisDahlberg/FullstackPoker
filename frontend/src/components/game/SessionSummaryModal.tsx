@@ -14,8 +14,8 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   sessionSummary: GameSessionSummary | null;
-//   startingPoints?: number;
-//   earnedPoints?: number;
+  //   startingPoints?: number;
+  //   earnedPoints?: number;
 }
 
 const RANK_THRESHOLDS = [
@@ -102,15 +102,21 @@ export function SessionSummaryModal({
   isOpen,
   onClose,
   sessionSummary,
-//   startingPoints = 2400,
-//   earnedPoints = 150,
+  //   startingPoints = 2400,
+  //   earnedPoints = 150,
 }: Props) {
-  const [displayPoints, setDisplayPoints] = useState(sessionSummary ? sessionSummary.startingRankPoints : 0);
+  const [displayPoints, setDisplayPoints] = useState(
+    sessionSummary ? sessionSummary.startingRankPoints : 0,
+  );
   const [animationPhase, setAnimationPhase] = useState(0);
 
-  const finalPoints = sessionSummary ? sessionSummary.startingRankPoints + sessionSummary.rankProfit : 0;
+  const finalPoints = sessionSummary
+    ? sessionSummary.startingRankPoints + sessionSummary.rankProfit
+    : 0;
   const currentRank = getRankData(displayPoints);
-  const startRank = getRankData(sessionSummary ? sessionSummary.startingRankPoints : 0);
+  const startRank = getRankData(
+    sessionSummary ? sessionSummary.startingRankPoints : 0,
+  );
   const hasRankedUp = displayPoints >= startRank.max + 1;
 
   const rankProgress =
@@ -121,9 +127,14 @@ export function SessionSummaryModal({
         100;
 
   useEffect(() => {
-    if (!isOpen) {
+    if (sessionSummary && animationPhase === 0) {
+      setDisplayPoints(sessionSummary.startingRankPoints);
+    }
+  }, [sessionSummary, animationPhase]);
+
+  useEffect(() => {
+    if (!isOpen || !sessionSummary) {
       setAnimationPhase(0);
-      setDisplayPoints(sessionSummary ? sessionSummary.startingRankPoints : 0);
       return;
     }
 
@@ -135,16 +146,17 @@ export function SessionSummaryModal({
     }
 
     if (animationPhase === 1) {
-      const duration = 2000;
+      const duration = 3500;
       const frames = 60;
-      const increment = sessionSummary ? sessionSummary.rankProfit / frames : 0;
-      let current = sessionSummary ? sessionSummary.startingRankPoints : 0;
+      const increment = sessionSummary.rankProfit / frames;
+      let current = sessionSummary.startingRankPoints;
 
       pointAnimation = setInterval(() => {
         current += increment;
+
         if (
-          (sessionSummary ? sessionSummary.rankProfit : 0 >= 0 && current >= finalPoints) ||
-          (sessionSummary ? sessionSummary.rankProfit : 0 < 0 && current <= finalPoints)
+          (sessionSummary.rankProfit >= 0 && current >= finalPoints) ||
+          (sessionSummary.rankProfit < 0 && current <= finalPoints)
         ) {
           setDisplayPoints(finalPoints);
           clearInterval(pointAnimation);
@@ -161,8 +173,6 @@ export function SessionSummaryModal({
     };
   }, [isOpen, animationPhase, sessionSummary, finalPoints]);
 
-  if (!sessionSummary) return null;
-
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-lg bg-gray-900 text-white border-gray-700 overflow-hidden">
@@ -177,10 +187,10 @@ export function SessionSummaryModal({
           <div className="text-center">
             <h3 className="text-lg text-gray-400">Total Profit</h3>
             <p
-              className={`text-4xl font-bold ${sessionSummary.profit >= 0 ? "text-green-500" : "text-red-500"}`}
+              className={`text-4xl font-bold ${sessionSummary?.profit! >= 0 ? "text-green-500" : "text-red-500"}`}
             >
-              {sessionSummary.profit >= 0 ? "+" : "-"}$
-              {Math.abs(sessionSummary.profit)}
+              {sessionSummary?.profit! >= 0 ? "+" : "-"}$
+              {Math.abs(sessionSummary?.profit!)}
             </p>
           </div>
 
