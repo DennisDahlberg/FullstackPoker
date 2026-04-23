@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import PlayerSeat from "@/components/PlayerSeat";
+import { SessionSummaryModal } from "@/components/game/SessionSummaryModal";
 import { getDynamicOffsets } from "@/lib/dealOffsets";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -301,7 +302,7 @@ export default function Game() {
                 {visibleCommunityCards.map((card, index) => {
                   const prevCount = prevCommunityCardCountRef.current;
                   const isNew = index >= prevCount;
-                  
+
                   const offsets = getDynamicOffsets();
                   const [rawX, rawY] = offsets[activeDealerIndex] ?? [0, -220];
 
@@ -309,7 +310,7 @@ export default function Game() {
                     <PlayingCard
                       key={`comm-${roundKey}-${index}`}
                       value={`${card.rank}${card.suit}`}
-                      hidden={false} 
+                      hidden={false}
                       dealDelay={isNew ? (index - prevCount) * 0.15 : 0}
                       initialOffsetX={isNew ? -rawX : 0}
                       initialOffsetY={isNew ? -rawY : 0}
@@ -611,112 +612,13 @@ export default function Game() {
       </AlertDialog>
 
       {/* Session Summary Dialog */}
-      <Dialog
-        open={!!sessionSummary}
-        onOpenChange={(open) => {
-          if (!open) handleSessionSummaryClose();
-        }}
-      >
-        <DialogContent className="sm:max-w-lg bg-gray-900 text-white border-gray-700">
-          <DialogHeader>
-            <DialogTitle className="text-2xl text-center">
-              Session Summary
-            </DialogTitle>
-          </DialogHeader>
-
-          {sessionSummary && (
-            <div className="space-y-6 py-4">
-              {/* Profit/Loss Header */}
-              <div className="flex flex-col items-center gap-2">
-                {sessionSummary.profit > 0 ? (
-                  <TrendingUp className="w-12 h-12 text-green-400" />
-                ) : sessionSummary.profit < 0 ? (
-                  <TrendingDown className="w-12 h-12 text-red-400" />
-                ) : (
-                  <Minus className="w-12 h-12 text-gray-400" />
-                )}
-                <span
-                  className={`text-4xl font-bold ${
-                    sessionSummary.profit > 0
-                      ? "text-green-400"
-                      : sessionSummary.profit < 0
-                        ? "text-red-400"
-                        : "text-gray-400"
-                  }`}
-                >
-                  {sessionSummary.profit >= 0 ? "+" : ""}$
-                  {sessionSummary.profit.toLocaleString()}
-                </span>
-                <span className="text-sm text-gray-400">
-                  {sessionSummary.profit > 0
-                    ? "Nice session!"
-                    : sessionSummary.profit < 0
-                      ? "Better luck next time"
-                      : "Break even"}
-                </span>
-              </div>
-
-              {/* Stats Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-black/30 p-4 rounded-lg text-center">
-                  <Clock className="w-5 h-5 mx-auto mb-1 text-gray-400" />
-                  <p className="text-lg font-bold">{sessionSummary.duration}</p>
-                  <p className="text-xs text-gray-500">Duration</p>
-                </div>
-                <div className="bg-black/30 p-4 rounded-lg text-center">
-                  <Trophy className="w-5 h-5 mx-auto mb-1 text-amber-400" />
-                  <p className="text-lg font-bold">
-                    {sessionSummary.roundsPlayed}
-                  </p>
-                  <p className="text-xs text-gray-500">Rounds Played</p>
-                </div>
-              </div>
-
-              {/* Chip Breakdown */}
-              <div className="bg-black/30 p-4 rounded-lg space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Starting chips</span>
-                  <span className="font-medium">
-                    ${sessionSummary.startingChips.toLocaleString()}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Final chips</span>
-                  <span className="font-medium">
-                    ${sessionSummary.finalChips.toLocaleString()}
-                  </span>
-                </div>
-                {sessionSummary.wasEarlyLeave &&
-                  sessionSummary.penaltyAmount > 0 && (
-                    <div className="flex justify-between text-sm text-red-400">
-                      <span>Early leave penalty</span>
-                      <span className="font-medium">
-                        -${sessionSummary.penaltyAmount.toLocaleString()}
-                      </span>
-                    </div>
-                  )}
-                <div className="border-t border-gray-700 pt-2 flex justify-between">
-                  <span className="text-gray-300 font-medium">
-                    Balance returned
-                  </span>
-                  <span className="font-bold text-amber-400">
-                    ${sessionSummary.balanceReturned.toLocaleString()}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button
-              className="w-full bg-amber-600 hover:bg-amber-700"
-              onClick={handleSessionSummaryClose}
-            >
-              Back to Dashboard
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <SessionSummaryModal
+        isOpen={!!sessionSummary}
+        onClose={() => (navigate("/dashboard"), clearSessionSummary())}
+        sessionSummary={sessionSummary}
+        startingPoints={2400}
+        earnedPoints={600}
+      />
 
       <Dialog open={isRebuyModalOpen} onOpenChange={() => {}}>
         <DialogContent
