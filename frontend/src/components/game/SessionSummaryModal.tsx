@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "../ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 import { Button } from "../ui/button";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -91,7 +97,13 @@ function getRankData(points: number) {
   );
 }
 
-export function SessionSummaryModal({ isOpen, onClose, sessionSummary, startingPoints = 2400, earnedPoints = 150 }: Props) {
+export function SessionSummaryModal({
+  isOpen,
+  onClose,
+  sessionSummary,
+  startingPoints = 2400,
+  earnedPoints = 150,
+}: Props) {
   const [displayPoints, setDisplayPoints] = useState(startingPoints);
   const [animationPhase, setAnimationPhase] = useState(0);
 
@@ -100,9 +112,12 @@ export function SessionSummaryModal({ isOpen, onClose, sessionSummary, startingP
   const startRank = getRankData(startingPoints);
   const hasRankedUp = displayPoints >= startRank.max + 1;
 
-  const rankProgress = currentRank.max === Infinity 
-    ? 100 
-    : ((displayPoints - currentRank.min) / (currentRank.max - currentRank.min)) * 100;
+  const rankProgress =
+    currentRank.max === Infinity
+      ? 100
+      : ((displayPoints - currentRank.min) /
+          (currentRank.max - currentRank.min)) *
+        100;
 
   useEffect(() => {
     if (!isOpen) {
@@ -110,18 +125,26 @@ export function SessionSummaryModal({ isOpen, onClose, sessionSummary, startingP
       setDisplayPoints(startingPoints);
       return;
     }
-    const phase1 = setTimeout(() => setAnimationPhase(1), 1000);
 
-    let pointAnimation: number;
+    let phase1: ReturnType<typeof setTimeout>;
+    let pointAnimation: ReturnType<typeof setInterval>;
+
+    if (animationPhase === 0) {
+      phase1 = setTimeout(() => setAnimationPhase(1), 1000);
+    }
+
     if (animationPhase === 1) {
-      const duration = 2000; 
+      const duration = 2000;
       const frames = 60;
       const increment = earnedPoints / frames;
       let current = startingPoints;
 
       pointAnimation = setInterval(() => {
         current += increment;
-        if ((earnedPoints > 0 && current >= finalPoints) || (earnedPoints < 0 && current <= finalPoints)) {
+        if (
+          (earnedPoints >= 0 && current >= finalPoints) ||
+          (earnedPoints < 0 && current <= finalPoints)
+        ) {
           setDisplayPoints(finalPoints);
           clearInterval(pointAnimation);
           setAnimationPhase(2);
@@ -132,8 +155,8 @@ export function SessionSummaryModal({ isOpen, onClose, sessionSummary, startingP
     }
 
     return () => {
-      clearTimeout(phase1);
-      clearInterval(pointAnimation);
+      if (phase1) clearTimeout(phase1);
+      if (pointAnimation) clearInterval(pointAnimation);
     };
   }, [isOpen, animationPhase, startingPoints, finalPoints, earnedPoints]);
 
@@ -143,29 +166,39 @@ export function SessionSummaryModal({ isOpen, onClose, sessionSummary, startingP
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-lg bg-gray-900 text-white border-gray-700 overflow-hidden">
         <DialogHeader>
-          <DialogTitle className="text-2xl text-center">Session Summary</DialogTitle>
+          <DialogTitle className="text-2xl text-center">
+            Session Summary
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6 py-4 flex flex-col items-center">
-          
           {/* Base Stats Here (Profit, Hands, etc) */}
           <div className="text-center">
             <h3 className="text-lg text-gray-400">Total Profit</h3>
-            <p className={`text-4xl font-bold ${sessionSummary.profit >= 0 ? "text-green-500" : "text-red-500"}`}>
-              {sessionSummary.profit >= 0 ? "+" : "-"}${Math.abs(sessionSummary.profit)}
+            <p
+              className={`text-4xl font-bold ${sessionSummary.profit >= 0 ? "text-green-500" : "text-red-500"}`}
+            >
+              {sessionSummary.profit >= 0 ? "+" : "-"}$
+              {Math.abs(sessionSummary.profit)}
             </p>
           </div>
 
           {/* Animated Rank Section */}
           <div className="w-full bg-black/40 p-6 rounded-xl mt-4 relative">
             <div className="flex justify-between items-end mb-2">
-              <motion.div 
-                animate={hasRankedUp ? { scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] } : {}}
+              <motion.div
+                animate={
+                  hasRankedUp
+                    ? { scale: [1, 1.2, 1], rotate: [0, 5, -5, 0] }
+                    : {}
+                }
                 transition={{ duration: 0.5 }}
                 className="flex flex-col"
               >
                 <span className="text-sm text-gray-400">Current Rank</span>
-                <span className={`text-2xl font-black uppercase tracking-wider ${currentRank.color} drop-shadow-md`}>
+                <span
+                  className={`text-2xl font-black uppercase tracking-wider ${currentRank.color} drop-shadow-md`}
+                >
                   {currentRank.name}
                 </span>
               </motion.div>
@@ -174,14 +207,19 @@ export function SessionSummaryModal({ isOpen, onClose, sessionSummary, startingP
                 <span className="text-xs text-gray-500">Rank Points</span>
                 <span className="text-xl font-mono font-bold">
                   {displayPoints.toLocaleString()}
-                  <span className="text-sm font-normal text-gray-500 ml-1">/ {currentRank.max === Infinity ? 'MAX' : currentRank.max.toLocaleString()}</span>
+                  <span className="text-sm font-normal text-gray-500 ml-1">
+                    /{" "}
+                    {currentRank.max === Infinity
+                      ? "MAX"
+                      : currentRank.max.toLocaleString()}
+                  </span>
                 </span>
               </div>
             </div>
 
             {/* Progress Bar Container */}
             <div className="h-4 w-full bg-gray-800 rounded-full overflow-hidden relative border border-gray-700">
-              <motion.div 
+              <motion.div
                 className={`h-full ${currentRank.bg}`}
                 initial={{ width: 0 }}
                 animate={{ width: `${rankProgress}%` }}
@@ -196,18 +234,21 @@ export function SessionSummaryModal({ isOpen, onClose, sessionSummary, startingP
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className={`absolute right-6 -top-4 font-bold ${earnedPoints >= 0 ? 'text-green-400' : 'text-red-400'}`}
+                  className={`absolute right-6 -top-4 font-bold ${earnedPoints >= 0 ? "text-green-400" : "text-red-400"}`}
                 >
-                  {earnedPoints >= 0 ? '+' : ''}{earnedPoints} pts
+                  {earnedPoints >= 0 ? "+" : ""}
+                  {earnedPoints} pts
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
-
         </div>
 
         <DialogFooter>
-          <Button className="w-full bg-amber-600 hover:bg-amber-700" onClick={onClose}>
+          <Button
+            className="w-full bg-amber-600 hover:bg-amber-700"
+            onClick={onClose}
+          >
             Back to Dashboard
           </Button>
         </DialogFooter>

@@ -616,8 +616,8 @@ export default function Game() {
         isOpen={!!sessionSummary}
         onClose={() => (navigate("/dashboard"), clearSessionSummary())}
         sessionSummary={sessionSummary}
-        startingPoints={2400}
-        earnedPoints={600}
+        startingPoints={12000}
+        earnedPoints={-3000}
       />
 
       <Dialog open={isRebuyModalOpen} onOpenChange={() => {}}>
