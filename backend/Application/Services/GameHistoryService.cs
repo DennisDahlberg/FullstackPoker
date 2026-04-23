@@ -48,8 +48,8 @@ public class GameHistoryService : IGameHistoryService
             decimal currentChips = player.Chips;
             var profit = currentChips - player.RoundStartingChips;
 
-            player.RankProfit += (int)profit;
-            await _userService.UpdateUserRankAsync(player.UserId, profit);
+            var updatedRankPoints = await _userService.UpdateUserRankAsync(player.UserId, profit);
+            player.RankPoints = updatedRankPoints;
         }
     }
 
@@ -82,6 +82,7 @@ public class GameHistoryService : IGameHistoryService
         var isEarlyLeave = !gameState.IsGameOver;
         var penaltyAmount = isEarlyLeave ? (int)(player.Chips * 0.1) : 0;
         var payout = player.Chips - penaltyAmount;
+        var rankProfit = player.RankPoints - player.StartingRankPoints;
 
         var duration = DateTimeOffset.UtcNow - gameState.StartedAt;
         var summary = new PlayerSessionSummary()
@@ -96,7 +97,7 @@ public class GameHistoryService : IGameHistoryService
             PenaltyAmount = penaltyAmount,
             WasEarlyLeave = isEarlyLeave,
             Hand = player.BestHand,
-            RankProfit = player.RankProfit,
+            RankProfit = rankProfit,
             StartingRankPoints = player.StartingRankPoints
         };
 

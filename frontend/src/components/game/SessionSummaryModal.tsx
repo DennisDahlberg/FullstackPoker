@@ -8,13 +8,14 @@ import {
 } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { AnimatePresence, motion } from "framer-motion";
+import type { GameSessionSummary } from "@/types/GameState";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  sessionSummary: any;
-  startingPoints?: number;
-  earnedPoints?: number;
+  sessionSummary: GameSessionSummary | null;
+//   startingPoints?: number;
+//   earnedPoints?: number;
 }
 
 const RANK_THRESHOLDS = [
@@ -101,15 +102,15 @@ export function SessionSummaryModal({
   isOpen,
   onClose,
   sessionSummary,
-  startingPoints = 2400,
-  earnedPoints = 150,
+//   startingPoints = 2400,
+//   earnedPoints = 150,
 }: Props) {
-  const [displayPoints, setDisplayPoints] = useState(startingPoints);
+  const [displayPoints, setDisplayPoints] = useState(sessionSummary ? sessionSummary.startingRankPoints : 0);
   const [animationPhase, setAnimationPhase] = useState(0);
 
-  const finalPoints = startingPoints + earnedPoints;
+  const finalPoints = sessionSummary ? sessionSummary.startingRankPoints + sessionSummary.rankProfit : 0;
   const currentRank = getRankData(displayPoints);
-  const startRank = getRankData(startingPoints);
+  const startRank = getRankData(sessionSummary ? sessionSummary.startingRankPoints : 0);
   const hasRankedUp = displayPoints >= startRank.max + 1;
 
   const rankProgress =
@@ -122,7 +123,7 @@ export function SessionSummaryModal({
   useEffect(() => {
     if (!isOpen) {
       setAnimationPhase(0);
-      setDisplayPoints(startingPoints);
+      setDisplayPoints(sessionSummary ? sessionSummary.startingRankPoints : 0);
       return;
     }
 
@@ -136,14 +137,14 @@ export function SessionSummaryModal({
     if (animationPhase === 1) {
       const duration = 2000;
       const frames = 60;
-      const increment = earnedPoints / frames;
-      let current = startingPoints;
+      const increment = sessionSummary ? sessionSummary.rankProfit / frames : 0;
+      let current = sessionSummary ? sessionSummary.startingRankPoints : 0;
 
       pointAnimation = setInterval(() => {
         current += increment;
         if (
-          (earnedPoints >= 0 && current >= finalPoints) ||
-          (earnedPoints < 0 && current <= finalPoints)
+          (sessionSummary ? sessionSummary.rankProfit : 0 >= 0 && current >= finalPoints) ||
+          (sessionSummary ? sessionSummary.rankProfit : 0 < 0 && current <= finalPoints)
         ) {
           setDisplayPoints(finalPoints);
           clearInterval(pointAnimation);
@@ -158,7 +159,7 @@ export function SessionSummaryModal({
       if (phase1) clearTimeout(phase1);
       if (pointAnimation) clearInterval(pointAnimation);
     };
-  }, [isOpen, animationPhase, startingPoints, finalPoints, earnedPoints]);
+  }, [isOpen, animationPhase, sessionSummary, finalPoints]);
 
   if (!sessionSummary) return null;
 
@@ -234,10 +235,10 @@ export function SessionSummaryModal({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className={`absolute right-6 -top-4 font-bold ${earnedPoints >= 0 ? "text-green-400" : "text-red-400"}`}
+                  className={`absolute right-6 -top-4 font-bold ${sessionSummary && sessionSummary.rankProfit >= 0 ? "text-green-400" : "text-red-400"}`}
                 >
-                  {earnedPoints >= 0 ? "+" : ""}
-                  {earnedPoints} pts
+                  {sessionSummary && sessionSummary.rankProfit >= 0 ? "+" : ""}
+                  {sessionSummary ? sessionSummary.rankProfit : 0} pts
                 </motion.div>
               )}
             </AnimatePresence>

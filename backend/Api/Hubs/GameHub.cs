@@ -70,7 +70,6 @@ public class GameHub : Hub
                 Comment = p.Comment,
                 IsAwaitingRebuy = p.IsAwaitingRebuy,
                 RoundStartingChips = p.RoundStartingChips,
-                RankProfit = p.RankProfit
             };
 
             bool isMe = p.UserId == viewerUserId;

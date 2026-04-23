@@ -16,7 +16,7 @@ public interface IUserService
     Task<ApplicationUser?> GetUserByUsername(string username);
     List<ApplicationUser> FindUsersAsync(string query, string currentUserId);
     Task<Result> UpdateUserBalanceAsync(string userId, decimal balance);
-    Task UpdateUserRankAsync(string userId, decimal profit);
+    Task<int> UpdateUserRankAsync(string userId, decimal profit);
     Task<IdentityResult> UpdatePasswordAsync(string userId, PasswordUpdateDto dto);
     Task<IdentityResult> UpdateUsernameAsync(string userId, string username);
     Task<IdentityResult> UpdateEmailAsync(string userId, string email);

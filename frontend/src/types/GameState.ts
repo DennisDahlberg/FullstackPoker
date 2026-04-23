@@ -54,6 +54,8 @@ export interface GameSessionSummary {
   balanceReturned: number;
   penaltyAmount: number;
   wasEarlyLeave: boolean;
+  rankProfit: number;
+  startingRankPoints: number;
 }
 
 export type GameActionPayload = 

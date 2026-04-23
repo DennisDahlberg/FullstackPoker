@@ -92,11 +92,11 @@ namespace Infrastructure.Services
             return Result.Ok();
         }
 
-        public async Task UpdateUserRankAsync(string userId, decimal profit)
+        public async Task<int> UpdateUserRankAsync(string userId, decimal profit)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user is null)
-                return;
+                return 0;
             
             var rankFloors = new Dictionary<string, int>
             {
@@ -143,6 +143,7 @@ namespace Infrastructure.Services
             };
 
             await _userManager.UpdateAsync(user);
+            return user.RankPoints;
         }
 
         public async Task<IdentityResult> UpdatePasswordAsync(string userId, PasswordUpdateDto dto)
