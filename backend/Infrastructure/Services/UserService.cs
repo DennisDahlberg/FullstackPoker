@@ -34,6 +34,7 @@ namespace Infrastructure.Services
                 Rank = user.Rank,
                 Username = user.UserName!,
                 ProfileImageUrl =  user.ProfileImageUrl,
+                RankPoints = user.RankPoints
             };
 
             return userDTO;

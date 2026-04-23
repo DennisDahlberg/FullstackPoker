@@ -47,6 +47,7 @@ namespace Application.Services
                 CurrentBet = 0,
                 SeatNumber = allPlayers.Count,
                 ProfileImageUrl = userData.ProfileImageUrl,
+                StartingRankPoints = userData.RankPoints
             });
         }
 
