@@ -8,7 +8,7 @@ services:
       POSTGRES_PASSWORD: super_hemligt
       POSTGRES_DB: poker_db
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
 
   redis:
     image: redis:alpine
@@ -28,8 +28,7 @@ services:
       - "5000:8080"
     environment:
       - ConnectionStrings__DefaultConnection=Host=db;Database=poker_db;Username=dennis;Password=super_hemligt
-      - Redis__ConnectionString=redis:6379
-
+      - Redis__ConnectionString=poker-redis:6379
   frontend:
     build: 
       context: ./frontend
@@ -41,8 +40,7 @@ services:
     depends_on:
       - backend
     environment:
-      - VITE_API_URL=http://localhost:5000
-
+      - VITE_API_URL=https://pokergame.win/
 # DET HÄR ÄR DELEN SOM FELMEDDELANDET KLAGAR PÅ:
 volumes:
   postgres_data:
