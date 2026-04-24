@@ -1,37 +1,48 @@
-version: "3.9"
 services:
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    ports:
-      - "5173:5173"
+  db:
+    image: postgres:alpine
+    container_name: poker-db
+    restart: always
     environment:
-      - NODE_ENV=development
+      POSTGRES_USER: dennis
+      POSTGRES_PASSWORD: super_hemligt
+      POSTGRES_DB: poker_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: poker-redis
+    restart: always
 
   backend:
-    build:
+    build: 
       context: ./backend
-      dockerfile: Dockerfile.dev
-    volumes:
-      - ./:/src
-    working_dir: /src/backend
+      dockerfile: Dockerfile
+    container_name: poker-api
+    restart: always
+    depends_on:
+      - db
+      - redis
     ports:
-      - "5132:5132"
+      - "5000:8080"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=Hejsan123!
+      - ConnectionStrings__DefaultConnection=Host=db;Database=poker_db;Username=dennis;Password=super_hemligt
+      - Redis__ConnectionString=redis:6379
+
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: poker-frontend
+    restart: always
     ports:
-      - "1433:1433"
-    healthcheck:
-      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "Hejsan123!", "-Q", "SELECT 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      - "8080:80"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://localhost:5000
+
+# DET HÄR ÄR DELEN SOM FELMEDDELANDET KLAGAR PÅ:
+volumes:
+  postgres_data:

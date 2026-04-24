@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { AuthContext, type ContextData } from "./AuthContext";
 import { api } from "@/lib/api";
-import { User } from "lucide-react";
 
 export function AuthProvider({children}: {children: React.ReactNode}) {
     const [data, setData] = useState<ContextData | null>(null);
