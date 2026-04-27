@@ -184,14 +184,33 @@ export function SessionSummaryModal({
 
         <div className="space-y-6 py-4 flex flex-col items-center">
           {/* Base Stats Here (Profit, Hands, etc) */}
-          <div className="text-center">
-            <h3 className="text-lg text-gray-400">Total Profit</h3>
-            <p
-              className={`text-4xl font-bold ${sessionSummary?.profit! >= 0 ? "text-green-500" : "text-red-500"}`}
-            >
-              {sessionSummary?.profit! >= 0 ? "+" : "-"}$
-              {Math.abs(sessionSummary?.profit!)}
-            </p>
+          <div className="grid grid-cols-2 gap-4 w-full">
+            <div className="col-span-2 text-center mb-2">
+              <h3 className="text-lg text-gray-400">Total Profit</h3>
+              <p
+                className={`text-4xl font-bold ${sessionSummary?.profit! >= 0 ? "text-green-500" : "text-red-500"}`}
+              >
+                {sessionSummary?.profit! >= 0 ? "+" : "-"}$
+                {Math.abs(sessionSummary?.profit! || 0)}
+              </p>
+            </div>
+            
+            <div className="bg-gray-800/50 p-3 rounded-lg flex flex-col items-center justify-center">
+              <span className="text-sm text-gray-400">Rounds Played</span>
+              <span className="text-xl font-semibold">{sessionSummary?.roundsPlayed || 0}</span>
+            </div>
+
+            <div className="bg-gray-800/50 p-3 rounded-lg flex flex-col items-center justify-center">
+              <span className="text-sm text-gray-400">Duration</span>
+              <span className="text-xl font-semibold">{sessionSummary?.duration || "0:00"}</span>
+            </div>
+
+            {sessionSummary?.wasEarlyLeave && (
+              <div className="col-span-2 bg-red-950 border border-red-900 p-3 rounded-lg flex flex-col items-center text-center mt-2">
+                <span className="text-sm text-red-400 font-semibold mb-1">Early Leave Penalty Applied</span>
+                <span className="text-lg font-bold text-red-500">-${sessionSummary?.penaltyAmount || 0}</span>
+              </div>
+            )}
           </div>
 
           {/* Animated Rank Section */}
