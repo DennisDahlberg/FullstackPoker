@@ -184,10 +184,8 @@ export default function Friends() {
     try {
       await api.friends.acceptFriendRequest(requestId);
       
-      // Remove from friend requests
       setFriendRequests(prev => prev.filter(req => req.id !== requestId));
       
-      // Optionally refresh friends list to show the new friend
       const updatedFriends = await api.friends.getFriends();
       setFriends(updatedFriends);
       
@@ -202,6 +200,21 @@ export default function Friends() {
       setAcceptingRequestId(null);
     }
   };
+
+  const handleDeclineRequest = async (requestId: number) => {
+    try { await api.friends.rejectFriendRequest(requestId);
+      setFriendRequests(prev => prev.filter(req => req.id !== requestId));
+
+      const updatedFriends = await api.friends.getFriends();
+      setFriends(updatedFriends);
+
+      toast.info("Friend request declined");
+    } catch (error) {
+      toast.error("Failed to decline request", {
+        description: error instanceof Error ? error.message : "Something went wrong",
+      });
+    }
+  }
 
   const handleAcceptInvite = async (invite: LobbyInvite) => {
     setAcceptingInviteId(invite.inviteId);
@@ -436,7 +449,10 @@ export default function Friends() {
                           "Accept"
                         )}
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-8 hover:bg-red-500/10 text-gray-400 hover:text-red-400">
+                      <Button 
+                        variant="ghost" size="sm" className="h-8 hover:bg-red-500/10 text-gray-400 hover:text-red-400"
+                        onClick={() => handleDeclineRequest(request.id)}
+                      >
                         Decline
                       </Button>
                     </div>

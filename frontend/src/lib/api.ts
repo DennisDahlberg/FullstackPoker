@@ -151,6 +151,19 @@ export const api = {
         throw "An error occurred while accepting friend request";
       }
     },
+    async rejectFriendRequest(requestId: number) {
+      try {
+        const response = await apiClient.post(
+          `/friends/reject/${requestId}`,
+        );
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || "Failed to reject friend request";
+        }
+        throw "An error occurred while rejecting friend request";
+      }
+    }
   },
 
   lobby: {
