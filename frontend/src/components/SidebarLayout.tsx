@@ -120,7 +120,7 @@ export default function SidebarLayout() {
                 >
                   <div className="flex items-center gap-3 text-left">
                     <Avatar className="h-8 w-8 rounded-lg border border-gray-700">
-                      <AvatarImage src="" alt="User" />
+                      <AvatarImage src={data?.user?.profileImageUrl || ""} alt="User" />
                       <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">
                         CN
                       </AvatarFallback>
@@ -165,7 +165,7 @@ export default function SidebarLayout() {
                 <DropdownMenuLabel className="p-0 font-normal">
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="h-8 w-8 rounded-lg border border-gray-700">
-                      <AvatarImage src="" alt="User" />
+                      <AvatarImage src={data?.user?.profileImageUrl || ""} alt="User" />
                       <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">
                         CN
                       </AvatarFallback>
