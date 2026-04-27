@@ -27,7 +27,7 @@ public class GameHistoryService : IGameHistoryService
         {
             FinishedAt =  DateTimeOffset.UtcNow,
             TableId = gameState.TableId,
-            StartedAt = gameState.StartedAt,
+            StartedAt = gameState.RoundStartedAt,
             WinnerIds = winnerIds,
             PlayerCount = gameState.Players.Count,
         };
@@ -84,7 +84,7 @@ public class GameHistoryService : IGameHistoryService
         var payout = player.Chips - penaltyAmount;
         var rankProfit = player.RankPoints - player.StartingRankPoints;
 
-        var duration = DateTimeOffset.UtcNow - gameState.StartedAt;
+        var duration = DateTimeOffset.UtcNow - gameState.GameStartedAt;
         var summary = new PlayerSessionSummary()
         {
             Duration = FormatDuration(duration),

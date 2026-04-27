@@ -71,8 +71,9 @@ namespace Application.Services
         var gameState = new GameState
         {
             Players = allPlayers,
-            StartedAt = DateTimeOffset.UtcNow,
-            TableId = table.Id
+            RoundStartedAt = DateTimeOffset.UtcNow,
+            GameStartedAt = DateTimeOffset.UtcNow,
+            TableId = table.Id,
         };
 
         SetupBlinds(gameState, table);
@@ -100,7 +101,7 @@ namespace Application.Services
         gameState.CurrentPlayerIndex = (gameState.BigBlindPosition + 1) % gameState.Players.Count;
         gameState.IsGameOver = false;
         gameState.WinnersPositions.Clear();
-        gameState.StartedAt = DateTimeOffset.UtcNow;
+        gameState.RoundStartedAt = DateTimeOffset.UtcNow;
         foreach (var player in gameState.Players)
         {
             player.Hand.Clear();

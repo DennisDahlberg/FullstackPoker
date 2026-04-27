@@ -29,7 +29,8 @@
         public bool IsFirstRound { get; set; } = true;
         public List<int> WinnersPositions { get; set; } = [];
         public int TableId { get; set; }
-        public DateTimeOffset StartedAt { get; set; }
+        public DateTimeOffset RoundStartedAt { get; set; }
+        public DateTimeOffset GameStartedAt { get; set; }
         public int PenaltyAmount { get; set; }
         public int EarlyLeavePayout { get; set; }
         public string CurrentViewerUserId { get; set; }
