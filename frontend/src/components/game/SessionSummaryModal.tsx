@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { TrendingUp, TrendingDown, Clock, Trophy } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -182,35 +183,60 @@ export function SessionSummaryModal({
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4 flex flex-col items-center">
+        <div className="space-y-4 py-4 flex flex-col items-center">
           {/* Base Stats Here (Profit, Hands, etc) */}
-          <div className="grid grid-cols-2 gap-4 w-full">
-            <div className="col-span-2 text-center mb-2">
-              <h3 className="text-lg text-gray-400">Total Profit</h3>
+          <div className="flex w-full flex-col gap-4">
+            <div className="text-center mb-2 flex flex-col items-center">
+              {sessionSummary?.profit! >= 0 ? (
+                <TrendingUp className="w-12 h-12 text-green-500 mb-2" />
+              ) : (
+                <TrendingDown className="w-12 h-12 text-red-500 mb-2" />
+              )}
               <p
-                className={`text-4xl font-bold ${sessionSummary?.profit! >= 0 ? "text-green-500" : "text-red-500"}`}
+                className={`text-5xl font-bold ${sessionSummary?.profit! >= 0 ? "text-green-500" : "text-red-500"}`}
               >
-                {sessionSummary?.profit! >= 0 ? "+" : "-"}$
-                {Math.abs(sessionSummary?.profit! || 0)}
+                ${sessionSummary?.profit! >= 0 ? "" : "-"}{Math.abs(sessionSummary?.profit! || 0)}
+              </p>
+              <p className="text-gray-400 mt-2">
+                {sessionSummary?.profit! >= 0 ? "Great session!" : "Better luck next time"}
               </p>
             </div>
-            
-            <div className="bg-gray-800/50 p-3 rounded-lg flex flex-col items-center justify-center">
-              <span className="text-sm text-gray-400">Rounds Played</span>
-              <span className="text-xl font-semibold">{sessionSummary?.roundsPlayed || 0}</span>
-            </div>
 
-            <div className="bg-gray-800/50 p-3 rounded-lg flex flex-col items-center justify-center">
-              <span className="text-sm text-gray-400">Duration</span>
-              <span className="text-xl font-semibold">{sessionSummary?.duration || "0:00"}</span>
-            </div>
-
-            {sessionSummary?.wasEarlyLeave && (
-              <div className="col-span-2 bg-red-950 border border-red-900 p-3 rounded-lg flex flex-col items-center text-center mt-2">
-                <span className="text-sm text-red-400 font-semibold mb-1">Early Leave Penalty Applied</span>
-                <span className="text-lg font-bold text-red-500">-${sessionSummary?.penaltyAmount || 0}</span>
+            <div className="grid grid-cols-2 gap-4 w-full">
+              <div className="bg-gray-900 border border-gray-800 p-4 rounded-xl flex flex-col items-center justify-center">
+                <Clock className="w-6 h-6 text-gray-400 mb-2" />
+                <span className="text-xl font-bold">{sessionSummary?.duration || "0s"}</span>
+                <span className="text-xs text-gray-500 mt-1">Duration</span>
               </div>
-            )}
+
+              <div className="bg-gray-900 border border-gray-800 p-4 rounded-xl flex flex-col items-center justify-center">
+                <Trophy className="w-6 h-6 text-amber-500 mb-2" />
+                <span className="text-xl font-bold">{sessionSummary?.roundsPlayed || 0}</span>
+                <span className="text-xs text-gray-500 mt-1">Rounds Played</span>
+              </div>
+            </div>
+
+            <div className="bg-gray-900 border border-gray-800 p-4 rounded-xl flex flex-col gap-3 text-sm">
+              <div className="flex justify-between items-center text-gray-300">
+                <span>Starting chips</span>
+                <span className="font-medium text-white">${sessionSummary?.startingChips || 0}</span>
+              </div>
+              <div className="flex justify-between items-center text-gray-300">
+                <span>Final chips</span>
+                <span className="font-medium text-white">${sessionSummary?.finalChips || 0}</span>
+              </div>
+              {sessionSummary?.wasEarlyLeave && (
+                <div className="flex justify-between items-center text-red-400">
+                  <span>Early leave penalty</span>
+                  <span>-${sessionSummary?.penaltyAmount || 0}</span>
+                </div>
+              )}
+              <div className="h-px bg-gray-700 w-full my-1"></div>
+              <div className="flex justify-between items-center text-gray-200">
+                <span>Balance returned</span>
+                <span className="font-bold text-amber-500">${sessionSummary?.balanceReturned || 0}</span>
+              </div>
+            </div>
           </div>
 
           {/* Animated Rank Section */}
