@@ -8,5 +8,6 @@
         public string Rank { get; set; } = null!;
         public decimal Balance { get; set; }
         public string? ProfileImageUrl { get; set; }
+        public int RankPoints { get; set; }
     }
 }

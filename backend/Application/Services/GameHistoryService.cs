@@ -27,26 +27,29 @@ public class GameHistoryService : IGameHistoryService
         {
             FinishedAt =  DateTimeOffset.UtcNow,
             TableId = gameState.TableId,
-            StartedAt = gameState.StartedAt,
+            StartedAt = gameState.RoundStartedAt,
             WinnerIds = winnerIds,
             PlayerCount = gameState.Players.Count,
         };
         
         var playerStats = GetPlayerStatsFromGame(gameState);
         
+        await UpdatePlayerRankAsync(gameState);
         await _gameRepository.SaveGameAsync(game,  playerStats);
     }
 
-    public async Task UpdatePlayerBalanceFromGame(GameState gameState)
+    private async Task UpdatePlayerRankAsync(GameState gameState)
     {
         foreach (var player in gameState.Players)
         {
             if (player.IsPlayer == false || string.IsNullOrWhiteSpace(player.UserId))
                 continue;
 
-            decimal balanceChange = !gameState.IsGameOver ? gameState.EarlyLeavePayout : player.Chips;
-            
-            await _userService.UpdateUserBalanceAsync(player.UserId, balanceChange);
+            decimal currentChips = player.Chips;
+            var profit = currentChips - player.RoundStartingChips;
+
+            var updatedRankPoints = await _userService.UpdateUserRankAsync(player.UserId, profit);
+            player.RankPoints = updatedRankPoints;
         }
     }
 
@@ -77,10 +80,13 @@ public class GameHistoryService : IGameHistoryService
     public PlayerSessionSummary GetGameSessionForPlayer(Player player, GameState gameState)
     {
         var isEarlyLeave = !gameState.IsGameOver;
+        var hasRebought = player.Rebuys > 0;
         var penaltyAmount = isEarlyLeave ? (int)(player.Chips * 0.1) : 0;
-        var payout = player.Chips - penaltyAmount;
+        var rankProfit = player.RankPoints - player.StartingRankPoints;
+        var rebuyAmount = player.Rebuys * player.GameStartingChips;
+        int payout = player.Chips - penaltyAmount - rebuyAmount;
 
-        var duration = DateTimeOffset.UtcNow - gameState.StartedAt;
+        var duration = DateTimeOffset.UtcNow - gameState.GameStartedAt;
         var summary = new PlayerSessionSummary()
         {
             Duration = FormatDuration(duration),
@@ -92,7 +98,11 @@ public class GameHistoryService : IGameHistoryService
             BalanceReturned = payout,
             PenaltyAmount = penaltyAmount,
             WasEarlyLeave = isEarlyLeave,
-            Hand = player.BestHand
+            Hand = player.BestHand,
+            RankProfit = rankProfit,
+            StartingRankPoints = player.StartingRankPoints,
+            HasRebought = hasRebought,
+            RebuyAmount = rebuyAmount
         };
 
         return summary;

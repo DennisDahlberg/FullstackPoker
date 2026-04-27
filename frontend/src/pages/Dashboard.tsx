@@ -173,10 +173,16 @@ export default function Dashboard() {
                 <p
                   className={cn(
                     "text-sm font-bold tracking-wide",
-                    user?.rank === "Beginner" && "text-green-400",
-                    user?.rank === "Intermediate" && "text-blue-400",
-                    user?.rank === "Pro" && "text-amber-400",
-                    user?.rank === "Elite" && "text-red-400",
+                    user?.rank === "Beginner" && "text-gray-400",
+                    user?.rank === "Amateur" && "text-green-500",
+                    user?.rank === "Intermediate" && "text-emerald-400",
+                    user?.rank === "Advanced" && "text-teal-400",
+                    user?.rank === "Veteran" && "text-cyan-400",
+                    user?.rank === "Expert" && "text-blue-500",
+                    user?.rank === "Pro" && "text-indigo-400",
+                    user?.rank === "Master" && "text-purple-500",
+                    user?.rank === "Elite" && "text-red-500",
+                    user?.rank === "Legend" && "text-amber-400",
                     !user?.rank && "text-gray-400",
                   )}
                 >

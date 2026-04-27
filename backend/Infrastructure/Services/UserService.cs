@@ -34,6 +34,7 @@ namespace Infrastructure.Services
                 Rank = user.Rank,
                 Username = user.UserName!,
                 ProfileImageUrl =  user.ProfileImageUrl,
+                RankPoints = user.RankPoints
             };
 
             return userDTO;
@@ -89,6 +90,60 @@ namespace Infrastructure.Services
                 return Result.Fail("Update failed");
             
             return Result.Ok();
+        }
+
+        public async Task<int> UpdateUserRankAsync(string userId, decimal profit)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return 0;
+            
+            var rankFloors = new Dictionary<string, int>
+            {
+                { "Legend", 1000000 },
+                { "Elite", 500000 },
+                { "Master", 250000 },
+                { "Pro", 100000 },
+                { "Expert", 50000 },
+                { "Veteran", 25000 },
+                { "Advanced", 10000 },
+                { "Intermediate", 2500 },
+                { "Amateur", 500 },
+                { "Beginner", 0 }
+            };
+
+            if (profit >= 0)
+                user.RankPoints += (int)profit;
+            else
+            {
+                var pointsToLose = (int)((double)profit * 0.30); 
+                user.RankPoints += pointsToLose;
+
+                if (rankFloors.TryGetValue(user.Rank, out int currentFloor))
+                {
+                    if (user.RankPoints < currentFloor)
+                    {
+                        user.RankPoints = currentFloor;
+                    }
+                }
+            }
+            
+            user.Rank = user.RankPoints switch
+            {
+                >= 1000000 => "Legend",
+                >= 500000 => "Elite",
+                >= 250000 => "Master",
+                >= 100000 => "Pro",
+                >= 50000 => "Expert",
+                >= 25000 => "Veteran",
+                >= 10000 => "Advanced",
+                >= 2500 => "Intermediate",
+                >= 500 => "Amateur",
+                _ => "Beginner"
+            };
+
+            await _userManager.UpdateAsync(user);
+            return user.RankPoints;
         }
 
         public async Task<IdentityResult> UpdatePasswordAsync(string userId, PasswordUpdateDto dto)

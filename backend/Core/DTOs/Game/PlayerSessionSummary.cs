@@ -7,9 +7,13 @@ public class PlayerSessionSummary
     public int StartingChips { get; set; }
     public int FinalChips { get; set; }
     public int Profit { get; set; }
+    public int StartingRankPoints { get; set; }
+    public int RankProfit { get; set; }
     public decimal BalanceReturned { get; set; }
     public int PenaltyAmount { get; set; }
     public bool WasEarlyLeave { get; set; }
+    public bool HasRebought { get; set; }
+    public int RebuyAmount { get; set; }
     public int RoundsPlayed { get; set; }
     public string Hand { get; set; } = null!;
 }
