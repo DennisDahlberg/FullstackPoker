@@ -163,6 +163,16 @@ export const api = {
         }
         throw "An error occurred while rejecting friend request";
       }
+    },
+    async removeFriend(friendId: number) {
+      try {
+        const response = await apiClient.delete(`/friends/${friendId}`);
+        return response.data;
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        throw err.response?.data || "Failed to remove friend";
+      }
+      throw "An error occurred while removing friend";
     }
   },
 

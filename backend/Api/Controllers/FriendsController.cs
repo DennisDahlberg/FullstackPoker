@@ -112,7 +112,7 @@ public class FriendsController : Controller
         return Ok();
     }
 
-    [HttpPost("remove/{friendId}")]
+    [HttpDelete("{friendId}")]
     public async Task<IActionResult> RemoveFriendAsync([FromRoute] int friendId)
     {
         var userId = _userService.GetLoggedInUserId(User);
