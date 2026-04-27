@@ -55,9 +55,9 @@ public class FriendService
         return Result.Ok(friendRequest.RequesterId);
     }
 
-    public async Task<Result<string>> RemoveFriendAsync(int requestId, string userId)
+    public async Task<Result<string>> RemoveFriendAsync(string userId, string friendUserId)
     {
-        var friend = _repository.GetFriendById(requestId, userId);
+        var friend = await _repository.GetFriendByIdsAsync(userId, friendUserId);
         
         if (friend is null)
             return Result.Fail("Friend not found");

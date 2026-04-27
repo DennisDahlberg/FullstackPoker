@@ -113,10 +113,10 @@ public class FriendsController : Controller
     }
 
     [HttpDelete("{friendId}")]
-    public async Task<IActionResult> RemoveFriendAsync([FromRoute] int friendId)
+    public async Task<IActionResult> RemoveFriendAsync([FromRoute] string friendId)
     {
         var userId = _userService.GetLoggedInUserId(User);
-        var result = await _friendService.RemoveFriendAsync(friendId, userId);
+        var result = await _friendService.RemoveFriendAsync(userId, friendId);
         
         if (result.IsFailed)
             return BadRequest(new { message = result.Errors.FirstOrDefault()?.Message ?? "Failed to accept friend request" });

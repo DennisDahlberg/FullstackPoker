@@ -1,4 +1,5 @@
 using Core.Models;
+using FluentResults;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,6 +25,16 @@ public class FriendsRepository
         var friend = _dbContext.Friends
             .Include(f => f.Addressee)
             .FirstOrDefault(f => f.Id == id && f.AddresseeId == userId);
+        return friend;
+    }
+
+    public async Task<Friend?> GetFriendByIdsAsync(string userId, string friendUserId)
+    {
+        var friend = await _dbContext.Friends
+            .Include(f => f.Addressee)
+            .FirstOrDefaultAsync(f => 
+                (f.RequesterId == userId && f.AddresseeId == friendUserId) ||
+                (f.RequesterId == friendUserId && f.AddresseeId == userId));
         return friend;
     }
 

@@ -202,7 +202,8 @@ export default function Friends() {
   };
 
   const handleDeclineRequest = async (requestId: number) => {
-    try { await api.friends.rejectFriendRequest(requestId);
+    try { 
+      await api.friends.rejectFriendRequest(requestId);
       setFriendRequests(prev => prev.filter(req => req.id !== requestId));
 
       const updatedFriends = await api.friends.getFriends();
@@ -244,6 +245,21 @@ export default function Friends() {
       setDecliningInviteId(null);
     }
   };
+
+  const handleRemoveFriend = async (friendId: string) => {
+    try { 
+      await api.friends.removeFriend(friendId);
+
+      const updatedFriends = await api.friends.getFriends();
+      setFriends(updatedFriends);
+
+      toast.info("Friend removed");
+    } catch (error) {
+      toast.error("Failed to remove friend", {
+        description: error instanceof Error ? error.message : "Something went wrong",
+      });
+    }
+  }
 
   const filteredFriends = friends.filter((friend) => {
     const matchesSearch = friend.username.toLowerCase().includes(searchQuery.toLowerCase());
@@ -398,7 +414,9 @@ export default function Friends() {
                       </div>
                     </div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-500/10 text-gray-500 hover:text-red-400">
+                      <Button 
+                        variant="ghost" size="icon" className="rounded-full hover:bg-red-500/10 text-gray-500 hover:text-red-400"
+                        onClick={() => handleRemoveFriend(friend.id)}>
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
