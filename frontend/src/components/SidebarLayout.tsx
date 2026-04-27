@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useAuthContext } from "@/context/AuthContext";
 import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import { useFriendsHub } from "@/context/FriendsHubContext";
 import {
   LayoutDashboard,
   Settings,
@@ -26,6 +27,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { api } from "@/lib/api";
 
 export default function SidebarLayout() {
   const [isOpen, setIsOpen] = useState(window.innerWidth >= 768);
@@ -33,6 +35,37 @@ export default function SidebarLayout() {
   const { data, loading, logout } = useAuthContext();
   const location = useLocation();
   const navigate = useNavigate();
+  const friendsHub = useFriendsHub();
+
+  const fetchNotifications = useCallback(async () => {
+    if (!data?.user) return;
+    try {
+      const [requests, invites] = await Promise.all([
+        api.friends.getFriendRequests(),
+        api.lobby.getPendingInvites(),
+      ])
+      setNotificationCount(requests.length + invites.length);
+    } catch (error) {
+      console.error("Failed to fetch notifications", error);
+      setNotificationCount(0);
+    }
+  }, [data?.user]);
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [fetchNotifications, location.pathname]);
+
+  useEffect(() => {
+    if (!friendsHub) return;
+
+    friendsHub.on("ReceiveFriendInvite", fetchNotifications);
+    friendsHub.on("LobbyInviteReceived", fetchNotifications);
+
+    return () => {
+      friendsHub.off("ReceiveFriendInvite", fetchNotifications);
+      friendsHub.off("LobbyInviteReceived", fetchNotifications);
+    };
+  }, [friendsHub, fetchNotifications]);
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
