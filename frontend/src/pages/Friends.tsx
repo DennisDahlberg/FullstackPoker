@@ -101,7 +101,9 @@ export default function Friends() {
       });
       
       api.friends.getFriends()
-        .then(data => setFriends(data))
+        .then(data => {
+          setFriends(data);
+          window.dispatchEvent(new Event("refreshNotifications"));})
         .catch(error => console.error("Failed to refresh friends:", error));
     };
 

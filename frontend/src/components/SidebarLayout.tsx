@@ -31,7 +31,7 @@ import { api } from "@/lib/api";
 
 export default function SidebarLayout() {
   const [isOpen, setIsOpen] = useState(window.innerWidth >= 768);
-  const [notificationCount, setNotificationCount] = useState(2);
+  const [notificationCount, setNotificationCount] = useState(0);
   const { data, loading, logout } = useAuthContext();
   const location = useLocation();
   const navigate = useNavigate();
@@ -66,6 +66,14 @@ export default function SidebarLayout() {
       friendsHub.off("LobbyInviteReceived", fetchNotifications);
     };
   }, [friendsHub, fetchNotifications]);
+
+  useEffect(() => {
+    const handleRefresh = () => fetchNotifications();
+    window.addEventListener("refreshNotifications", handleRefresh);
+    return () => {
+      window.removeEventListener("refreshNotifications", handleRefresh);
+    };
+  }, [fetchNotifications]);
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
