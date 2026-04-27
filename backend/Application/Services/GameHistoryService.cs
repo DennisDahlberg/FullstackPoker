@@ -80,9 +80,11 @@ public class GameHistoryService : IGameHistoryService
     public PlayerSessionSummary GetGameSessionForPlayer(Player player, GameState gameState)
     {
         var isEarlyLeave = !gameState.IsGameOver;
+        var hasRebought = player.Rebuys > 0;
         var penaltyAmount = isEarlyLeave ? (int)(player.Chips * 0.1) : 0;
         var payout = player.Chips - penaltyAmount;
         var rankProfit = player.RankPoints - player.StartingRankPoints;
+        var rebuyAmount = player.Rebuys * player.GameStartingChips;
 
         var duration = DateTimeOffset.UtcNow - gameState.GameStartedAt;
         var summary = new PlayerSessionSummary()
@@ -98,7 +100,9 @@ public class GameHistoryService : IGameHistoryService
             WasEarlyLeave = isEarlyLeave,
             Hand = player.BestHand,
             RankProfit = rankProfit,
-            StartingRankPoints = player.StartingRankPoints
+            StartingRankPoints = player.StartingRankPoints,
+            HasRebought = hasRebought,
+            RebuyAmount = rebuyAmount
         };
 
         return summary;

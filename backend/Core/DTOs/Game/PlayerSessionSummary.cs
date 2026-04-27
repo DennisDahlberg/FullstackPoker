@@ -12,6 +12,8 @@ public class PlayerSessionSummary
     public decimal BalanceReturned { get; set; }
     public int PenaltyAmount { get; set; }
     public bool WasEarlyLeave { get; set; }
+    public bool HasRebought { get; set; }
+    public int RebuyAmount { get; set; }
     public int RoundsPlayed { get; set; }
     public string Hand { get; set; } = null!;
 }
