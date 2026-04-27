@@ -150,7 +150,6 @@ export default function Game() {
   const confirmLeave = async () => {
     setIsLeaveWarningOpen(false);
     await leaveGame();
-    refetch();
   };
 
   const getCallAmount = () => {
@@ -607,7 +606,7 @@ export default function Game() {
       {/* Session Summary Dialog */}
       <SessionSummaryModal
         isOpen={!!sessionSummary}
-        onClose={() => (navigate("/dashboard"), clearSessionSummary())}
+        onClose={() => (navigate("/dashboard"), clearSessionSummary(), refetch())}
         sessionSummary={sessionSummary}
       />
 
