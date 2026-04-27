@@ -385,9 +385,6 @@ export default function Friends() {
                       </div>
                     </div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="ghost" size="icon" className="rounded-full hover:bg-gray-800 text-gray-400 hover:text-white">
-                        <MessageSquare className="h-4 w-4" />
-                      </Button>
                       <Button variant="ghost" size="icon" className="rounded-full hover:bg-red-500/10 text-gray-500 hover:text-red-400">
                         <X className="h-4 w-4" />
                       </Button>

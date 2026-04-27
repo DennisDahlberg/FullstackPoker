@@ -38,7 +38,7 @@ public class FriendService
         return Result.Ok();
     }
 
-    public async Task<Result<string>> AcceptFriendRequestAsync(int requestId, string userId)
+    public async Task<Result<string>> HandleFriendRequestAsync(int requestId, string userId, bool accept)
     {
         var friendRequest = _repository.GetFriendById(requestId, userId);
         
@@ -48,7 +48,8 @@ public class FriendService
         if (friendRequest.Status !=  FriendStatus.Pending)
             return Result.Fail("Friend request not pending");
         
-        friendRequest.Status = FriendStatus.Accepted;
+        friendRequest.Status = accept ? FriendStatus.Accepted : FriendStatus.Rejected;
+        
         await _repository.SaveChangesAsync();
 
         return Result.Ok(friendRequest.RequesterId);
