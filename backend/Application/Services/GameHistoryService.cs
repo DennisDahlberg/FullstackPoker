@@ -82,9 +82,9 @@ public class GameHistoryService : IGameHistoryService
         var isEarlyLeave = !gameState.IsGameOver;
         var hasRebought = player.Rebuys > 0;
         var penaltyAmount = isEarlyLeave ? (int)(player.Chips * 0.1) : 0;
-        var payout = player.Chips - penaltyAmount;
         var rankProfit = player.RankPoints - player.StartingRankPoints;
         var rebuyAmount = player.Rebuys * player.GameStartingChips;
+        int payout = player.Chips - penaltyAmount - rebuyAmount;
 
         var duration = DateTimeOffset.UtcNow - gameState.GameStartedAt;
         var summary = new PlayerSessionSummary()

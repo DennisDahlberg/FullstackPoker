@@ -56,6 +56,8 @@ export interface GameSessionSummary {
   wasEarlyLeave: boolean;
   rankProfit: number;
   startingRankPoints: number;
+  hasRebought: boolean;
+  rebuyAmount: number;
 }
 
 export type GameActionPayload = 

@@ -216,11 +216,7 @@ export function SessionSummaryModal({
               </div>
             </div>
 
-            <div className="bg-gray-900 border border-gray-800 p-4 rounded-xl flex flex-col gap-3 text-sm">
-              <div className="flex justify-between items-center text-gray-300">
-                <span>Starting chips</span>
-                <span className="font-medium text-white">${sessionSummary?.startingChips || 0}</span>
-              </div>
+            <div className="bg-gray-900 border border-gray-800 p-4 rounded-xl flex flex-col gap-3 text-sm">              
               <div className="flex justify-between items-center text-gray-300">
                 <span>Final chips</span>
                 <span className="font-medium text-white">${sessionSummary?.finalChips || 0}</span>
@@ -231,9 +227,14 @@ export function SessionSummaryModal({
                   <span>-${sessionSummary?.penaltyAmount || 0}</span>
                 </div>
               )}
+              {sessionSummary?.hasRebought && (
+                <div className="flex justify-between items-center text-red-400">
+                  <span>Rebuy amount</span>
+                  <span>-${sessionSummary?.rebuyAmount || 0}</span>
+                </div>
+              ) }
               <div className="h-px bg-gray-700 w-full my-1"></div>
-              <div className="flex justify-between items-center text-gray-200">
-                <span>Balance returned</span>
+              <div className="flex justify-end items-center text-gray-200">
                 <span className="font-bold text-amber-500">${sessionSummary?.balanceReturned || 0}</span>
               </div>
             </div>
