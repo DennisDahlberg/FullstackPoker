@@ -52,7 +52,10 @@ public class FriendsRepository
             .FirstOrDefaultAsync(f => 
                 (f.RequesterId == currentUserId && f.AddresseeId == targetUserId) ||
                 (f.RequesterId == targetUserId && f.AddresseeId == currentUserId));
-        return existingFriendship != null;
+        if (existingFriendship is null)
+            return false;
+        
+        return existingFriendship.Status != FriendStatus.Rejected;
     }
 
     public async Task SaveChangesAsync()
