@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils";
 
 export default function SidebarLayout() {
   const [isOpen, setIsOpen] = useState(window.innerWidth >= 768);
+  const [notificationCount, setNotificationCount] = useState(2);
   const { data, loading, logout } = useAuthContext();
   const location = useLocation();
   const navigate = useNavigate();
@@ -94,8 +95,15 @@ export default function SidebarLayout() {
                   }
                 `}
               >
-                <item.icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
+                <div className="flex items-center gap-3">
+                  <item.icon className="w-5 h-5" />
+                  <span className="font-medium">{item.label}</span>
+                </div>
+                {item.label === "Friends" && notificationCount > 0 && (
+                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                    {notificationCount}
+                  </span>
+                )}
               </Link>
             );
           })}
