@@ -1,16 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import PlayerSeat from "@/components/PlayerSeat";
+import { useAuthContext } from "@/context/AuthContext";
 import { SessionSummaryModal } from "@/components/game/SessionSummaryModal";
 import { getDynamicOffsets } from "@/lib/dealOffsets";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Clock,
   LogOut,
-  Minus,
   Settings,
-  TrendingDown,
-  TrendingUp,
-  Trophy,
 } from "lucide-react";
 import PlayingCard from "@/components/PlayingCard";
 import { useEffect, useRef, useState } from "react";
@@ -38,6 +34,7 @@ import {
 import { toast } from "sonner";
 
 export default function Game() {
+  const { refetch } = useAuthContext();
   const navigate = useNavigate();
   const game = useGameStore((s) => s.game);
   const error = useGameStore((s) => s.error);
@@ -153,11 +150,7 @@ export default function Game() {
   const confirmLeave = async () => {
     setIsLeaveWarningOpen(false);
     await leaveGame();
-  };
-
-  const handleSessionSummaryClose = () => {
-    clearSessionSummary();
-    navigate("/dashboard");
+    refetch();
   };
 
   const getCallAmount = () => {
@@ -278,9 +271,9 @@ export default function Game() {
         {/* Poker Table */}
         <div className="absolute inset-8 md:inset-16 lg:inset-24 max-w-5xl mx-auto">
           {/* Table Surface */}
-          <div className="absolute inset-0 bg-gradient-to-b from-green-800 to-green-900 rounded-[50%] border-8 border-amber-900 shadow-2xl">
+          <div className="absolute inset-0 bg-linear-to-b from-green-800 to-green-900 rounded-[50%] border-8 border-amber-900 shadow-2xl">
             {/* Table felt texture overlay */}
-            <div className="absolute inset-0 rounded-[50%] opacity-30 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_rgba(0,0,0,0.3)_100%)]" />
+            <div className="absolute inset-0 rounded-[50%] opacity-30 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.3)_100%)]" />
 
             {/* Center Content */}
             <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
