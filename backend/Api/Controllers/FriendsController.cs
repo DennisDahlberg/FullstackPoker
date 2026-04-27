@@ -111,4 +111,16 @@ public class FriendsController : Controller
             .SendAsync("FriendRequestRejected", User.Identity!.Name);
         return Ok();
     }
+
+    [HttpPost("remove/{friendId}")]
+    public async Task<IActionResult> RemoveFriendAsync([FromRoute] int friendId)
+    {
+        var userId = _userService.GetLoggedInUserId(User);
+        var result = await _friendService.RemoveFriendAsync(friendId, userId);
+        
+        if (result.IsFailed)
+            return BadRequest(new { message = result.Errors.FirstOrDefault()?.Message ?? "Failed to accept friend request" });
+       
+        return Ok();
+    }
 }

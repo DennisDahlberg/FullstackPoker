@@ -55,6 +55,22 @@ public class FriendService
         return Result.Ok(friendRequest.RequesterId);
     }
 
+    public async Task<Result<string>> RemoveFriendAsync(int requestId, string userId)
+    {
+        var friend = _repository.GetFriendById(requestId, userId);
+        
+        if (friend is null)
+            return Result.Fail("Friend not found");
+        
+        if (friend.Status !=  FriendStatus.Accepted)
+            return Result.Fail("Friend not found");
+        
+        friend.Status = FriendStatus.Rejected;
+        await _repository.SaveChangesAsync();
+        
+        return Result.Ok(friend.RequesterId);
+    }
+
     public async Task<List<FriendRequestDto>> GetFriendRequestsAsync(string userId)
     {
         var requests = await _repository.GetFriendRequestsAsync(userId);
