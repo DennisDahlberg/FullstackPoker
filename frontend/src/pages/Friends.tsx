@@ -117,23 +117,15 @@ export default function Friends() {
     );
   };
 
-    const handleLobbyInviteReceived = (invite: LobbyInvite) => {
-      setGameInvites(prev => [invite, ...prev]);
-      toast.info("Game invite received!", {
-        description: `${invite.hostUsername} invited you to join their lobby`,
-      });
-    };
 
     friendsHub.on("ReceiveFriendInvite", handleReceiveFriendInvite);
     friendsHub.on("FriendRequestAccepted", handleFriendRequestAccepted);
     friendsHub.on("FriendStatusChanged", handleFriendStatusChanged);
-    friendsHub.on("LobbyInviteReceived", handleLobbyInviteReceived);
 
     return () => {
       friendsHub.off("ReceiveFriendInvite", handleReceiveFriendInvite);
       friendsHub.off("FriendRequestAccepted", handleFriendRequestAccepted);
       friendsHub.off("FriendStatusChanged", handleFriendStatusChanged);
-      friendsHub.off("LobbyInviteReceived", handleLobbyInviteReceived);
     };
   }, [friendsHub]);
 
