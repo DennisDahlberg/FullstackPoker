@@ -122,7 +122,7 @@ export default function SidebarLayout() {
                     <Avatar className="h-8 w-8 rounded-lg border border-gray-700">
                       <AvatarImage src={data?.user?.profileImageUrl || ""} alt="User" />
                       <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">
-                        CN
+                        {data?.user?.name.charAt(0).toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
@@ -167,7 +167,7 @@ export default function SidebarLayout() {
                     <Avatar className="h-8 w-8 rounded-lg border border-gray-700">
                       <AvatarImage src={data?.user?.profileImageUrl || ""} alt="User" />
                       <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">
-                        CN
+                        {data?.user?.name.charAt(0).toUpperCase() || "U"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
