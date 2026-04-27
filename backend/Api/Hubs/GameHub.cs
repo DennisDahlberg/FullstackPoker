@@ -316,6 +316,7 @@ public class GameHub : Hub
                 else
                 {
                     player.Chips = buyInAmount;
+                    player.Rebuys++;
                     player.IsAwaitingRebuy = false;
                     player.IsActive = true;
                     player.IsFolded = false;

@@ -20,6 +20,7 @@
         public string? Comment { get; set; }
         public string? UserId { get; set; }
         public int SeatNumber { get; set; }
+        public int Rebuys { get; set; }
         
         public string Description { get; set; } = null!;
         public string PlayStyle { get; set; } = null!;
