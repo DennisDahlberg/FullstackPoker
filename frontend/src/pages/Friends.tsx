@@ -88,11 +88,8 @@ export default function Friends() {
     if (!friendsHub) return;
 
     const handleReceiveFriendInvite = (senderUsername: string) => {
-      toast.info("New friend request", {
-        description: `${senderUsername} sent you a friend request`,
-      });
+      console.log("Received friend invite from:", senderUsername);
       
-      // Refresh friend requests list
       api.friends.getFriendRequests()
         .then(data => setFriendRequests(data))
         .catch(error => console.error("Failed to refresh requests:", error));
@@ -103,7 +100,6 @@ export default function Friends() {
         description: `${accepterUsername} accepted your friend request`,
       });
       
-      // Refresh friends list
       api.friends.getFriends()
         .then(data => setFriends(data))
         .catch(error => console.error("Failed to refresh friends:", error));
