@@ -20,7 +20,7 @@ export default function PlayingCard({
       src={
         hidden ? `/images/cards/blue_back.png` : `/images/cards/${value}.png`
       }
-      className="w-16"
+      className="w-9 sm:w-12 md:w-16"
       alt=""
       initial={{
         opacity: 0,

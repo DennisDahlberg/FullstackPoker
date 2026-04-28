@@ -26,14 +26,14 @@ export default function PlayerSeat({
   dealerPosition?: number;
 }) {
   const positions: Record<number, string> = {
-    0: "bottom-3 left-1/2 -translate-x-1/2",
-    1: "bottom-13 left-4 md:left-16",
-    2: "top-1/2 -translate-y-1/2 left-2 md:left-8",
-    3: "top-16 left-4 md:left-16",
-    4: "top-4 left-1/2 -translate-x-1/2",
-    5: "top-16 right-4 md:right-16",
-    6: "top-1/2 -translate-y-1/2 right-2 md:right-8",
-    7: "bottom-13 right-4 md:right-16",
+    0: "bottom-1 sm:bottom-3 left-1/2 -translate-x-1/2",
+    1: "bottom-[20%] sm:bottom-13 left-4 sm:left-4 md:left-16",
+    2: "top-[40%] sm:top-1/2 -translate-y-1/2 left-2 sm:left-2 md:left-8",
+    3: "top-[18%] sm:top-16 left-4 sm:left-4 md:left-16",
+    4: "top-4 sm:top-6 left-1/2 -translate-x-1/2",
+    5: "top-[18%] sm:top-16 right-4 sm:right-4 md:right-16",
+    6: "top-[40%] sm:top-1/2 -translate-y-1/2 right-2 sm:right-2 md:right-8",
+    7: "bottom-[20%] sm:bottom-13 right-4 sm:right-4 md:right-16",
   };
 
   const fallbackImages = {
@@ -101,17 +101,17 @@ export default function PlayerSeat({
       transition={{ duration: 0.4 }}
     >
       {isEmpty ? (
-        <div className="w-24 h-24 rounded-full bg-gray-800 border-4 border-gray-700 flex items-center justify-center text-gray-600">
+        <div className="w-14 h-14 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full bg-gray-800 border-2 sm:border-3 md:border-4 border-gray-700 flex items-center justify-center text-gray-600 text-[10px] sm:text-sm">
           <span>Empty</span>
         </div>
       ) : (
         <div className="relative flex flex-col">
           {/* Name / chips panel */}
-          <div className="flex flex-col items-center z-10 bg-gray-900 rounded text-sm w-35">
-            <span className="w-full text-center border-b border-gray-700">
+          <div className="flex flex-col items-center z-10 bg-gray-900 rounded text-[10px] sm:text-sm w-24 sm:w-32 md:w-35">
+            <span className="w-full text-center border-b border-gray-700 truncate px-0.5 sm:px-1">
               {player?.name}
             </span>
-            <span className="self-end pr-2">
+            <span className="self-end pr-0.5 sm:pr-2">
               ${player?.chips.toLocaleString()}
             </span>
           </div>
@@ -121,7 +121,7 @@ export default function PlayerSeat({
               player?.profileImageUrl ??
               (player.isPlayer ? fallbackImages.user : fallbackImages.robot)
             }
-            className={`z-15 absolute -left-12 -bottom-3 h-16 w-16 rounded-full object-cover border-4 ${
+            className={`z-15 absolute -left-7 sm:-left-10 md:-left-12 -bottom-1.5 sm:-bottom-3 h-10 w-10 sm:h-14 sm:w-14 md:h-16 md:w-16 rounded-full object-cover border-2 sm:border-3 md:border-4 ${
               isCurrentPlayer ? "border-yellow-400" : "border-gray-700"
             }`}
             alt=""
@@ -144,7 +144,7 @@ export default function PlayerSeat({
           />
 
           {player?.hand && player.hand.length >= 2 && (
-            <div className="absolute bottom-7 left-1 z-5 flex gap-1">
+            <div className="absolute bottom-4 sm:bottom-6 md:bottom-7 left-0 sm:left-1 z-5 flex gap-0.5 sm:gap-1">
               <PlayingCard
                 key={`${roundKey}-0`}
                 hidden={player.hand[0].isHidden}
@@ -166,7 +166,7 @@ export default function PlayerSeat({
 
           {/* Dealer button */}
           {player.isDealer && (
-            <div className="absolute -top-3 -left-13 bg-yellow-400 text-black rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold border-2 border-gray-900 z-20">
+            <div className="absolute -top-1.5 sm:-top-3 -left-8 sm:-left-12 md:-left-13 bg-yellow-400 text-black rounded-full w-4 h-4 sm:w-6 sm:h-6 flex items-center justify-center text-[10px] sm:text-xs font-bold border border-gray-900 sm:border-2 z-20">
               D
             </div>
           )}
@@ -178,7 +178,7 @@ export default function PlayerSeat({
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.85, y: 4 }}
                 transition={{ duration: 0.2 }}
-                className="absolute z-50 w-48 rounded-2xl bg-white p-3 text-sm text-gray-900 shadow-2xl before:absolute before:h-4 before:w-4 before:rotate-45 before:bg-white before:content-[''] top-18 -left-14 before:-top-2 before:left-7"
+                className="hidden sm:block absolute z-50 w-36 sm:w-48 rounded-2xl bg-white p-2 sm:p-3 text-xs sm:text-sm text-gray-900 shadow-2xl before:absolute before:h-3 before:w-3 sm:before:h-4 sm:before:w-4 before:rotate-45 before:bg-white before:content-[''] top-14 sm:top-18 -left-10 sm:-left-14 before:-top-1.5 sm:before:-top-2 before:left-5 sm:before:left-7"
               >
                 {visibleComment}
               </motion.div>
@@ -190,7 +190,7 @@ export default function PlayerSeat({
             initial={{ opacity: 0, scale: 0.6, y: -6 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ type: "spring", stiffness: 400, damping: 22 }}
-            className={`absolute -bottom-7 bg-gray-900 w-full rounded text-md text-center ${
+            className={`absolute -bottom-4 sm:-bottom-6 md:-bottom-7 bg-gray-900 w-full rounded text-[10px] sm:text-sm text-center px-0.5 ${
               getActionMessage(player.lastAction, player.lastActionAmount)
                 .className
             }`}
@@ -211,9 +211,9 @@ export default function PlayerSeat({
                 damping: 14,
                 delay: 0.3,
               }}
-              className="absolute top-5.5 -left-8 right-0 flex justify-center z-30"
+              className="absolute top-3 sm:top-5 md:top-5.5 -left-5 sm:-left-7 md:-left-8 right-0 flex justify-center z-30"
             >
-              <span className="bg-amber-500 text-black text-xs font-bold px-2 py-0.5 rounded-full shadow-lg whitespace-nowrap">
+              <span className="bg-amber-500 text-black text-[10px] sm:text-xs font-bold px-1 sm:px-2 py-0.5 rounded-full shadow-lg whitespace-nowrap">
                 +${(player.chips - player.roundStartingChips).toLocaleString()}
               </span>
             </motion.div>

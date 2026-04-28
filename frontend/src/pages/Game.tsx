@@ -178,28 +178,28 @@ export default function Game() {
         return {
           label: "Fold",
           className:
-            "w-24 h-12 bg-red-900/30 border-red-700 text-red-400 hover:bg-red-900/50 hover:text-red-300",
+            "w-20 sm:w-24 h-10 sm:h-12 text-xs sm:text-sm bg-red-900/30 border-red-700 text-red-400 hover:bg-red-900/50 hover:text-red-300",
           onClick: () => playerAction("fold"),
         };
       case "check":
         return {
           label: "Check",
           className:
-            "w-24 h-12 bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white",
+            "w-20 sm:w-24 h-10 sm:h-12 text-xs sm:text-sm bg-gray-800 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white",
           onClick: () => playerAction("check"),
         };
       case "call":
         return {
           label: `Call ($${getCallAmount()})`,
           className:
-            "w-24 h-12 bg-blue-800/30 border-blue-700 text-blue-400 hover:bg-blue-800/50 hover:text-blue-300",
+            "w-20 sm:w-24 h-10 sm:h-12 text-xs sm:text-sm bg-blue-800/30 border-blue-700 text-blue-400 hover:bg-blue-800/50 hover:text-blue-300",
           onClick: () => playerAction("call"),
         };
       case "raise":
         return {
           label: "Raise",
           className:
-            "w-24 h-12 bg-green-800/30 border-green-700 text-green-400 hover:bg-green-800/50 hover:text-green-300",
+            "w-20 sm:w-24 h-10 sm:h-12 text-xs sm:text-sm bg-green-800/30 border-green-700 text-green-400 hover:bg-green-800/50 hover:text-green-300",
           onClick: () => {
             setRaiseValue(minRaise);
             setIsRaiseModalOpen(true);
@@ -209,7 +209,7 @@ export default function Game() {
         return {
           label: "All In",
           className:
-            "w-24 h-12 bg-purple-800/30 border-purple-700 text-purple-400 hover:bg-purple-800/50 hover:text-purple-300",
+            "w-20 sm:w-24 h-10 sm:h-12 text-xs sm:text-sm bg-purple-800/30 border-purple-700 text-purple-400 hover:bg-purple-800/50 hover:text-purple-300",
           onClick: () => playerAction("all-in"),
         };
     }
@@ -217,9 +217,9 @@ export default function Game() {
 
   if (!game && !sessionSummary) {
   return (
-    <div className="fixed inset-0 bg-gray-950 flex flex-col items-center justify-center gap-4 z-50">
-      <Loader2 className="h-12 w-12 animate-spin text-amber-500" />
-      <p className="text-gray-400 text-lg font-medium animate-pulse">
+    <div className="fixed inset-0 bg-gray-950 flex flex-col items-center justify-center gap-3 sm:gap-4 z-50 px-4">
+      <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-amber-500" />
+      <p className="text-gray-400 text-base sm:text-lg font-medium animate-pulse">
         Loading game...
       </p>
     </div>
@@ -234,10 +234,10 @@ export default function Game() {
   return (
     <div className="fixed inset-0 bg-gray-950 flex flex-col">
       {/* Header */}
-      <div className="h-14 bg-gray-900/80 border-b border-gray-800 flex items-center justify-between px-4">
-        <div className="flex items-center gap-2 text-sm text-gray-400">
+      <div className="h-12 sm:h-14 bg-gray-900/80 border-b border-gray-800 flex items-center justify-between px-2 sm:px-4">
+        <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-400">
           {game?.isGameOver && (
-            <span className="text-amber-400 font-semibold">
+            <span className="text-amber-400 font-semibold truncate max-w-[180px] sm:max-w-none">
               🏆{" "}
               {game.winnersPositions
                 .map((pos) => game.players[pos].name)
@@ -251,26 +251,26 @@ export default function Game() {
             </span>
           )}
           {!isMyTurn && !game?.isGameOver && (
-            <span>
+            <span className="truncate max-w-[180px] sm:max-w-none">
               Waiting for {game?.players[game.currentPlayerIndex]?.name}...
             </span>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-400 hover:text-white"
+            className="text-gray-400 hover:text-white h-8 w-8 sm:h-10 sm:w-10"
           >
-            <Settings className="w-5 h-5" />
+            <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+            className="text-red-400 hover:text-red-300 hover:bg-red-900/20 h-8 w-8 sm:h-10 sm:w-10"
             onClick={handleLeaveClick}
           >
-            <LogOut className="w-5 h-5" />
+            <LogOut className="w-4 h-4 sm:w-5 sm:h-5" />
           </Button>
         </div>
       </div>
@@ -278,29 +278,29 @@ export default function Game() {
       {/* Game Area */}
       <div className="flex-1 relative overflow-hidden">
         {/* Poker Table */}
-        <div className="absolute inset-8 md:inset-16 lg:inset-24 max-w-5xl mx-auto">
+        <div className="absolute inset-6 inset-y-8 sm:inset-8 md:inset-12 lg:inset-16 xl:inset-24 max-w-5xl mx-auto">
           {/* Table Surface */}
-          <div className="absolute inset-0 bg-linear-to-b from-green-800 to-green-900 rounded-[50%] border-8 border-amber-900 shadow-2xl">
+          <div className="absolute inset-0 bg-linear-to-b from-green-800 to-green-900 rounded-[50%] border-4 sm:border-6 md:border-8 border-amber-900 shadow-2xl">
             {/* Table felt texture overlay */}
             <div className="absolute inset-0 rounded-[50%] opacity-30 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.3)_100%)]" />
 
             {/* Center Content */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 sm:gap-3 md:gap-4">
               {/* Pot */}
-              <div className="bg-black/40 px-6 py-2 rounded-full">
+              <div className="bg-black/40 px-2 py-1 sm:px-4 md:px-6 sm:py-1.5 md:py-2 rounded-full">
                 <motion.span
                   key={game?.pot}
                   initial={{ scale: 1.25 }}
                   animate={{ scale: 1 }}
                   transition={{ duration: 0.25 }}
-                  className="text-amber-400 font-bold text-lg md:text-xl"
+                  className="text-amber-400 font-bold text-xs sm:text-base md:text-lg lg:text-xl"
                 >
-                  Pot: ${game?.pot.toLocaleString()}
+                  <span className="hidden sm:inline">Pot: </span>${game?.pot.toLocaleString()}
                 </motion.span>
               </div>
 
               {/* Community Cards */}
-              <div className="flex gap-2 md:gap-3">
+              <div className="flex gap-1 sm:gap-2 md:gap-3">
                 {visibleCommunityCards.map((card, index) => {
                   const prevCount = prevCommunityCardCountRef.current;
                   const isNew = index >= prevCount;
@@ -345,10 +345,10 @@ export default function Game() {
       </div>
 
       {/* Actions */}
-      <div className="h-24 bg-gray-900 border-t border-gray-800 p-6">
-        <div className="max-w-2xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 h-full">
+      <div className="h-20 sm:h-24 bg-gray-900 border-t border-gray-800 p-3 sm:p-4 md:p-6">
+        <div className="max-w-2xl mx-auto flex flex-col md:flex-row items-center justify-center gap-2 sm:gap-3 md:gap-4 h-full">
           {game?.isGameOver ? (
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4">
               <div className="relative flex items-center justify-center w-10 h-10 shrink-0">
                 <svg className="w-full h-full transform -rotate-90">
                   <circle
@@ -379,25 +379,25 @@ export default function Game() {
                 </span>
               </div>
               {hasSubmittedReady ? (
-                <span className="text-green-400 font-semibold text-sm">
+                <span className="text-green-400 font-semibold text-xs sm:text-sm">
                   You're ready!
                 </span>
               ) : (
                 <Button
                   onClick={handlePlayAnotherRound}
-                  className="bg-green-600 hover:bg-green-700 text-white"
+                  className="bg-green-600 hover:bg-green-700 text-white text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10"
                 >
                   Play Another Round
                 </Button>
               )}
               <Button
                 variant="outline"
-                className="border-red-700 text-red-400 hover:bg-red-900/20 hover:text-red-300"
+                className="border-red-700 text-red-400 hover:bg-red-900/20 hover:text-red-300 text-xs sm:text-sm px-3 sm:px-4 h-9 sm:h-10"
                 onClick={handleLeaveClick}
               >
                 Leave
               </Button>
-              <span className="text-gray-500 text-sm">
+              <span className="text-gray-500 text-xs sm:text-sm">
                 {game.readyPlayerIds.length} /{" "}
                 {game.players.filter((p) => p.isPlayer && p.userId).length}{" "}
                 ready
@@ -408,7 +408,7 @@ export default function Game() {
               {isMyTurn && (game?.availableActions.length ?? 0) > 0 ? (
                 <motion.div
                   key="actions"
-                  className="flex items-center gap-3"
+                  className="flex flex-wrap items-center justify-center gap-2 sm:gap-3"
                   initial={{ opacity: 0, y: 16 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 16 }}
@@ -454,14 +454,14 @@ export default function Game() {
         </div>
       </div>
       <Dialog open={isRaiseModalOpen} onOpenChange={setIsRaiseModalOpen}>
-        <DialogContent className="sm:max-w-md bg-gray-900 text-white border-gray-700">
+        <DialogContent className="sm:max-w-md w-[90vw] sm:w-full bg-gray-900 text-white border-gray-700">
           <DialogHeader>
-            <DialogTitle>Place your raise</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">Place your raise</DialogTitle>
           </DialogHeader>
 
-          <div className="flex flex-col gap-6 py-4">
+          <div className="flex flex-col gap-4 sm:gap-6 py-3 sm:py-4">
             <div className="relative flex items-center justify-center gap-2">
-              <span className="text-2xl font-bold text-green-400 absolute left-4">
+              <span className="text-xl sm:text-2xl font-bold text-green-400 absolute left-2 sm:left-4">
                 $
               </span>
               <Input
@@ -471,7 +471,7 @@ export default function Game() {
                 min={minRaise}
                 step={5}
                 onChange={(e) => setRaiseValue(Number(e.target.value))}
-                className="text-3xl h-16 text-center font-mono bg-black/20"
+                className="text-2xl sm:text-3xl h-14 sm:h-16 text-center font-mono bg-black/20"
               />
             </div>
 
@@ -484,9 +484,10 @@ export default function Game() {
               className="py-2 bg-gray-800/50 rounded-lg"
             />
 
-            <div className="grid grid-cols-4 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <Button
                 variant="outline"
+                className="text-xs sm:text-sm h-9 sm:h-10"
                 onClick={() =>
                   setRaiseValue(Math.floor((player?.chips ?? 0) / 4))
                 }
@@ -495,6 +496,7 @@ export default function Game() {
               </Button>
               <Button
                 variant="outline"
+                className="text-xs sm:text-sm h-9 sm:h-10"
                 onClick={() =>
                   setRaiseValue(Math.floor((player?.chips ?? 0) / 2))
                 }
@@ -503,6 +505,7 @@ export default function Game() {
               </Button>
               <Button
                 variant="outline"
+                className="text-xs sm:text-sm h-9 sm:h-10"
                 onClick={() =>
                   setRaiseValue(Math.floor(((player?.chips ?? 0) * 3) / 4))
                 }
@@ -511,7 +514,7 @@ export default function Game() {
               </Button>
               <Button
                 variant="outline"
-                className="border-purple-500"
+                className="border-purple-500 text-xs sm:text-sm h-9 sm:h-10"
                 onClick={() => setRaiseValue(player?.chips ?? 0)}
               >
                 All-In
@@ -521,7 +524,7 @@ export default function Game() {
 
           <DialogFooter>
             <Button
-              className="w-full bg-green-600 hover:bg-green-700"
+              className="w-full bg-green-600 hover:bg-green-700 text-sm sm:text-base h-10 sm:h-11"
               onClick={() => {
                 playerAction("raise", { amount: raiseValue });
                 setIsRaiseModalOpen(false);
@@ -537,14 +540,14 @@ export default function Game() {
         open={isLeaveWarningOpen}
         onOpenChange={setIsLeaveWarningOpen}
       >
-        <AlertDialogContent className="bg-gray-900 text-white border-gray-700">
+        <AlertDialogContent className="w-[90vw] sm:w-full max-w-lg bg-gray-900 text-white border-gray-700">
           <AlertDialogHeader>
             <AlertDialogTitle
-              className={`text-xl ${hasPenalty ? "text-red-400" : "text-yellow-400"}`}
+              className={`text-lg sm:text-xl ${hasPenalty ? "text-red-400" : "text-yellow-400"}`}
             >
               {hasPenalty ? "Leave Game Early?" : "Leave Game?"}
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-300 space-y-3">
+            <AlertDialogDescription className="text-gray-300 space-y-3 text-sm sm:text-base">
               {hasPenalty ? (
                 <>
                   <p>You are about to leave the game before it has finished.</p>
@@ -595,16 +598,16 @@ export default function Game() {
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-gray-800 hover:bg-gray-700">
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel className="bg-gray-800 hover:bg-gray-700 w-full sm:w-auto text-sm sm:text-base h-10 sm:h-11">
               {hasPenalty ? "Stay in Game" : "Cancel"}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmLeave}
               className={
                 hasPenalty
-                  ? "bg-red-600 hover:bg-red-700"
-                  : "bg-blue-600 hover:bg-blue-700"
+                  ? "bg-red-600 hover:bg-red-700 w-full sm:w-auto text-sm sm:text-base h-10 sm:h-11"
+                  : "bg-blue-600 hover:bg-blue-700 w-full sm:w-auto text-sm sm:text-base h-10 sm:h-11"
               }
             >
               Leave Game
@@ -622,53 +625,53 @@ export default function Game() {
 
       <Dialog open={isRebuyModalOpen} onOpenChange={() => {}}>
         <DialogContent
-          className="sm:max-w-md bg-gray-900 text-white border-gray-700"
+          className="w-[90vw] sm:w-full sm:max-w-md bg-gray-900 text-white border-gray-700"
           onInteractOutside={(e) => e.preventDefault()}
           onEscapeKeyDown={(e) => e.preventDefault()}
         >
           <DialogHeader>
-            <DialogTitle className="text-2xl text-center">
+            <DialogTitle className="text-xl sm:text-2xl text-center">
               You are out of chips!
             </DialogTitle>
           </DialogHeader>
 
-          <div className="flex flex-col items-center justify-center py-6 space-y-6">
-            <div className="relative flex items-center justify-center w-32 h-32">
+          <div className="flex flex-col items-center justify-center py-4 sm:py-6 space-y-4 sm:space-y-6">
+            <div className="relative flex items-center justify-center w-24 h-24 sm:w-32 sm:h-32">
               <svg className="w-full h-full transform -rotate-90">
                 <circle
-                  cx="64"
-                  cy="64"
-                  r="56"
+                  cx="50%"
+                  cy="50%"
+                  r="44"
                   stroke="currentColor"
-                  strokeWidth="8"
+                  strokeWidth="6"
                   fill="transparent"
                   className="text-gray-700"
                 />
                 <circle
-                  cx="64"
-                  cy="64"
-                  r="56"
+                  cx="50%"
+                  cy="50%"
+                  r="44"
                   stroke="currentColor"
-                  strokeWidth="8"
+                  strokeWidth="6"
                   fill="transparent"
-                  strokeDasharray={2 * Math.PI * 56}
-                  strokeDashoffset={2 * Math.PI * 56 * (1 - rebuyTimeLeft / 10)}
+                  strokeDasharray={2 * Math.PI * 44}
+                  strokeDashoffset={2 * Math.PI * 44 * (1 - rebuyTimeLeft / 10)}
                   className="text-amber-500 transition-all duration-1000 ease-linear"
                 />
               </svg>
               <div className="absolute flex items-center justify-center w-full h-full">
-                <span className="text-3xl font-bold">{rebuyTimeLeft}</span>
+                <span className="text-2xl sm:text-3xl font-bold">{rebuyTimeLeft}</span>
               </div>
             </div>
-            <p className="text-gray-400 text-center">
+            <p className="text-gray-400 text-center text-sm sm:text-base px-4">
               Would you like to rebuy to continue playing or leave the table?
             </p>
           </div>
 
-          <DialogFooter className="flex gap-2 sm:justify-between w-full">
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between w-full">
             <Button
               variant="outline"
-              className="w-1/2 border-red-700 text-red-500 hover:bg-red-900/20 hover:text-red-400"
+              className="w-full sm:w-1/2 border-red-700 text-red-500 hover:bg-red-900/20 hover:text-red-400 text-sm sm:text-base h-10 sm:h-11"
               onClick={() => {
                 submitRebuy(false);
                 setIsRebuyModalOpen(false);
@@ -677,7 +680,7 @@ export default function Game() {
               Leave Table
             </Button>
             <Button
-              className="w-1/2 bg-amber-600 hover:bg-amber-700 text-white"
+              className="w-full sm:w-1/2 bg-amber-600 hover:bg-amber-700 text-white text-sm sm:text-base h-10 sm:h-11"
               onClick={() => {
                 submitRebuy(true);
                 setIsRebuyModalOpen(false);
