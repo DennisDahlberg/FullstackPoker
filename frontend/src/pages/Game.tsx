@@ -5,6 +5,7 @@ import { SessionSummaryModal } from "@/components/game/SessionSummaryModal";
 import { getDynamicOffsets } from "@/lib/dealOffsets";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  Loader2,
   LogOut,
   Settings,
 } from "lucide-react";
@@ -214,7 +215,16 @@ export default function Game() {
     }
   };
 
-  if (!game && !sessionSummary) return <div>Loading...</div>;
+  if (!game && !sessionSummary) {
+  return (
+    <div className="fixed inset-0 bg-gray-950 flex flex-col items-center justify-center gap-4 z-50">
+      <Loader2 className="h-12 w-12 animate-spin text-amber-500" />
+      <p className="text-gray-400 text-lg font-medium animate-pulse">
+        Loading game...
+      </p>
+    </div>
+  );
+}
 
   const activeDealerIndex = game?.players.findIndex((p) => p.isDealer) ?? 0;
   const myPlayerIndex = game?.players.findIndex((p) => p.userId === myUserId);
