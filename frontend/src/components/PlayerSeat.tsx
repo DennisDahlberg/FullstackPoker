@@ -144,7 +144,7 @@ export default function PlayerSeat({
           />
 
           {player?.hand && player.hand.length >= 2 && (
-            <div className="absolute bottom-4 sm:bottom-6 md:bottom-7 left-0 sm:left-1 z-5 flex gap-0.5 sm:gap-1">
+            <div className="absolute bottom-4 sm:bottom-6 md:bottom-7 left-3 sm:left-1 z-5 flex gap-0.5 sm:gap-1">
               <PlayingCard
                 key={`${roundKey}-0`}
                 hidden={player.hand[0].isHidden}
