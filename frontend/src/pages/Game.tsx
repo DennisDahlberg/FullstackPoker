@@ -285,7 +285,7 @@ export default function Game() {
             <div className="absolute inset-0 rounded-[50%] opacity-30 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(0,0,0,0.3)_100%)]" />
 
             {/* Center Content */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 sm:gap-3 md:gap-4">
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 mt-12 sm:mt-0 sm:gap-3 md:gap-4">
               {/* Pot */}
               <div className="bg-black/40 px-2 py-1 sm:px-4 md:px-6 sm:py-1.5 md:py-2 rounded-full">
                 <motion.span

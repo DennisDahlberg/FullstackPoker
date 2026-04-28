@@ -26,14 +26,14 @@ export default function PlayerSeat({
   dealerPosition?: number;
 }) {
   const positions: Record<number, string> = {
-    0: "bottom-1 sm:bottom-3 left-1/2 -translate-x-1/2",
-    1: "bottom-[20%] sm:bottom-13 left-4 sm:left-4 md:left-16",
-    2: "top-[40%] sm:top-1/2 -translate-y-1/2 left-2 sm:left-2 md:left-8",
-    3: "top-[18%] sm:top-16 left-4 sm:left-4 md:left-16",
+    0: "bottom-0 sm:bottom-3 left-1/2 -translate-x-1/2",
+    1: "bottom-[17%] sm:bottom-13 left-4 sm:left-4 md:left-16",
+    2: "top-[43%] sm:top-1/2 -translate-y-1/2 left-2 sm:left-2 md:left-8",
+    3: "top-[20%] sm:top-16 left-4 sm:left-4 md:left-16",
     4: "top-4 sm:top-6 left-1/2 -translate-x-1/2",
-    5: "top-[18%] sm:top-16 right-4 sm:right-4 md:right-16",
-    6: "top-[40%] sm:top-1/2 -translate-y-1/2 right-2 sm:right-2 md:right-8",
-    7: "bottom-[20%] sm:bottom-13 right-4 sm:right-4 md:right-16",
+    5: "top-[20%] sm:top-16 right-4 sm:right-4 md:right-16",
+    6: "top-[43%] sm:top-1/2 -translate-y-1/2 right-2 sm:right-2 md:right-8",
+    7: "bottom-[17%] sm:bottom-13 right-4 sm:right-4 md:right-16",
   };
 
   const fallbackImages = {
