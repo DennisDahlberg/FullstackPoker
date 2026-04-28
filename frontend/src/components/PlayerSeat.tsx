@@ -211,9 +211,9 @@ export default function PlayerSeat({
                 damping: 14,
                 delay: 0.3,
               }}
-              className="absolute top-3 sm:top-5 md:top-5.5 -left-5 sm:-left-7 md:-left-8 right-0 flex justify-center z-30"
+              className="absolute top-4 sm:top-5 md:top-5.5 -left-5 sm:-left-7 md:-left-8 right-0 flex justify-center z-30"
             >
-              <span className="bg-amber-500 text-black text-[10px] sm:text-xs font-bold px-1 sm:px-2 py-0.5 rounded-full shadow-lg whitespace-nowrap">
+              <span className="bg-amber-500 text-black text-[7px] sm:text-xs font-bold px-1 sm:px-2 py-0.5 rounded-full shadow-lg whitespace-nowrap">
                 +${(player.chips - player.roundStartingChips).toLocaleString()}
               </span>
             </motion.div>
