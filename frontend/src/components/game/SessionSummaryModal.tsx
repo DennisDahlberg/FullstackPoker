@@ -176,47 +176,47 @@ export function SessionSummaryModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-lg bg-gray-900 text-white border-gray-700 overflow-hidden">
+      <DialogContent className="max-w-[95vw] sm:max-w-md md:max-w-lg bg-gray-900 text-white border-gray-700 overflow-hidden">
         <DialogHeader>
-          <DialogTitle className="text-2xl text-center">
+          <DialogTitle className="text-xl sm:text-2xl text-center">
             Session Summary
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4 py-4 flex flex-col items-center">
+        <div className="space-y-3 sm:space-y-4 py-2 sm:py-4 flex flex-col items-center">
           {/* Base Stats Here (Profit, Hands, etc) */}
-          <div className="flex w-full flex-col gap-4">
+          <div className="flex w-full flex-col gap-3 sm:gap-4">
             <div className="text-center mb-2 flex flex-col items-center">
               {sessionSummary?.profit! >= 0 ? (
-                <TrendingUp className="w-12 h-12 text-green-500 mb-2" />
+                <TrendingUp className="w-10 h-10 sm:w-12 sm:h-12 text-green-500 mb-1 sm:mb-2" />
               ) : (
-                <TrendingDown className="w-12 h-12 text-red-500 mb-2" />
+                <TrendingDown className="w-10 h-10 sm:w-12 sm:h-12 text-red-500 mb-1 sm:mb-2" />
               )}
               <p
-                className={`text-5xl font-bold ${sessionSummary?.profit! >= 0 ? "text-green-500" : "text-red-500"}`}
+                className={`text-3xl sm:text-4xl md:text-5xl font-bold ${sessionSummary?.profit! >= 0 ? "text-green-500" : "text-red-500"}`}
               >
                 ${sessionSummary?.profit! >= 0 ? "" : "-"}{Math.abs(sessionSummary?.profit! || 0)}
               </p>
-              <p className="text-gray-400 mt-2">
+              <p className="text-sm sm:text-base text-gray-400 mt-1 sm:mt-2">
                 {sessionSummary?.profit! >= 0 ? "Great session!" : "Better luck next time"}
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 w-full">
-              <div className="bg-gray-900 border border-gray-800 p-4 rounded-xl flex flex-col items-center justify-center">
-                <Clock className="w-6 h-6 text-gray-400 mb-2" />
-                <span className="text-xl font-bold">{sessionSummary?.duration || "0s"}</span>
+            <div className="grid grid-cols-2 gap-2 sm:gap-4 w-full">
+              <div className="bg-gray-900 border border-gray-800 p-3 sm:p-4 rounded-xl flex flex-col items-center justify-center">
+                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 mb-1 sm:mb-2" />
+                <span className="text-lg sm:text-xl font-bold">{sessionSummary?.duration || "0s"}</span>
                 <span className="text-xs text-gray-500 mt-1">Duration</span>
               </div>
 
-              <div className="bg-gray-900 border border-gray-800 p-4 rounded-xl flex flex-col items-center justify-center">
-                <Trophy className="w-6 h-6 text-amber-500 mb-2" />
-                <span className="text-xl font-bold">{sessionSummary?.roundsPlayed || 0}</span>
+              <div className="bg-gray-900 border border-gray-800 p-3 sm:p-4 rounded-xl flex flex-col items-center justify-center">
+                <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500 mb-1 sm:mb-2" />
+                <span className="text-lg sm:text-xl font-bold">{sessionSummary?.roundsPlayed || 0}</span>
                 <span className="text-xs text-gray-500 mt-1">Rounds Played</span>
               </div>
             </div>
 
-            <div className="bg-gray-900 border border-gray-800 p-4 rounded-xl flex flex-col gap-3 text-sm">              
+            <div className="bg-gray-900 border border-gray-800 p-3 sm:p-4 rounded-xl flex flex-col gap-2 sm:gap-3 text-xs sm:text-sm">              
               <div className="flex justify-between items-center text-gray-300">
                 <span>Final chips</span>
                 <span className="font-medium text-white">${sessionSummary?.finalChips || 0}</span>
@@ -241,7 +241,7 @@ export function SessionSummaryModal({
           </div>
 
           {/* Animated Rank Section */}
-          <div className="w-full bg-black/40 p-6 rounded-xl mt-4 relative">
+          <div className="w-full bg-black/40 p-4 sm:p-6 rounded-xl mt-2 sm:mt-4 relative">
             <div className="flex justify-between items-end mb-2">
               <motion.div
                 animate={
@@ -252,9 +252,9 @@ export function SessionSummaryModal({
                 transition={{ duration: 0.5 }}
                 className="flex flex-col"
               >
-                <span className="text-sm text-gray-400">Current Rank</span>
+                <span className="text-xs sm:text-sm text-gray-400">Current Rank</span>
                 <span
-                  className={`text-2xl font-black uppercase tracking-wider ${currentRank.color} drop-shadow-md`}
+                  className={`text-lg sm:text-xl md:text-2xl font-black uppercase tracking-wider ${currentRank.color} drop-shadow-md`}
                 >
                   {currentRank.name}
                 </span>
@@ -262,9 +262,9 @@ export function SessionSummaryModal({
 
               <div className="text-right flex flex-col">
                 <span className="text-xs text-gray-500">Rank Points</span>
-                <span className="text-xl font-mono font-bold">
+                <span className="text-base sm:text-lg md:text-xl font-mono font-bold">
                   {displayPoints.toLocaleString()}
-                  <span className="text-sm font-normal text-gray-500 ml-1">
+                  <span className="text-xs sm:text-sm font-normal text-gray-500 ml-1">
                     /{" "}
                     {currentRank.max === Infinity
                       ? "MAX"
@@ -275,7 +275,7 @@ export function SessionSummaryModal({
             </div>
 
             {/* Progress Bar Container */}
-            <div className="h-4 w-full bg-gray-800 rounded-full overflow-hidden relative border border-gray-700">
+            <div className="h-3 sm:h-4 w-full bg-gray-800 rounded-full overflow-hidden relative border border-gray-700">
               <motion.div
                 className={`h-full ${currentRank.bg}`}
                 initial={{ width: 0 }}
@@ -291,7 +291,7 @@ export function SessionSummaryModal({
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className={`absolute right-6 -top-4 font-bold ${sessionSummary && sessionSummary.rankProfit >= 0 ? "text-green-400" : "text-red-400"}`}
+                  className={`absolute right-4 sm:right-6 -top-3 sm:-top-4 text-sm sm:text-base font-bold ${sessionSummary && sessionSummary.rankProfit >= 0 ? "text-green-400" : "text-red-400"}`}
                 >
                   {sessionSummary && sessionSummary.rankProfit >= 0 ? "+" : ""}
                   {sessionSummary ? sessionSummary.rankProfit : 0} pts
@@ -303,7 +303,7 @@ export function SessionSummaryModal({
 
         <DialogFooter>
           <Button
-            className="w-full bg-amber-600 hover:bg-amber-700"
+            className="w-full bg-amber-600 hover:bg-amber-700 text-sm sm:text-base"
             onClick={onClose}
           >
             Back to Dashboard
