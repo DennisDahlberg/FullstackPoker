@@ -44,7 +44,7 @@ export default function SidebarLayout() {
       const [requests, invites] = await Promise.all([
         api.friends.getFriendRequests(),
         api.lobby.getPendingInvites(),
-      ])
+      ]);
       setNotificationCount(requests.length + invites.length);
     } catch (error) {
       console.error("Failed to fetch notifications", error);
@@ -53,14 +53,14 @@ export default function SidebarLayout() {
   }, [data?.user]);
 
   useEffect(() => {
-  const handleResize = () => {
-    setIsMobile(window.innerWidth < 768);
-    setIsOpen(window.innerWidth >= 768);
-  };
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsOpen(window.innerWidth >= 768);
+    };
 
-  window.addEventListener("resize", handleResize);
-  return () => window.removeEventListener("resize", handleResize);
-}, []);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     fetchNotifications();
@@ -180,7 +180,10 @@ export default function SidebarLayout() {
                 >
                   <div className="flex items-center gap-3 text-left">
                     <Avatar className="h-8 w-8 rounded-lg border border-gray-700">
-                      <AvatarImage src={data?.user?.profileImageUrl || ""} alt="User" />
+                      <AvatarImage
+                        src={data?.user?.profileImageUrl || ""}
+                        alt="User"
+                      />
                       <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">
                         {data?.user?.name.charAt(0).toUpperCase() || "U"}
                       </AvatarFallback>
@@ -219,13 +222,16 @@ export default function SidebarLayout() {
               <DropdownMenuContent
                 className="w-56 min-w-56 rounded-lg bg-gray-950 border-gray-800 text-gray-200"
                 side={isMobile ? "top" : "right"}
-                align= "end"
+                align="end"
                 sideOffset={4}
               >
                 <DropdownMenuLabel className="p-0 font-normal">
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="h-8 w-8 rounded-lg border border-gray-700">
-                      <AvatarImage src={data?.user?.profileImageUrl || ""} alt="User" />
+                      <AvatarImage
+                        src={data?.user?.profileImageUrl || ""}
+                        alt="User"
+                      />
                       <AvatarFallback className="rounded-lg bg-gray-800 text-gray-300">
                         {data?.user?.name.charAt(0).toUpperCase() || "U"}
                       </AvatarFallback>
@@ -243,14 +249,20 @@ export default function SidebarLayout() {
                 <DropdownMenuSeparator className="bg-gray-800" />
                 <DropdownMenuItem
                   className="focus:bg-gray-900 focus:text-white cursor-pointer"
-                  onClick={() => navigate("/profile")}
+                  onClick={() => {
+                    navigate("/profile");
+                    if (window.innerWidth < 768) setIsOpen(false);
+                  }}
                 >
                   <User className="mr-2 h-4 w-4" />
                   Profile
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="focus:bg-gray-900 focus:text-white cursor-pointer"
-                  onClick={() => navigate("/settings")}
+                  onClick={() => {
+                    navigate("/settings");
+                    if (window.innerWidth < 768) setIsOpen(false);
+                  }}
                 >
                   <Settings className="mr-2 h-4 w-4" />
                   Settings
