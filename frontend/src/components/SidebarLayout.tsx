@@ -218,8 +218,8 @@ export default function SidebarLayout() {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 className="w-56 min-w-56 rounded-lg bg-gray-950 border-gray-800 text-gray-200"
-                side="right"
-                align="end"
+                side={isMobile ? "top" : "right"}
+                align= "end"
                 sideOffset={4}
               >
                 <DropdownMenuLabel className="p-0 font-normal">
