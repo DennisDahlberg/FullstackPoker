@@ -403,7 +403,7 @@ export default function Bots() {
                     </div>
                   </div>
                   {bot.isUserCreated && (
-                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                    <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
                       <button
                         onClick={() => openEditDialog(bot)}
                         className="p-1.5 rounded-lg text-gray-500 hover:text-amber-400 hover:bg-amber-500/10 transition-all"
