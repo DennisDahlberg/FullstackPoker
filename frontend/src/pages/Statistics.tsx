@@ -326,7 +326,7 @@ export default function Statistics() {
                       </span>
                       <span className="flex items-center gap-1">
                         <Users className="w-3 h-3" />
-                        {game.players} players
+                        {game.players}
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
@@ -348,7 +348,7 @@ export default function Statistics() {
                       {game.profit >= 0 ? "+" : ""}
                       {game.profit.toLocaleString()}
                     </p>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-gray-600 hidden sm:block">
                       Chips: {game.chipsPostGame.toLocaleString()}
                     </p>
                   </div>
