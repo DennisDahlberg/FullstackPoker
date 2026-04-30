@@ -31,6 +31,7 @@ import { api } from "@/lib/api";
 
 export default function SidebarLayout() {
   const [isOpen, setIsOpen] = useState(window.innerWidth >= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [notificationCount, setNotificationCount] = useState(0);
   const { data, loading, logout } = useAuthContext();
   const location = useLocation();
@@ -50,6 +51,16 @@ export default function SidebarLayout() {
       setNotificationCount(0);
     }
   }, [data?.user]);
+
+  useEffect(() => {
+  const handleResize = () => {
+    setIsMobile(window.innerWidth < 768);
+    setIsOpen(window.innerWidth >= 768);
+  };
+
+  window.addEventListener("resize", handleResize);
+  return () => window.removeEventListener("resize", handleResize);
+}, []);
 
   useEffect(() => {
     fetchNotifications();
