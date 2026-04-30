@@ -281,7 +281,7 @@ export default function SidebarLayout() {
         ${isOpen ? "md:ml-64" : "ml-0"}
       `}
       >
-        <main className="flex-1 p-4 md:p-8 overflow-auto">
+        <main className="flex-1 pt-16 pb-4 px-4 xl:p-8 overflow-auto">
           <Outlet />
         </main>
       </div>
