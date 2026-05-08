@@ -48,16 +48,16 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/login">
               <Button
-                variant="outline"
-                className="border-amber-500 text-amber-400 hover:bg-amber-500/10"
+                className="bg-yellow-600 hover:bg-amber-500 text-white shadow-lg"
               >
                 Sign In
               </Button>
             </Link>
-            <Button className="bg-yellow-600 hover:bg-amber-500 text-white shadow-lg">
-              <Play className="w-4 h-4 mr-2" />
-              Play Now
-            </Button>
+            <Link to="/register">
+              <Button variant="outline" className="border-amber-500 text-amber-400 hover:bg-amber-500/10">
+                Register
+              </Button>
+            </Link>
           </div>
 
           {/* Mobile menu button */}
@@ -98,14 +98,15 @@ export default function Navbar() {
             </a>
             <div className="pt-4 space-y-3">
               <Link to="/login">
-                <Button
-                  className="w-full bg-yellow-600"
-                >
-                  Sign In
-                </Button>
+                <Button className="w-full bg-yellow-600">Sign In</Button>
               </Link>
               <Link to="/register">
-                <Button className="w-full border-amber-500 text-amber-400 mt-3" variant="outline">Register</Button>
+                <Button
+                  className="w-full border-amber-500 text-amber-400 mt-3"
+                  variant="outline"
+                >
+                  Register
+                </Button>
               </Link>
             </div>
           </div>
