@@ -336,12 +336,29 @@ namespace Application.Services
 
         if (state.Players.Count(p => !p.IsFolded) == 1)
         {
+            foreach (var card in state.CommunityCards)
+                card.IsHidden = false;
+    
+            state.Stage = GameStage.Showdown;
             await HandleEndOfRound(state);
             state.AvailableActions = GetAvailableActions(state);
             return;
         }
-
-        if (state.Players.Where(p => p.IsActive == true).All(p => p.HasActedThisRound == true))
+        
+        var activePlayers = state.Players.Where(p => p.IsActive).ToList();
+        
+        if (!activePlayers.Any())
+        {
+            foreach (var card in state.CommunityCards)
+                card.IsHidden = false;
+    
+            state.Stage = GameStage.Showdown;
+            await HandleEndOfRound(state);
+            state.AvailableActions = GetAvailableActions(state);
+            return;
+        }
+        
+        if (activePlayers.All(p => p.HasActedThisRound))
         {
             await HandleEndOfStage(state);
             state.AvailableActions = GetAvailableActions(state);
