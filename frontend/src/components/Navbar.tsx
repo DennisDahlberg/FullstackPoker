@@ -124,44 +124,6 @@ export default function Navbar() {
           </div>
         </div>
       </div>
-
-      {/* {isMenuOpen && (
-        <div className="md:hidden bg-gray-900/95 backdrop-blur-md border-t border-yellow-900/50">
-          <div className="px-4 py-6 space-y-4">
-            <a
-              href="#features"
-              className="block text-gray-300 hover:text-amber-400 transition-colors"
-            >
-              Features
-            </a>
-            <a
-              href="#how-to-play"
-              className="block text-gray-300 hover:text-amber-400 transition-colors"
-            >
-              How to Play
-            </a>
-            <a
-              href="#ai-opponents"
-              className="block text-gray-300 hover:text-amber-400 transition-colors"
-            >
-              AI Opponents
-            </a>
-            <div className="pt-4 space-y-3">
-              <Link to="/login">
-                <Button className="w-full bg-yellow-600">Sign In</Button>
-              </Link>
-              <Link to="/register">
-                <Button
-                  className="w-full border-amber-500 text-amber-400 mt-3"
-                  variant="outline"
-                >
-                  Register
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      )} */}
     </nav>
   );
 }
