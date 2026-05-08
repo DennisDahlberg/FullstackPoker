@@ -283,13 +283,9 @@ namespace Application.Services
             case "call":
                 var callAmount = state.HighestBet - currentPlayer.CurrentBet;
                 var actualCallAmount = Math.Min(callAmount, currentPlayer.Chips);
-                currentPlayer.CurrentBet += callAmount;
-                currentPlayer.Chips -= callAmount;
+                currentPlayer.CurrentBet += actualCallAmount;
+                currentPlayer.Chips -= actualCallAmount;
                 state.Pot += actualCallAmount;
-                if (actualCallAmount >= currentPlayer.Chips)
-                {
-                    currentPlayer.IsActive = false;
-                }
 
                 if (actualCallAmount == 0)
                 {
@@ -331,6 +327,12 @@ namespace Application.Services
         currentPlayer.HasActedThisRound = true;
         if (!string.IsNullOrEmpty(actionRequest.Comment))
             currentPlayer.Comment = actionRequest.Comment;
+
+        if (currentPlayer.Chips <= 0)
+        {
+            currentPlayer.Chips = 0;
+            currentPlayer.IsActive = false;
+        }
 
         if (state.Players.Count(p => !p.IsFolded) == 1)
         {
