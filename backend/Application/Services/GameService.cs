@@ -474,6 +474,19 @@ namespace Application.Services
                 player.Comment = null;
         }
 
+        if (state.Stage != GameStage.Showdown && 
+            state.Players.Count(p => p.IsActive) == 1 && 
+            state.Players.Count(p => !p.IsFolded) > 1)
+        {
+            foreach (var card in state.CommunityCards)
+                card.IsHidden = false;
+    
+            state.Stage = GameStage.Showdown;
+            await HandleEndOfRound(state);
+            state.AvailableActions = GetAvailableActions(state);
+            return;
+        }
+
         state.CurrentPlayerIndex = state.DealerPosition;
         HandleNextPlayer(state);
     }
