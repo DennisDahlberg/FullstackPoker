@@ -47,14 +47,15 @@ export default function Navbar() {
 
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/login">
-              <Button
-                className="bg-yellow-600 hover:bg-amber-500 text-white shadow-lg"
-              >
+              <Button className="bg-yellow-600 hover:bg-amber-500 text-white shadow-lg">
                 Sign In
               </Button>
             </Link>
             <Link to="/register">
-              <Button variant="outline" className="border-amber-500 text-amber-400 hover:bg-amber-500/10">
+              <Button
+                variant="outline"
+                className="border-amber-500 text-amber-400 hover:bg-amber-500/10"
+              >
                 Register
               </Button>
             </Link>
@@ -75,7 +76,56 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Menu */}
-      {isMenuOpen && (
+      <div
+        className={`md:hidden bg-gray-900/95 backdrop-blur-md border-t border-yellow-900/50 overflow-hidden transition-all duration-300 ease-in-out ${
+          isMenuOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="px-4 py-6 space-y-4">
+          <a
+            href="#features"
+            onClick={() => setIsMenuOpen(false)}
+            className="block text-gray-300 hover:text-amber-400 transition-colors"
+          >
+            Features
+          </a>
+          <a
+            href="#how-to-play"
+            onClick={() => setIsMenuOpen(false)}
+            className="block text-gray-300 hover:text-amber-400 transition-colors"
+          >
+            How to Play
+          </a>
+          <a
+            href="#ai-opponents"
+            onClick={() => setIsMenuOpen(false)}
+            className="block text-gray-300 hover:text-amber-400 transition-colors"
+          >
+            AI Opponents
+          </a>
+          <div className="pt-4 space-y-3">
+            <Link to="/login">
+              <Button
+                className="w-full bg-yellow-600"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sign In
+              </Button>
+            </Link>
+            <Link to="/register">
+              <Button
+                className="w-full border-amber-500 text-amber-400 mt-3"
+                variant="outline"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Register
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* {isMenuOpen && (
         <div className="md:hidden bg-gray-900/95 backdrop-blur-md border-t border-yellow-900/50">
           <div className="px-4 py-6 space-y-4">
             <a
@@ -111,7 +161,7 @@ export default function Navbar() {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </nav>
   );
 }
