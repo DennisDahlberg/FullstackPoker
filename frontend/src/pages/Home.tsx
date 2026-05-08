@@ -1,6 +1,7 @@
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { Play, Sparkles } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function Home() {
   return (
@@ -22,10 +23,12 @@ export default function Home() {
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center mt-8 sm:mt-12">
-          <Button size="lg" className="text-base sm:text-lg px-6 py-5 sm:px-8 sm:py-6 bg-yellow-600 hover:bg-amber-500 text-white shadow-2xl transform hover:scale-105 transition-all w-full sm:w-auto">
-            <Play className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
-            Play Free Now
-          </Button>
+          <Link to="/login">
+            <Button size="lg" className="text-base sm:text-lg px-6 py-5 sm:px-8 sm:py-6 bg-yellow-600 hover:bg-amber-500 text-white shadow-2xl transform hover:scale-105 transition-all w-full sm:w-auto">
+              <Play className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
+              Play Free Now
+            </Button>
+          </Link>
           <Button size="lg" variant="outline" className="text-base sm:text-lg px-6 py-5 sm:px-8 sm:py-6 border-2 border-yellow-600 text-yellow-500 hover:bg-yellow-500/10 w-full sm:w-auto">
             <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 mr-2 sm:mr-3" />
             View AI Profiles
