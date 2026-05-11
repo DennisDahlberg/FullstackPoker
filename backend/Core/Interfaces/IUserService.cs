@@ -21,4 +21,5 @@ public interface IUserService
     Task<IdentityResult> UpdateUsernameAsync(string userId, string username);
     Task<IdentityResult> UpdateEmailAsync(string userId, string email);
     Task<Result> UpdateProfileImage(string userId, byte[] imageData, string imageType);
+    Task<LoginBonusResult> ProcessDailyLoginBonusAsync(string userId);
 }

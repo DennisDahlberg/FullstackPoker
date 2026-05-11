@@ -44,9 +44,11 @@ namespace Api.Controllers
             if (!result.Succeeded)
                 return Unauthorized("Invalid login");
 
+            var bonusResult = await _userService.ProcessDailyLoginBonusAsync(user.Id);
+
             var (token, refreshToken) = await _jwtTokenService.CreateTokensAsync(user);
 
-            return Ok(new { token, refreshToken });
+            return Ok(new { token, refreshToken, loginBonus = bonusResult });
         }
 
         [HttpPost("register")]
