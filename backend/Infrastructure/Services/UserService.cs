@@ -196,9 +196,50 @@ namespace Infrastructure.Services
 
         public async Task<LoginBonusResult> ProcessDailyLoginBonusAsync(string userId)
         {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+                return new LoginBonusResult();
             
+            if (user.LastLoginDate == DateTime.UtcNow.Date)
+                return new LoginBonusResult();
 
-            return new LoginBonusResult();
+            if (user.LastLoginDate != DateTime.UtcNow.Date.AddDays(-1))
+                user.ConsecutiveLoginDays = 0;
+
+            if (user.ConsecutiveLoginDays < 7)
+                user.ConsecutiveLoginDays++;
+
+            var loginBonus = new LoginBonusResult
+            {
+                WasAwarded = true,
+                CurrentStreak = user.ConsecutiveLoginDays,
+                BonusAmount = GetDailyLoginBonusAmount(user.ConsecutiveLoginDays)
+            };
+
+            return loginBonus;
+        }
+
+        private int GetDailyLoginBonusAmount(int loginDays)
+        {
+            switch (loginDays)
+            {
+                case 1:
+                    return 50;
+                case 2:
+                    return 100;
+                case 3:
+                    return 150;
+                case 4:
+                    return 200;
+                case 5:
+                    return 300;
+                case 6:
+                    return 400;
+                case 7:
+                    return 500;
+                default:
+                    return 0;
+            } 
         }
     }
 }
