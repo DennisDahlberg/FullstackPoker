@@ -16,13 +16,13 @@ interface LoginBonusModalProps {
 }
 
 const bonusSchedule = [
-  { day: 1, amount: 100 },
-  { day: 2, amount: 200 },
-  { day: 3, amount: 300 },
-  { day: 4, amount: 500 },
-  { day: 5, amount: 750 },
-  { day: 6, amount: 1000 },
-  { day: 7, amount: 1500 },
+  { day: 1, amount: 50 },
+  { day: 2, amount: 100 },
+  { day: 3, amount: 150 },
+  { day: 4, amount: 200 },
+  { day: 5, amount: 300 },
+  { day: 6, amount: 400 },
+  { day: 7, amount: 500 },
 ];
 
 export default function LoginBonusModal({
