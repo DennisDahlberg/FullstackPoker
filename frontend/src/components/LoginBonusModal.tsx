@@ -40,31 +40,12 @@ export default function LoginBonusModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md border-amber-500/20 bg-gradient-to-br from-gray-900 via-gray-900 to-amber-950/30 overflow-hidden">
-        {/* Animated background effects */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-20 -right-20 w-40 h-40 bg-amber-500/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-amber-600/10 rounded-full blur-3xl animate-pulse delay-1000" />
-          <Sparkles className="absolute top-4 right-4 w-6 h-6 text-amber-400/40 animate-pulse" />
-          <Sparkles className="absolute bottom-8 left-6 w-4 h-4 text-amber-400/30 animate-pulse delay-500" />
-        </div>
+      <DialogContent className="sm:max-w-md border-amber-500/20 bg-gray-900 overflow-hidden">
 
         <div className="relative z-10">
           <DialogHeader className="space-y-4">
-            {/* Icon */}
-            <div className="flex justify-center">
-              <div className="relative">
-                <div className="w-20 h-20 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-amber-500/50 animate-bounce-slow">
-                  <Gift className="w-10 h-10 text-white" />
-                </div>
-                <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-gray-900 flex items-center justify-center">
-                  <Coins className="w-3 h-3 text-white" />
-                </div>
-              </div>
-            </div>
-
             <DialogTitle className="text-center">
-              <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-600 mb-2">
+              <h2 className="text-3xl font-black text-amber-500 mb-2">
                 Daily Login Bonus!
               </h2>
               <p className="text-sm text-gray-400 font-normal">
@@ -127,7 +108,7 @@ export default function LoginBonusModal({
                     className={cn(
                       "w-10 h-10 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all",
                       currentStreak >= day.day
-                        ? "bg-gradient-to-br from-amber-400 to-amber-600 border-amber-300 text-white shadow-lg shadow-amber-500/30"
+                        ? "bg-amber-500 border-amber-300 text-white shadow-lg shadow-amber-500/30"
                         : currentStreak === day.day - 1
                           ? "bg-gray-800 border-amber-500/50 text-amber-400 animate-pulse"
                           : "bg-gray-800/50 border-gray-700 text-gray-600"
@@ -155,7 +136,6 @@ export default function LoginBonusModal({
             <div className="bg-gray-800/40 border border-gray-700/50 rounded-xl p-4 mb-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-500" />
                   <span className="text-sm text-gray-400">
                     Come back tomorrow for
                   </span>
@@ -171,7 +151,7 @@ export default function LoginBonusModal({
           )}
 
           {isMaxStreak && (
-            <div className="bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/20 rounded-xl p-4 mb-6">
+            <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 mb-6">
               <div className="flex items-center gap-2 justify-center">
                 <Flame className="w-5 h-5 text-orange-400" />
                 <span className="text-sm font-bold text-orange-400">
@@ -184,7 +164,7 @@ export default function LoginBonusModal({
           {/* Close Button */}
           <Button
             onClick={onClose}
-            className="w-full bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold text-base py-6"
+            className="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold text-base py-6"
           >
             Awesome!
           </Button>
