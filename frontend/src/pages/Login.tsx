@@ -1,34 +1,46 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Coins, LogIn, Eye, EyeOff } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuthContext } from '@/context/AuthContext';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Coins, LogIn, Eye, EyeOff } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthContext } from "@/context/AuthContext";
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  const { login: logIn } = useAuthContext();
+  const { login: logIn, refetch } = useAuthContext();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
-      await logIn(email, password);
-      navigate('/dashboard');
+      const response = await logIn(email, password);
+      console.log("This is the response from login:", response);
+      
+      if (response.loginBonus?.wasAwarded) {
+        localStorage.setItem("loginBonus", JSON.stringify(response.loginBonus));
+      }
+
+      navigate("/dashboard");
     } catch (err) {
       if (typeof err === "string") {
-        setError(err); 
-      } else { 
-        setError('An error occurred during login'); 
+        setError(err);
+      } else {
+        setError("An error occurred during login");
       }
     } finally {
       setIsLoading(false);
@@ -36,8 +48,7 @@ export default function Login() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-8 sm:py-0">  
-
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-8 sm:py-0">
       <div className="relative z-10 w-full max-w-md px-4">
         {/* Logo */}
         <div className="flex flex-col items-center mb-6 sm:mb-8">
@@ -55,7 +66,9 @@ export default function Login() {
         {/* Login Card */}
         <Card className="bg-gray-800/80 border-gray-700/50 backdrop-blur-sm shadow-2xl">
           <CardHeader className="text-center space-y-1 sm:space-y-2 pb-4 sm:pb-6">
-            <CardTitle className="text-xl sm:text-2xl text-white">Welcome Back</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl text-white">
+              Welcome Back
+            </CardTitle>
             <CardDescription className="text-sm sm:text-base text-gray-400">
               Sign in to continue your poker journey
             </CardDescription>
@@ -67,9 +80,12 @@ export default function Login() {
                   {error}
                 </div>
               )}
-              
+
               <div className="space-y-1.5 sm:space-y-2">
-                <label htmlFor="email" className="text-xs sm:text-sm font-medium text-gray-300">
+                <label
+                  htmlFor="email"
+                  className="text-xs sm:text-sm font-medium text-gray-300"
+                >
                   Email
                 </label>
                 <Input
@@ -84,13 +100,16 @@ export default function Login() {
               </div>
 
               <div className="space-y-1.5 sm:space-y-2">
-                <label htmlFor="password" className="text-xs sm:text-sm font-medium text-gray-300">
+                <label
+                  htmlFor="password"
+                  className="text-xs sm:text-sm font-medium text-gray-300"
+                >
                   Password
                 </label>
                 <div className="relative">
                   <Input
                     id="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -120,7 +139,10 @@ export default function Login() {
                   />
                   <span className="text-gray-400">Remember me</span>
                 </label>
-                <a href="#" className="text-amber-400 hover:text-amber-300 transition-colors">
+                <a
+                  href="#"
+                  className="text-amber-400 hover:text-amber-300 transition-colors"
+                >
                   Forgot password?
                 </a>
               </div>
@@ -146,8 +168,11 @@ export default function Login() {
 
             <div className="mt-4 sm:mt-6 text-center">
               <p className="text-gray-400 text-xs sm:text-sm">
-                Don't have an account?{' '}
-                <Link to="/register" className="text-amber-400 hover:text-amber-300 font-medium transition-colors">
+                Don't have an account?{" "}
+                <Link
+                  to="/register"
+                  className="text-amber-400 hover:text-amber-300 font-medium transition-colors"
+                >
                   Sign up for free
                 </Link>
               </p>

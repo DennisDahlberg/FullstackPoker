@@ -1,5 +1,8 @@
 import { useAuthContext } from "@/context/AuthContext";
 import { Link } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import LoginBonusModal from "@/components/LoginBonusModal";
+import type { LoginBonusData } from "@/context/AuthContext";
 import {
   Trophy,
   TrendingUp,
@@ -23,9 +26,11 @@ import { api } from "@/lib/api";
 import type { Friend } from "@/types/Friends";
 
 export default function Dashboard() {
-  const { data } = useAuthContext();
+  const { data, refetch } = useAuthContext();
   const user = data?.user;
   const balance = user?.balance ?? 25_000;
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(true);
@@ -36,6 +41,9 @@ export default function Dashboard() {
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loadingFriends, setLoadingFriends] = useState(true);
   const onlineCount = friends.filter((f) => f.isOnline).length;
+
+  const [showBonusModal, setShowBonusModal] = useState(false);
+  const [bonusData, setBonusData] = useState<LoginBonusData | null>(null);
 
   useEffect(() => {
     api.statistics
@@ -59,6 +67,23 @@ export default function Dashboard() {
       .then(setFriends)
       .catch(console.error)
       .finally(() => setLoadingFriends(false));
+  }, []);
+
+  useEffect(() => {
+    const storedBonus = localStorage.getItem("loginBonus");
+    if (storedBonus) {
+      try {
+        const loginBonus: LoginBonusData = JSON.parse(storedBonus);
+        if (loginBonus.wasAwarded) {
+          setBonusData(loginBonus);
+          setShowBonusModal(true);
+        }
+      } catch (error) {
+        console.error("Error parsing login bonus:", error);
+      }
+
+      localStorage.removeItem("loginBonus");
+    }
   }, []);
 
   const statBoxes = [
@@ -425,6 +450,18 @@ export default function Dashboard() {
           </Button>
         </Link>
       </div>
+
+      {bonusData && (
+        <LoginBonusModal
+          isOpen={showBonusModal}
+          onClose={async () => {
+            setShowBonusModal(false);
+            await refetch();
+          }}
+          bonusAmount={bonusData.bonusAmount}
+          currentStreak={bonusData.currentStreak}
+        />
+      )}
     </div>
   );
 }
