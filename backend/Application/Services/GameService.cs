@@ -93,6 +93,12 @@ namespace Application.Services
         gameState.Players.RemoveAll(p => !p.IsPlayer && p.Chips <= 0);
         if (gameState.Players.Count > 0)
             gameState.DealerPosition = gameState.DealerPosition % gameState.Players.Count;
+
+        if (gameState.Players.Count <= 1)
+        {
+            gameState.IsGameOver = true;
+            return gameState;
+        }
         
         gameState.Deck = InitializeDeck();
         gameState.CommunityCards.Clear();
