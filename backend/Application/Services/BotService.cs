@@ -64,9 +64,6 @@ public class BotService : IBotService
             if (bot != null)
                 bots.Add(bot.Adapt<BotDto>());
         }
-
-        if (bots.Count == 0)
-            return Result.Fail("No bots were found");
         
         return Result.Ok(bots);
     }
