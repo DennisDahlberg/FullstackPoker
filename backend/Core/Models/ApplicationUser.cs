@@ -10,5 +10,7 @@ namespace Core.Models
         public int RankPoints { get; set; }
         public decimal Balance { get; set; }
         public string? ProfileImageUrl { get; set; }
+        public DateTime? LastLoginDate { get; set; }
+        public int ConsecutiveLoginDays { get; set; } = 0;
     }
 }
