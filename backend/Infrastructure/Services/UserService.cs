@@ -199,11 +199,13 @@ namespace Infrastructure.Services
             var user = await _userManager.FindByIdAsync(userId);
             if (user is null)
                 return new LoginBonusResult();
+
+            var today = DateTime.UtcNow.Date;
             
-            if (user.LastLoginDate == DateTime.UtcNow.Date)
+            if (user.LastLoginDate.HasValue && user.LastLoginDate.Value.Date == today)
                 return new LoginBonusResult();
 
-            if (user.LastLoginDate != DateTime.UtcNow.Date.AddDays(-1))
+            if (!user.LastLoginDate.HasValue || user.LastLoginDate.Value.Date != today.AddDays(-1))
                 user.ConsecutiveLoginDays = 0;
 
             if (user.ConsecutiveLoginDays < 7)
@@ -215,6 +217,10 @@ namespace Infrastructure.Services
                 CurrentStreak = user.ConsecutiveLoginDays,
                 BonusAmount = GetDailyLoginBonusAmount(user.ConsecutiveLoginDays)
             };
+            
+            user.Balance += loginBonus.BonusAmount;
+            user.LastLoginDate = DateTime.UtcNow;
+            await _userManager.UpdateAsync(user);
 
             return loginBonus;
         }
