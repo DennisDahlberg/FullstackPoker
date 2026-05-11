@@ -193,5 +193,12 @@ namespace Infrastructure.Services
             await _userManager.UpdateAsync(user);
             return Result.Ok();
         }
+
+        public async Task<LoginBonusResult> ProcessDailyLoginBonusAsync(string userId)
+        {
+            
+
+            return new LoginBonusResult();
+        }
     }
 }
