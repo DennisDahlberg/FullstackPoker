@@ -126,7 +126,8 @@ public class FriendService
             {
                 Id = user.Id,
                 Username = user.UserName!,
-                Status = status
+                Status = status,
+                ProfileImageUrl = user.ProfileImageUrl,
             };
         }).ToList();
 
