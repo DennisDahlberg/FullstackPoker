@@ -9,6 +9,7 @@ export interface FriendRequest {
   id: number;
   username: string;
   sentAt: string;
+  profileImageUrl: string;
 }
 
 export interface User {
