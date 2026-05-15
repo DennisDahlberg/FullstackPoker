@@ -6,7 +6,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   UserPlus,
   X,
-  MessageSquare,
   Search,
   Users,
   Loader2,
@@ -149,7 +148,6 @@ export default function Friends() {
     };
   }, [friendsHub]);
 
-  // Debounced search for finding users
   useEffect(() => {
     if (activeTab !== "find" || findSearchQuery.length < 2) {
       setSearchResults([]);
@@ -674,10 +672,11 @@ export default function Friends() {
                     className="flex items-center justify-between py-4 group hover:bg-gray-900/40 px-2 rounded-lg transition-colors"
                   >
                     <div className="flex items-center gap-4">
-                      <Avatar className="flex items-center justify-center h-10 w-10 bg-gray-800 border border-white/5">
-                        <span className="font-bold text-amber-500">
+                      <Avatar className="flex items-center justify-center h-10 w-10 border border-gray-800 group-hover:border-amber-500/30 transition-colors">
+                        <AvatarImage src={user.profileImageUrl} alt="User" />
+                        <AvatarFallback className="font-bold text-amber-500">
                           {user.username[0].toUpperCase()}
-                        </span>
+                        </AvatarFallback>
                       </Avatar>
                       <span className="font-bold text-sm text-gray-300 group-hover:text-white transition-colors">
                         {user.username}

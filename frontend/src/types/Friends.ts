@@ -15,6 +15,7 @@ export interface User {
   id: string;
   username: string;
   status: "none" | "friend" | "pending" | "requested";
+  profileImageUrl: string;
 }
 
 export type TabId = "friends" | "requests" | "find" | "invites";
