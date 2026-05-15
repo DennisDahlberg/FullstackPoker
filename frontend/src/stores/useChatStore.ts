@@ -52,6 +52,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         "ReceiveMessage",
         (data: {
           senderId: string;
+          recipientId: string;
           senderUsername: string;
           senderProfileImageUrl: string;
           content: string;
@@ -59,7 +60,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
           isOwnMessage: boolean;
         }) => {
           const conversations = get().conversations;
-          const friendId = data.senderId;
+          const friendId = data.isOwnMessage ? data.recipientId : data.senderId;
 
           let conversation = conversations.get(friendId);
           if (!conversation) {

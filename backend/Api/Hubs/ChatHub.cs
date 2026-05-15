@@ -31,16 +31,18 @@ public class ChatHub : Hub
         await Clients.User(recipientId).SendAsync("ReceiveMessage", new
         {
             SenderId = senderId,
+            RecipientId = recipientId,
             SenderUsername = sender.UserName,
             SenderProfileImageUrl = sender.ProfileImageUrl,
             Content = message,
-            SentAt = DateTime.Now,
+            SentAt = DateTime.UtcNow,
             IsOwnMessage = false
         });
         
         await Clients.Caller.SendAsync("ReceiveMessage", new
         {
             SenderId = senderId,
+            RecipientId = recipientId,
             SenderUsername = sender.UserName,
             SenderProfileImageUrl = sender.ProfileImageUrl,
             Content = message,
