@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using OpenAI.Chat;
 using System.Text;
 using System.Text.Json.Serialization;
+using Api.Hubs;
 using Core.Interfaces;
 using Infrastructure.Repositories;
 using StackExchange.Redis;
@@ -219,6 +220,7 @@ namespace Api
                 app.MapHub<FriendsHub>("/hubs/friends");
                 app.MapHub<GameHub>("/hubs/game");
                 app.MapHub<LobbyHub>("/hubs/lobby");
+                app.MapHub<ChatHub>("/hubs/chat");
 
                 app.Run();
             }
