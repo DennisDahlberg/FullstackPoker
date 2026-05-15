@@ -10,11 +10,13 @@ public class ChatHub : Hub
 {
     private readonly FriendService _friendService;
     private readonly IUserService _userService;
+    private readonly IChatService _chatService;
 
-    public ChatHub(FriendService friendService, IUserService userService)
+    public ChatHub(FriendService friendService, IUserService userService, IChatService chatService)
     {
         _friendService = friendService;
         _userService = userService;
+        _chatService = chatService;
     }
 
     public async Task SendMessage(string recipientId, string message)
@@ -25,6 +27,13 @@ public class ChatHub : Hub
         if (sender == null)
         {
             await Clients.Caller.SendAsync("Error", "User not found");
+            return;
+        }
+        
+        var result = await _chatService.SendMessageAsync(senderId, recipientId, message);
+        if (result.IsFailed)
+        {
+            await Clients.Caller.SendAsync("Error", result.Errors.First().Message);
             return;
         }
 
