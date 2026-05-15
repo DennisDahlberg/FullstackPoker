@@ -84,4 +84,9 @@ public class ChatService : IChatService
 
         return conversations.OrderByDescending(c => c.LastMessageTime).ToList();
     }
+    
+    public async Task MarkMessagesAsReadAsync(string userId, string friendId)
+    {
+        await _chatRepository.MarkMessagesAsReadAsync(userId, friendId);
+    }
 }

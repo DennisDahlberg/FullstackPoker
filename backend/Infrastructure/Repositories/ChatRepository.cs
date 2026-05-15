@@ -54,4 +54,18 @@ public class ChatRepository : IChatRepository
             .Where(m => m.SenderId == friendId && m.RecipientId == userId && !m.IsRead)
             .CountAsync();
     }
+
+    public async Task MarkMessagesAsReadAsync(string userId, string friendId)
+    {
+        var unreadMessages = await _context.ChatMessages
+            .Where(m => m.SenderId == friendId && m.RecipientId == userId && !m.IsRead)
+            .ToListAsync();
+
+        foreach (var message in unreadMessages)
+        {
+            message.IsRead = true;
+        }
+        
+        await _context.SaveChangesAsync();
+    }
 }

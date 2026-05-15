@@ -40,5 +40,15 @@ public class ChatController : Controller
         var conversations = await _chatService.GetConversationsAsync(userId);
         return Ok(conversations);
     }
-    
+
+    [HttpPost("{friendId}/read")]
+    public async Task<IActionResult> MarkMessagesAsReadAsync([FromRoute] string friendId)
+    {
+        var userId = _userService.GetLoggedInUserId(User);
+        if (userId == null)
+            return Unauthorized();
+
+        await _chatService.MarkMessagesAsReadAsync(userId, friendId);
+        return Ok();
+    }
 }
