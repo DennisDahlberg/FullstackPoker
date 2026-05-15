@@ -79,6 +79,7 @@ public class FriendService
             Id = r.Id,
             SentAt =  r.CreatedAt,
             Username = r.Requester.UserName,
+            ProfileImageUrl = r.Requester.ProfileImageUrl,
         }).ToList();
         return result;
     }
