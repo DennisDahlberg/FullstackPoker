@@ -27,6 +27,7 @@ interface ChatStore {
   markAsRead: (friendId: string) => void;
   getTotalUnread: () => number;
   loadMessages: (friendId: string) => Promise<ChatMessage[]>;
+  loadConversations: () => Promise<void>;
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -191,6 +192,42 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       return chatMessages;
     } catch (err) {
       console.error("Failed to load messages:", err);
+      throw err;
+    }
+  },
+
+  loadConversations: async () => {
+    try {
+      const conversationsData = await api.chat.getConversations();
+
+      const conversations = new Map<string, ChatConversation>();
+
+      for (const conv of conversationsData) {
+        const messages = await api.chat.getMessages(conv.friendId);
+
+        const chatMessages: ChatMessage[] = messages.map((msg: any) => ({
+          id: msg.id.toString(),
+          senderId: msg.senderId,
+          senderUsername: msg.senderUsername,
+          senderProfileImageUrl: msg.senderProfileImageUrl,
+          message: msg.content,
+          timestamp: msg.sentAt,
+          isOwnMessage: msg.isOwnMessage,
+        }));
+
+        conversations.set(conv.friendId, {
+          friendId: conv.friendId,
+          friendUsername: conv.friendUsername,
+          friendProfileImageUrl: conv.friendProfileImageUrl,
+          isOnline: conv.isOnline,
+          messages: chatMessages,
+          unreadCount: conv.unreadCount,
+        });
+      }
+
+      set({ conversations });
+    } catch (err) {
+      console.error("Failed to load conversations:", err);
       throw err;
     }
   },

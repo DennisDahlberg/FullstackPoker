@@ -191,6 +191,18 @@ export const api = {
         throw "An error occurred while fetching messages";
       }
     },
+
+    async getConversations() {
+      try {
+        const response = await apiClient.get(`/chat/conversations`);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || "Failed to fetch conversations";
+        }
+        throw "An error occurred while fetching conversations";
+      }
+    },
   },
 
   lobby: {

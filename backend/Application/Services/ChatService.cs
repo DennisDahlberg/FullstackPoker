@@ -77,7 +77,8 @@ public class ChatService : IChatService
                 FriendProfileImageUrl = friend.ProfileImageUrl,
                 LastMessage = lastMessage?.Content,
                 LastMessageTime = lastMessage?.SentAt,
-                UnreadCount = unreadCount
+                UnreadCount = unreadCount,
+                IsOnline = false,
             });
         }
 

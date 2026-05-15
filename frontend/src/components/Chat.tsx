@@ -39,6 +39,7 @@ export default function Chat({
     getOrCreateConversation,
     setActiveChat,
     loadMessages,
+    loadConversations,
   } = useChatStore();
 
   const [activeConversation, setActiveConversation] =
@@ -90,6 +91,14 @@ export default function Chat({
       }
     }
   }, [conversations, activeChat]);
+
+  useEffect(() => {
+  if (open && isConnected) {
+    loadConversations().catch(err => {
+      console.error("Failed to load conversations:", err);
+    });
+  }
+}, [open, isConnected, loadConversations]);
 
   const handleSelectConversation = (conversation: ChatConversation) => {
     setActiveConversation(conversation);
