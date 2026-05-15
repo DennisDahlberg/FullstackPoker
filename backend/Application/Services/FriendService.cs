@@ -91,6 +91,7 @@ public class FriendService
         {
             Username = f.Addressee.UserName != currentUser.UserName ? f.Addressee.UserName : f.Requester.UserName,
             Id = f.AddresseeId != currentUser.Id ? f.AddresseeId : f.RequesterId,
+            ProfileImageUrl = f.AddresseeId != currentUser.Id ? f.Addressee.ProfileImageUrl : f.Requester.ProfileImageUrl,
         }).ToList();
         return result;
     }
