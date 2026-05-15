@@ -2,6 +2,7 @@ export interface Friend {
   id: string;
   username: string;
   isOnline: boolean;
+  profileImageUrl: string;
 }
 
 export interface FriendRequest {

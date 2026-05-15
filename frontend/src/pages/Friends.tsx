@@ -2,8 +2,17 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar } from "@/components/ui/avatar";
-import { UserPlus, X, MessageSquare, Search, Users, Loader2, Gamepad2, Check } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  UserPlus,
+  X,
+  MessageSquare,
+  Search,
+  Users,
+  Loader2,
+  Gamepad2,
+  Check,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { useFriendsHub } from "@/context/FriendsHubContext";
@@ -20,7 +29,9 @@ export default function Friends() {
   const [searchResults, setSearchResults] = useState<User[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [sendingRequestTo, setSendingRequestTo] = useState<string | null>(null);
-  const [acceptingRequestId, setAcceptingRequestId] = useState<number | null>(null);
+  const [acceptingRequestId, setAcceptingRequestId] = useState<number | null>(
+    null,
+  );
   const [friends, setFriends] = useState<Friend[]>([]);
   const [friendRequests, setFriendRequests] = useState<FriendRequest[]>([]);
   const [isLoadingFriends, setIsLoadingFriends] = useState(true);
@@ -28,8 +39,12 @@ export default function Friends() {
 
   const [gameInvites, setGameInvites] = useState<LobbyInvite[]>([]);
   const [isLoadingInvites, setIsLoadingInvites] = useState(true);
-  const [acceptingInviteId, setAcceptingInviteId] = useState<string | null>(null);
-  const [decliningInviteId, setDecliningInviteId] = useState<string | null>(null);
+  const [acceptingInviteId, setAcceptingInviteId] = useState<string | null>(
+    null,
+  );
+  const [decliningInviteId, setDecliningInviteId] = useState<string | null>(
+    null,
+  );
 
   const friendsHub = useFriendsHub();
 
@@ -41,7 +56,10 @@ export default function Friends() {
         setFriends(data);
       } catch (error) {
         toast.error("Failed to load friends", {
-          description: error instanceof Error ? error.message : "Could not fetch friends list",
+          description:
+            error instanceof Error
+              ? error.message
+              : "Could not fetch friends list",
         });
       } finally {
         setIsLoadingFriends(false);
@@ -58,7 +76,10 @@ export default function Friends() {
         setFriendRequests(data);
       } catch (error) {
         toast.error("Failed to load friend requests", {
-          description: error instanceof Error ? error.message : "Could not fetch friend requests",
+          description:
+            error instanceof Error
+              ? error.message
+              : "Could not fetch friend requests",
         });
       } finally {
         setIsLoadingRequests(false);
@@ -82,41 +103,40 @@ export default function Friends() {
     fetchInvites();
   }, []);
 
-
   // SignalR event listeners
   useEffect(() => {
     if (!friendsHub) return;
 
     const handleReceiveFriendInvite = (senderUsername: string) => {
       console.log("Received friend invite from:", senderUsername);
-      
-      api.friends.getFriendRequests()
-        .then(data => setFriendRequests(data))
-        .catch(error => console.error("Failed to refresh requests:", error));
+
+      api.friends
+        .getFriendRequests()
+        .then((data) => setFriendRequests(data))
+        .catch((error) => console.error("Failed to refresh requests:", error));
     };
 
     const handleFriendRequestAccepted = (accepterUsername: string) => {
       toast.success("Friend request accepted", {
         description: `${accepterUsername} accepted your friend request`,
       });
-      
-      api.friends.getFriends()
-        .then(data => {
+
+      api.friends
+        .getFriends()
+        .then((data) => {
           setFriends(data);
-          window.dispatchEvent(new Event("refreshNotifications"));})
-        .catch(error => console.error("Failed to refresh friends:", error));
+          window.dispatchEvent(new Event("refreshNotifications"));
+        })
+        .catch((error) => console.error("Failed to refresh friends:", error));
     };
 
     const handleFriendStatusChanged = (friendId: string, isOnline: boolean) => {
-    setFriends(prev => 
-      prev.map(friend => 
-        friend.id === friendId 
-          ? { ...friend, isOnline }
-          : friend
-      )
-    );
-  };
-
+      setFriends((prev) =>
+        prev.map((friend) =>
+          friend.id === friendId ? { ...friend, isOnline } : friend,
+        ),
+      );
+    };
 
     friendsHub.on("ReceiveFriendInvite", handleReceiveFriendInvite);
     friendsHub.on("FriendRequestAccepted", handleFriendRequestAccepted);
@@ -128,7 +148,6 @@ export default function Friends() {
       friendsHub.off("FriendStatusChanged", handleFriendStatusChanged);
     };
   }, [friendsHub]);
-
 
   // Debounced search for finding users
   useEffect(() => {
@@ -144,7 +163,8 @@ export default function Friends() {
         setSearchResults(results);
       } catch (error) {
         toast.error("Search failed", {
-          description: error instanceof Error ? error.message : "Failed to search users",
+          description:
+            error instanceof Error ? error.message : "Failed to search users",
         });
       } finally {
         setIsSearching(false);
@@ -158,13 +178,11 @@ export default function Friends() {
     setSendingRequestTo(userId);
     try {
       await api.friends.sendFriendRequest(username);
-      
-      setSearchResults(prev => 
-        prev.map(user => 
-          user.id === userId 
-            ? { ...user, status: "pending" as const }
-            : user
-        )
+
+      setSearchResults((prev) =>
+        prev.map((user) =>
+          user.id === userId ? { ...user, status: "pending" as const } : user,
+        ),
       );
 
       toast.success("Friend request sent", {
@@ -172,7 +190,8 @@ export default function Friends() {
       });
     } catch (error) {
       toast.error("Failed to send request", {
-        description: error instanceof Error ? error.message : "Something went wrong",
+        description:
+          error instanceof Error ? error.message : "Something went wrong",
       });
     } finally {
       setSendingRequestTo(null);
@@ -183,18 +202,19 @@ export default function Friends() {
     setAcceptingRequestId(requestId);
     try {
       await api.friends.acceptFriendRequest(requestId);
-      
-      setFriendRequests(prev => prev.filter(req => req.id !== requestId));
-      
+
+      setFriendRequests((prev) => prev.filter((req) => req.id !== requestId));
+
       const updatedFriends = await api.friends.getFriends();
       setFriends(updatedFriends);
-      
+
       toast.success("Friend request accepted", {
         description: `You are now friends with ${username}`,
       });
     } catch (error) {
       toast.error("Failed to accept request", {
-        description: error instanceof Error ? error.message : "Something went wrong",
+        description:
+          error instanceof Error ? error.message : "Something went wrong",
       });
     } finally {
       setAcceptingRequestId(null);
@@ -202,9 +222,9 @@ export default function Friends() {
   };
 
   const handleDeclineRequest = async (requestId: number) => {
-    try { 
+    try {
       await api.friends.rejectFriendRequest(requestId);
-      setFriendRequests(prev => prev.filter(req => req.id !== requestId));
+      setFriendRequests((prev) => prev.filter((req) => req.id !== requestId));
 
       const updatedFriends = await api.friends.getFriends();
       setFriends(updatedFriends);
@@ -212,16 +232,19 @@ export default function Friends() {
       toast.info("Friend request declined");
     } catch (error) {
       toast.error("Failed to decline request", {
-        description: error instanceof Error ? error.message : "Something went wrong",
+        description:
+          error instanceof Error ? error.message : "Something went wrong",
       });
     }
-  }
+  };
 
   const handleAcceptInvite = async (invite: LobbyInvite) => {
     setAcceptingInviteId(invite.inviteId);
     try {
       const result = await api.lobby.acceptInvite(invite.inviteId);
-      setGameInvites(prev => prev.filter(i => i.inviteId !== invite.inviteId));
+      setGameInvites((prev) =>
+        prev.filter((i) => i.inviteId !== invite.inviteId),
+      );
       toast.success("Invite accepted! Joining lobby...");
       navigate(`/lobby?tableId=${result.tableId}`);
     } catch (err: any) {
@@ -236,7 +259,9 @@ export default function Friends() {
     setDecliningInviteId(invite.inviteId);
     try {
       await api.lobby.declineInvite(invite.inviteId);
-      setGameInvites(prev => prev.filter(i => i.inviteId !== invite.inviteId));
+      setGameInvites((prev) =>
+        prev.filter((i) => i.inviteId !== invite.inviteId),
+      );
       toast.info("Invite declined");
     } catch (err) {
       console.error("Failed to decline invite:", err);
@@ -247,7 +272,7 @@ export default function Friends() {
   };
 
   const handleRemoveFriend = async (friendId: string) => {
-    try { 
+    try {
       await api.friends.removeFriend(friendId);
 
       const updatedFriends = await api.friends.getFriends();
@@ -256,19 +281,22 @@ export default function Friends() {
       toast.info("Friend removed");
     } catch (error) {
       toast.error("Failed to remove friend", {
-        description: error instanceof Error ? error.message : "Something went wrong",
+        description:
+          error instanceof Error ? error.message : "Something went wrong",
       });
     }
-  }
+  };
 
   const filteredFriends = friends.filter((friend) => {
-    const matchesSearch = friend.username.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesSearch = friend.username
+      .toLowerCase()
+      .includes(searchQuery.toLowerCase());
     const matchesOnline = !showOnlineOnly || friend.isOnline;
     return matchesSearch && matchesOnline;
   });
 
   const filteredRequests = friendRequests.filter((request) =>
-    request.username.toLowerCase().includes(searchQuery.toLowerCase())
+    request.username.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const onlineFriendsCount = friends.filter((f) => f.isOnline).length;
@@ -279,13 +307,23 @@ export default function Friends() {
     switch (user.status) {
       case "friend":
         return (
-          <Button variant="outline" size="sm" disabled className="cursor-not-allowed">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled
+            className="cursor-not-allowed"
+          >
             Already Friends
           </Button>
         );
       case "pending":
         return (
-          <Button variant="outline" size="sm" disabled className="cursor-not-allowed">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled
+            className="cursor-not-allowed"
+          >
             Request Sent
           </Button>
         );
@@ -297,8 +335,8 @@ export default function Friends() {
         );
       default:
         return (
-          <Button 
-            variant="amberOutline" 
+          <Button
+            variant="amberOutline"
             size="sm"
             onClick={() => handleSendFriendRequest(user.username, user.id)}
             disabled={isLoading}
@@ -332,25 +370,41 @@ export default function Friends() {
             Manage your social circle and game invites
           </p>
         </div>
-        
+
         {/* Sub-Tabs (Discord Style) */}
         <div className="flex bg-gray-900 p-1 rounded-lg border border-white/5">
           {[
             { id: "friends", label: "All", icon: Users },
-            { id: "requests", label: "Pending", icon: UserPlus, count: friendRequests.length },
-            { id: "invites", label: "Game Invites", icon: Gamepad2, count: gameInvites.length },
+            {
+              id: "requests",
+              label: "Pending",
+              icon: UserPlus,
+              count: friendRequests.length,
+            },
+            {
+              id: "invites",
+              label: "Game Invites",
+              icon: Gamepad2,
+              count: gameInvites.length,
+            },
             { id: "find", label: "Add Friend", icon: Search },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabId)}
               className={`flex items-center gap-2 px-4 py-1.5 rounded-md text-sm font-medium transition-all
-                ${activeTab === tab.id 
-                  ? "bg-gray-800 text-amber-500 shadow-sm" 
-                  : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"}`}
+                ${
+                  activeTab === tab.id
+                    ? "bg-gray-800 text-amber-500 shadow-sm"
+                    : "text-gray-400 hover:text-gray-200 hover:bg-gray-800/50"
+                }`}
             >
               {tab.label}
-              {tab.count ? <span className="bg-red-500 text-white text-[10px] px-1.5 rounded-full">{tab.count}</span> : null}
+              {tab.count ? (
+                <span className="bg-red-500 text-white text-[10px] px-1.5 rounded-full">
+                  {tab.count}
+                </span>
+              ) : null}
             </button>
           ))}
         </div>
@@ -379,7 +433,7 @@ export default function Friends() {
                 <span className="text-[11px] font-bold uppercase tracking-widest text-gray-500">
                   Online — {onlineFriendsCount}
                 </span>
-                <button 
+                <button
                   onClick={() => setShowOnlineOnly(!showOnlineOnly)}
                   className="text-[11px] font-bold uppercase tracking-widest text-amber-500 hover:underline"
                 >
@@ -393,30 +447,47 @@ export default function Friends() {
                 </div>
               ) : filteredFriends.length === 0 ? (
                 <p className="text-gray-500 text-sm text-center py-8">
-                  {searchQuery ? "No friends found matching your search" : "No friends yet. Add some friends to get started!"}
+                  {searchQuery
+                    ? "No friends found matching your search"
+                    : "No friends yet. Add some friends to get started!"}
                 </p>
               ) : (
                 filteredFriends.map((friend) => (
-                  <div 
-                    key={friend.id} 
+                  <div
+                    key={friend.id}
                     className="group flex items-center justify-between p-3 rounded-xl transition-all border-y border-transparent hover:border-t-white/5 hover:border-b-black/20 hover:bg-gray-900/40"
                   >
                     <div className="flex items-center gap-4">
                       <div className="relative">
                         <Avatar className="flex items-center justify-center h-10 w-10 border border-gray-800 group-hover:border-amber-500/30 transition-colors">
-                          <span className="font-bold text-amber-500">{friend.username[0]}</span>
+                          <AvatarImage
+                            src={friend.profileImageUrl}
+                            alt="User"
+                          />
+                          <AvatarFallback className="font-bold text-amber-500">
+                            {friend.username[0].toUpperCase()}
+                          </AvatarFallback>
                         </Avatar>
-                        <div className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-gray-950 ${friend.isOnline ? 'bg-green-500' : 'bg-gray-600'}`} />
+                        <div
+                          className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-gray-950 ${friend.isOnline ? "bg-green-500" : "bg-gray-600"}`}
+                        />
                       </div>
                       <div>
-                        <h4 className="font-bold text-sm text-gray-200 group-hover:text-white">{friend.username}</h4>
-                        <p className="text-xs text-gray-500">{friend.isOnline ? 'Active Now' : 'Offline'}</p>
+                        <h4 className="font-bold text-sm text-gray-200 group-hover:text-white">
+                          {friend.username}
+                        </h4>
+                        <p className="text-xs text-gray-500">
+                          {friend.isOnline ? "Active Now" : "Offline"}
+                        </p>
                       </div>
                     </div>
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button 
-                        variant="ghost" size="icon" className="rounded-full hover:bg-red-500/10 text-gray-500 hover:text-red-400"
-                        onClick={() => handleRemoveFriend(friend.id)}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full hover:bg-red-500/10 text-gray-500 hover:text-red-400"
+                        onClick={() => handleRemoveFriend(friend.id)}
+                      >
                         <X className="h-4 w-4" />
                       </Button>
                     </div>
@@ -437,25 +508,35 @@ export default function Friends() {
                   No pending requests
                 </p>
               ) : (
-                filteredRequests.map(request => (
-                  <div key={request.id} className="group flex items-center justify-between p-4 border-y border-transparent hover:bg-gray-900/40 hover:border-t-white/5">
+                filteredRequests.map((request) => (
+                  <div
+                    key={request.id}
+                    className="group flex items-center justify-between p-4 border-y border-transparent hover:bg-gray-900/40 hover:border-t-white/5"
+                  >
                     <div className="flex items-center gap-4">
                       <Avatar className="flex items-center justify-center h-10 w-10 bg-amber-900/20 text-amber-500 font-bold">
                         {request.username[0]}
                       </Avatar>
                       <div>
-                        <h4 className="text-sm font-bold">{request.username}</h4>
+                        <h4 className="text-sm font-bold">
+                          {request.username}
+                        </h4>
                         <p className="text-[10px] text-gray-500 uppercase font-bold tracking-tight">
-                          Incoming Request • {formatDistanceToNow(new Date(request.sentAt), { addSuffix: true })}
+                          Incoming Request •{" "}
+                          {formatDistanceToNow(new Date(request.sentAt), {
+                            addSuffix: true,
+                          })}
                         </p>
                       </div>
                     </div>
                     <div className="flex gap-2">
-                      <Button 
-                        variant="amber" 
-                        size="sm" 
+                      <Button
+                        variant="amber"
+                        size="sm"
                         className="h-8 px-4"
-                        onClick={() => handleAcceptRequest(request.id, request.username)}
+                        onClick={() =>
+                          handleAcceptRequest(request.id, request.username)
+                        }
                         disabled={acceptingRequestId === request.id}
                       >
                         {acceptingRequestId === request.id ? (
@@ -467,8 +548,10 @@ export default function Friends() {
                           "Accept"
                         )}
                       </Button>
-                      <Button 
-                        variant="ghost" size="sm" className="h-8 hover:bg-red-500/10 text-gray-400 hover:text-red-400"
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 hover:bg-red-500/10 text-gray-400 hover:text-red-400"
                         onClick={() => handleDeclineRequest(request.id)}
                       >
                         Decline
@@ -489,7 +572,9 @@ export default function Friends() {
               ) : gameInvites.length === 0 ? (
                 <div className="text-center py-12 space-y-3">
                   <Gamepad2 className="h-10 w-10 text-gray-700 mx-auto" />
-                  <p className="text-gray-500 text-sm">No pending game invites</p>
+                  <p className="text-gray-500 text-sm">
+                    No pending game invites
+                  </p>
                 </div>
               ) : (
                 gameInvites.map((invite) => (
@@ -567,25 +652,32 @@ export default function Friends() {
                   <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-amber-500" />
                 )}
               </div>
-              
+
               {findSearchQuery.length > 0 && findSearchQuery.length < 2 && (
                 <p className="text-gray-500 text-sm text-center py-8">
                   Type at least 2 characters to search
                 </p>
               )}
 
-              {findSearchQuery.length >= 2 && !isSearching && searchResults.length === 0 && (
-                <p className="text-gray-500 text-sm text-center py-8">
-                  No users found matching "{findSearchQuery}"
-                </p>
-              )}
+              {findSearchQuery.length >= 2 &&
+                !isSearching &&
+                searchResults.length === 0 && (
+                  <p className="text-gray-500 text-sm text-center py-8">
+                    No users found matching "{findSearchQuery}"
+                  </p>
+                )}
 
               <div className="divide-y divide-gray-800/50">
-                {searchResults.map(user => (
-                  <div key={user.id} className="flex items-center justify-between py-4 group hover:bg-gray-900/40 px-2 rounded-lg transition-colors">
+                {searchResults.map((user) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between py-4 group hover:bg-gray-900/40 px-2 rounded-lg transition-colors"
+                  >
                     <div className="flex items-center gap-4">
                       <Avatar className="flex items-center justify-center h-10 w-10 bg-gray-800 border border-white/5">
-                        <span className="font-bold text-amber-500">{user.username[0].toUpperCase()}</span>
+                        <span className="font-bold text-amber-500">
+                          {user.username[0].toUpperCase()}
+                        </span>
                       </Avatar>
                       <span className="font-bold text-sm text-gray-300 group-hover:text-white transition-colors">
                         {user.username}
