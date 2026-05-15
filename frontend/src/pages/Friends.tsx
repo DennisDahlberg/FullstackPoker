@@ -11,8 +11,10 @@ import {
   Loader2,
   Gamepad2,
   Check,
+  MessageCircle,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import Chat from "@/components/Chat";
 import { toast } from "sonner";
 import { useFriendsHub } from "@/context/FriendsHubContext";
 import { formatDistanceToNow } from "date-fns";
@@ -44,6 +46,9 @@ export default function Friends() {
   const [decliningInviteId, setDecliningInviteId] = useState<string | null>(
     null,
   );
+
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatFriendId, setChatFriendId] = useState<string | undefined>();
 
   const friendsHub = useFriendsHub();
 
@@ -285,6 +290,11 @@ export default function Friends() {
     }
   };
 
+  const handleOpenChat = (friendId: string) => {
+    setChatFriendId(friendId);
+    setChatOpen(true);
+  };
+
   const filteredFriends = friends.filter((friend) => {
     const matchesSearch = friend.username
       .toLowerCase()
@@ -483,6 +493,14 @@ export default function Friends() {
                       <Button
                         variant="ghost"
                         size="icon"
+                        className="rounded-full hover:bg-amber-500/10 text-gray-500 hover:text-amber-400"
+                        onClick={() => handleOpenChat(friend.id)}
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         className="rounded-full hover:bg-red-500/10 text-gray-500 hover:text-red-400"
                         onClick={() => handleRemoveFriend(friend.id)}
                       >
@@ -585,7 +603,10 @@ export default function Friends() {
                   >
                     <div className="flex items-center gap-4">
                       <Avatar className="flex items-center justify-center h-10 w-10 border border-gray-800 group-hover:border-amber-500/30 transition-colors">
-                        <AvatarImage src={invite.hostProfileImageUrl} alt="User" />
+                        <AvatarImage
+                          src={invite.hostProfileImageUrl}
+                          alt="User"
+                        />
                         <AvatarFallback className="font-bold text-amber-500">
                           {invite.hostUsername[0].toUpperCase()}
                         </AvatarFallback>
@@ -696,6 +717,12 @@ export default function Friends() {
           )}
         </div>
       </div>
+
+      <Chat
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        initialFriendId={chatFriendId}
+      />
     </div>
   );
 }
