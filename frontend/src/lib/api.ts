@@ -179,6 +179,20 @@ export const api = {
     },
   },
 
+  chat: {
+    async getMessages(friendId: string) {
+      try {
+        const response = await apiClient.get(`/chat/${friendId}`);
+        return response.data;
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || "Failed to fetch messages";
+        }
+        throw "An error occurred while fetching messages";
+      }
+    },
+  },
+
   lobby: {
     async getPendingInvites() {
       try {

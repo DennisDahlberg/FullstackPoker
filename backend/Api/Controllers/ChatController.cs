@@ -19,7 +19,7 @@ public class ChatController : Controller
         _chatService = chatService;
     }
 
-    [HttpGet("/{friendId}")]
+    [HttpGet("{friendId}")]
     public async Task<IActionResult> GetMessagesAsync([FromRoute] string friendId)
     {
         var userId = _userService.GetLoggedInUserId(User);

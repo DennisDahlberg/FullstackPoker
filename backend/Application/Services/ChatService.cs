@@ -24,10 +24,13 @@ public class ChatService : IChatService
         {
             Id = m.Id,
             SenderId = m.SenderId,
+            SenderUsername = m.Sender.UserName,
+            SenderProfileImageUrl = m.Sender.ProfileImageUrl, 
             RecipientId = m.RecipientId,
             Content = m.Content,
             SentAt = m.SentAt,
             IsRead = m.IsRead,
+            IsOwnMessage = m.SenderId == userId,
         }).ToList();
     }
 

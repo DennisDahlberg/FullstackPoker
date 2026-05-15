@@ -1,3 +1,4 @@
+import { api } from "@/lib/api";
 import type { ChatConversation, ChatMessage } from "@/types/Chat";
 import {
   HubConnectionBuilder,
@@ -25,6 +26,7 @@ interface ChatStore {
   ) => ChatConversation;
   markAsRead: (friendId: string) => void;
   getTotalUnread: () => number;
+  loadMessages: (friendId: string) => Promise<ChatMessage[]>;
 }
 
 export const useChatStore = create<ChatStore>((set, get) => ({
@@ -159,10 +161,38 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       conversations.set(friendId, conversation);
       set({ conversations: new Map(conversations) });
     } else {
-        conversation.isOnline = isOnline
-        set({ conversations: new Map(conversations) });
+      conversation.isOnline = isOnline;
+      set({ conversations: new Map(conversations) });
     }
     return conversation;
+  },
+
+  loadMessages: async (friendId: string) => {
+    try {
+      const messages = await api.chat.getMessages(friendId);
+
+      const chatMessages: ChatMessage[] = messages.map((msg: any) => ({
+        id: msg.id.toString(),
+        senderId: msg.senderId,
+        senderUsername: msg.senderUsername,
+        senderProfileImageUrl: msg.senderProfileImageUrl,
+        message: msg.content,
+        timestamp: msg.sentAt,
+        isOwnMessage: msg.isOwnMessage,
+      }));
+
+      const conversations = get().conversations;
+      const conversation = conversations.get(friendId);
+      if (conversation) {
+        conversation.messages = chatMessages;
+        set({ conversations: new Map(conversations) });
+      }
+
+      return chatMessages;
+    } catch (err) {
+      console.error("Failed to load messages:", err);
+      throw err;
+    }
   },
 
   markAsRead: (friendId: string) => {

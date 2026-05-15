@@ -38,6 +38,7 @@ export default function Chat({
     sendMessage,
     getOrCreateConversation,
     setActiveChat,
+    loadMessages,
   } = useChatStore();
 
   const [activeConversation, setActiveConversation] =
@@ -69,6 +70,8 @@ export default function Chat({
             friend.profileImageUrl,
             friend.isOnline,
           );
+
+          await loadMessages(friend.id);
           setActiveConversation(conversation);
           setActiveChat(friend.id);
         }
