@@ -24,7 +24,7 @@ interface ChatStore {
     friendProfileImageUrl: string,
     isOnline: boolean,
   ) => ChatConversation;
-  markAsRead: (friendId: string) => void;
+  markAsRead: (friendId: string) => Promise<void>;
   getTotalUnread: () => number;
   loadMessages: (friendId: string) => Promise<ChatMessage[]>;
   loadConversations: () => Promise<void>;
@@ -139,6 +139,9 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   },
 
   setActiveChat: (friendId: string | null) => {
+    if (friendId) {
+      get().markAsRead(friendId);
+    }
     set({ activeChat: friendId });
   },
 
@@ -232,9 +235,20 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     }
   },
 
-  markAsRead: (friendId: string) => {
-    return;
-  },
+  markAsRead: async (friendId: string) => {
+  const conversations = get().conversations;
+  const conversation = conversations.get(friendId);
+  if (conversation && conversation.unreadCount > 0) {
+    conversation.unreadCount = 0;
+    set({ conversations: new Map(conversations) });
+
+    try {
+      await api.chat.markAsRead(friendId);
+    } catch (err) {
+      console.error("Failed to mark messages as read:", err);
+    }
+  }
+},
 
   getTotalUnread: () => {
     return 0;

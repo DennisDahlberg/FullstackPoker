@@ -203,6 +203,17 @@ export const api = {
         throw "An error occurred while fetching conversations";
       }
     },
+
+    async markAsRead(friendId: string) {
+      try {
+        await apiClient.post(`/chat/${friendId}/read`);
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          throw err.response?.data || "Failed to mark messages as read";
+        }
+        throw "An error occurred while marking messages as read";
+      }
+    },
   },
 
   lobby: {
