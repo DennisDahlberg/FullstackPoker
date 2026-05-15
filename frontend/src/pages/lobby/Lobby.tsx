@@ -18,6 +18,7 @@ import {
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { BotProfile } from "@/types/Lobby";
+import type { Friend } from "@/types/Friends";
 
 export default function Lobby() {
   const [searchParams] = useSearchParams();
@@ -47,9 +48,7 @@ export default function Lobby() {
     "All" | "Beginner" | "Intermediate" | "Pro" | "Elite"
   >("All");
 
-  const [friends, setFriends] = useState<
-    { id: string; username: string; isOnline: boolean }[]
-  >([]);
+  const [friends, setFriends] = useState<Friend[]>([]);
   const [loadingFriends, setLoadingFriends] = useState(true);
   const [showInvitePanel, setShowInvitePanel] = useState(false);
   const [invitingId, setInvitingId] = useState<string | null>(null);
@@ -58,7 +57,6 @@ export default function Lobby() {
   const standardBots = bots.filter((b) => !b.isUserCreated);
   const userBots = bots.filter((b) => b.isUserCreated);
 
-  // Navigate to game when it starts
   useEffect(() => {
     if (gameStartedId) {
       clearGameStarted();
@@ -66,7 +64,6 @@ export default function Lobby() {
     }
   }, [gameStartedId]);
 
-  // Connect to lobby hub on mount
   useEffect(() => {
     if (!tableId) {
       navigate("/lobby/create");
@@ -76,7 +73,6 @@ export default function Lobby() {
     connectAndCreate(Number(tableId));
 
     return () => {
-      // Only leave if game hasn't started
       const { gameStartedId } = useLobbyStore.getState();
       if (!gameStartedId) {
         leaveLobby();
@@ -84,7 +80,6 @@ export default function Lobby() {
     };
   }, [tableId]);
 
-  // Fetch available bots
   useEffect(() => {
     const fetchBots = async () => {
       try {
@@ -110,7 +105,6 @@ export default function Lobby() {
     fetchBots();
   }, []);
 
-  // Fetch friends for invite panel
   useEffect(() => {
     const fetchFriends = async () => {
       try {
@@ -159,7 +153,6 @@ export default function Lobby() {
 
   const canStartGame = lobby && lobby.players.length + lobby.botIds.length >= 2;
 
-  // Loading state
   if (loading && !lobby) {
     return (
       <div className="flex flex-col items-center justify-center h-dvh gap-4">
@@ -169,7 +162,6 @@ export default function Lobby() {
     );
   }
 
-  // Error state
   if (error && !lobby) {
     return (
       <div className="flex flex-col items-center justify-center h-dvh gap-4">
@@ -271,10 +263,14 @@ export default function Lobby() {
                   >
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="relative">
-                        <Avatar className="h-9 w-9 border border-gray-700">
-                          <div className="flex h-full w-full items-center justify-center bg-gray-800 text-sm font-bold text-amber-500">
-                            {friend.username[0]}
-                          </div>
+                        <Avatar className="flex items-center justify-center h-10 w-10 border border-gray-800 group-hover:border-amber-500/30 transition-colors">
+                          <AvatarImage
+                            src={friend.profileImageUrl}
+                            alt="User"
+                          />
+                          <AvatarFallback className="font-bold text-amber-500">
+                            {friend.username[0].toUpperCase()}
+                          </AvatarFallback>
                         </Avatar>
                         <div
                           className={cn(
@@ -345,10 +341,11 @@ export default function Lobby() {
               key={p.userId}
               className="flex items-center gap-3 bg-gray-900/60 border border-gray-800 rounded-lg px-4 py-3"
             >
-              <Avatar className="h-8 w-8 border border-gray-700">
-                <div className="flex h-full w-full items-center justify-center bg-gray-800 text-sm font-bold text-gray-200">
-                  {p.username[0]}
-                </div>
+              <Avatar className="flex items-center justify-center h-10 w-10 border border-gray-800 group-hover:border-amber-500/30 transition-colors">
+                <AvatarImage src={p.profileImageUrl} alt="User" />
+                <AvatarFallback className="font-bold text-amber-500">
+                  {p.username[0].toUpperCase()}
+                </AvatarFallback>
               </Avatar>
               <div>
                 <span className="font-bold text-gray-200">{p.username}</span>

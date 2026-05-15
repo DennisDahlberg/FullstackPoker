@@ -104,7 +104,8 @@ public class LobbyController : Controller
             UserId = user.Id,
             Username = user.UserName,
             IsHost = false,
-            IsReady = false
+            IsReady = false,
+            ProfileImageUrl = user.ProfileImageUrl,
         });
 
         await _lobbyStateManager.SaveLobbyStateAsync(invite.LobbyId, lobby);

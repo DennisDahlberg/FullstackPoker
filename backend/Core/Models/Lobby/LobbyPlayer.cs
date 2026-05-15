@@ -6,4 +6,5 @@ public class LobbyPlayer
     public string Username { get; set; } = null!;
     public bool IsHost { get; set; } = false;
     public bool IsReady { get; set; } = false;
+    public string? ProfileImageUrl { get; set; }
 }

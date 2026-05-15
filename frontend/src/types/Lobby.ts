@@ -22,6 +22,7 @@ export interface LobbyPlayer {
   username: string;
   isHost: boolean;
   isReady: boolean;
+  profileImageUrl: string;
 }
 
 export interface LobbyState {

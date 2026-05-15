@@ -584,8 +584,11 @@ export default function Friends() {
                     className="group flex items-center justify-between p-4 border-y border-transparent hover:bg-gray-900/40 hover:border-t-white/5"
                   >
                     <div className="flex items-center gap-4">
-                      <Avatar className="flex items-center justify-center h-10 w-10 bg-amber-900/20 text-amber-500 font-bold">
-                        {invite.hostUsername[0]}
+                      <Avatar className="flex items-center justify-center h-10 w-10 border border-gray-800 group-hover:border-amber-500/30 transition-colors">
+                        <AvatarImage src={invite.hostProfileImageUrl} alt="User" />
+                        <AvatarFallback className="font-bold text-amber-500">
+                          {invite.hostUsername[0].toUpperCase()}
+                        </AvatarFallback>
                       </Avatar>
                       <div>
                         <h4 className="text-sm font-bold text-gray-200">
