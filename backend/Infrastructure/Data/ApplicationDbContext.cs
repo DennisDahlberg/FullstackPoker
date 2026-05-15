@@ -15,6 +15,7 @@ namespace Infrastructure.Data
         public DbSet<Table> Tables { get; set; }
         public DbSet<Game> Games { get; set; }
         public DbSet<PlayerGameStat> PlayerGameStats { get; set; }
+        public DbSet<ChatMessage> ChatMessages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
