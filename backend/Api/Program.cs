@@ -80,6 +80,8 @@ namespace Api
                 builder.Services.AddTransient<ILobbyStateManager, LobbyStateManager>();
                 builder.Services.AddTransient<IStatisticService, StatisticService>();
                 builder.Services.AddTransient<IStatisticRepository, StatisticRepository>();
+                builder.Services.AddTransient<IChatService, ChatService>();
+                builder.Services.AddTransient<IChatRepository, ChatRepository>();
             
                 // Validation
                 builder.Services.AddValidatorsFromAssemblyContaining<CreateBotValidator>();
