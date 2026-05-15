@@ -1,6 +1,6 @@
 using Core.Models;
 
-namespace Core.DTOs;
+namespace Core.DTOs.Chat;
 
 public class ChatMessageDto
 {

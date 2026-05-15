@@ -29,4 +29,16 @@ public class ChatController : Controller
         var messages = await _chatService.GetMessagesAsync(userId, friendId);
         return Ok(messages);
     }
+
+    [HttpGet("conversations")]
+    public async Task<IActionResult> GetConversationsAsync()
+    {
+        var userId = _userService.GetLoggedInUserId(User);
+        if (userId == null)
+            return Unauthorized();
+        
+        var conversations = await _chatService.GetConversationsAsync(userId);
+        return Ok(conversations);
+    }
+    
 }

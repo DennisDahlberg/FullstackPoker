@@ -30,4 +30,28 @@ public class ChatRepository : IChatRepository
             .OrderBy(m => m.SentAt)
             .ToListAsync();
     }
+
+    public async Task<List<string>> GetConversationUserIdsAsync(string userId)
+    {
+        var senderIds = await _context.ChatMessages
+            .Where(m => m.RecipientId == userId)
+            .Select(m => m.SenderId)
+            .Distinct()
+            .ToListAsync();
+
+        var recipientIds = await _context.ChatMessages
+            .Where(m => m.SenderId == userId)
+            .Select(m => m.RecipientId)
+            .Distinct()
+            .ToListAsync();
+
+        return senderIds.Union(recipientIds).Distinct().ToList();
+    }
+
+    public async Task<int> GetUnreadCountAsync(string userId, string friendId)
+    {
+        return await _context.ChatMessages
+            .Where(m => m.SenderId == friendId && m.RecipientId == userId && !m.IsRead)
+            .CountAsync();
+    }
 }

@@ -1,4 +1,5 @@
 using Core.DTOs;
+using Core.DTOs.Chat;
 using Core.Interfaces;
 using Core.Models;
 using FluentResults;
@@ -51,5 +52,35 @@ public class ChatService : IChatService
         
         await _chatRepository.SaveChatMessageAsync(message);
         return Result.Ok();
+    }
+
+    public async Task<List<ConversationDto>> GetConversationsAsync(string userId)
+    {
+        var conversationUserIds = await _chatRepository.GetConversationUserIdsAsync(userId);
+
+        var conversations = new List<ConversationDto>();
+
+        foreach (var friendId in conversationUserIds)
+        {
+            var friend = await _userService.GetUserById(friendId);
+            if (friend == null) continue;
+            
+            var messages = await _chatRepository.GetMessagesBetweenUsersAsync(userId, friendId);
+            var lastMessage = messages.OrderByDescending(m => m.SentAt).FirstOrDefault();
+
+            var unreadCount = await _chatRepository.GetUnreadCountAsync(userId, friendId);
+
+            conversations.Add(new ConversationDto
+            {
+                FriendId = friendId,
+                FriendUsername = friend.UserName,
+                FriendProfileImageUrl = friend.ProfileImageUrl,
+                LastMessage = lastMessage?.Content,
+                LastMessageTime = lastMessage?.SentAt,
+                UnreadCount = unreadCount
+            });
+        }
+
+        return conversations.OrderByDescending(c => c.LastMessageTime).ToList();
     }
 }
