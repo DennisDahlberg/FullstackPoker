@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import {
   Sheet,
@@ -9,9 +9,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Send, ArrowLeft, MessageCircle } from "lucide-react";
+import { Send, ArrowLeft, MessageCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { ChatConversation } from "@/types/Chat";
+import { useChatStore } from "@/stores/useChatStore";
+import { api } from "@/lib/api";
+import type { Friend } from "@/types/Friends";
 
 interface ChatProps {
   open: boolean;
@@ -24,145 +27,91 @@ export default function Chat({
   onOpenChange,
   initialFriendId,
 }: ChatProps) {
-  const mockConversations: ChatConversation[] = [
-    {
-      friendId: "1",
-      friendUsername: "PokerPro99",
-      friendProfileImageUrl:
-        "https://api.dicebear.com/7.x/avataaars/svg?seed=PokerPro99",
-      isOnline: true,
-      unreadCount: 2,
-      messages: [
-        {
-          id: "1",
-          senderId: "1",
-          senderUsername: "PokerPro99",
-          senderProfileImageUrl:
-            "https://api.dicebear.com/7.x/avataaars/svg?seed=PokerPro99",
-          message: "Hey! Want to play a quick game?",
-          timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-          isOwnMessage: false,
-        },
-        {
-          id: "2",
-          senderId: "me",
-          senderUsername: "You",
-          senderProfileImageUrl: "",
-          message: "Sure! What stakes?",
-          timestamp: new Date(Date.now() - 1000 * 60 * 4).toISOString(),
-          isOwnMessage: true,
-        },
-        {
-          id: "3",
-          senderId: "1",
-          senderUsername: "PokerPro99",
-          senderProfileImageUrl:
-            "https://api.dicebear.com/7.x/avataaars/svg?seed=PokerPro99",
-          message: "Low stakes, just for fun",
-          timestamp: new Date(Date.now() - 1000 * 60 * 2).toISOString(),
-          isOwnMessage: false,
-        },
-        {
-          id: "4",
-          senderId: "1",
-          senderUsername: "PokerPro99",
-          senderProfileImageUrl:
-            "https://api.dicebear.com/7.x/avataaars/svg?seed=PokerPro99",
-          message: "Ready when you are!",
-          timestamp: new Date(Date.now() - 1000 * 30).toISOString(),
-          isOwnMessage: false,
-        },
-      ],
-    },
-    {
-      friendId: "2",
-      friendUsername: "BluffMaster",
-      friendProfileImageUrl:
-        "https://api.dicebear.com/7.x/avataaars/svg?seed=BluffMaster",
-      isOnline: false,
-      unreadCount: 0,
-      messages: [
-        {
-          id: "5",
-          senderId: "2",
-          senderUsername: "BluffMaster",
-          senderProfileImageUrl:
-            "https://api.dicebear.com/7.x/avataaars/svg?seed=BluffMaster",
-          message: "That was a great game yesterday!",
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(),
-          isOwnMessage: false,
-        },
-        {
-          id: "6",
-          senderId: "me",
-          senderUsername: "You",
-          senderProfileImageUrl: "",
-          message: "Yeah! We should play again soon",
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 11).toISOString(),
-          isOwnMessage: true,
-        },
-      ],
-    },
-    {
-      friendId: "3",
-      friendUsername: "AllInAnnie",
-      friendProfileImageUrl:
-        "https://api.dicebear.com/7.x/avataaars/svg?seed=AllInAnnie",
-      isOnline: true,
-      unreadCount: 0,
-      messages: [
-        {
-          id: "7",
-          senderId: "me",
-          senderUsername: "You",
-          senderProfileImageUrl: "",
-          message: "Nice bluff earlier!",
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-          isOwnMessage: true,
-        },
-        {
-          id: "8",
-          senderId: "3",
-          senderUsername: "AllInAnnie",
-          senderProfileImageUrl:
-            "https://api.dicebear.com/7.x/avataaars/svg?seed=AllInAnnie",
-          message: "Thanks! You almost had me though 😅",
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 1).toISOString(),
-          isOwnMessage: false,
-        },
-      ],
-    },
-  ];
+  const {
+    connection,
+    isConnected,
+    conversations,
+    activeChat,
+    connect,
+    disconnect,
+    getTotalUnread,
+    sendMessage,
+    getOrCreateConversation,
+    setActiveChat,
+  } = useChatStore();
 
-  const [conversations] = useState<ChatConversation[]>(mockConversations);
   const [activeConversation, setActiveConversation] =
-    useState<ChatConversation | null>(
-      initialFriendId
-        ? conversations.find((c) => c.friendId === initialFriendId) || null
-        : null,
-    );
+    useState<ChatConversation | null>(null);
   const [messageInput, setMessageInput] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (open && !isConnected) {
+      connect();
+    }
+  }, [open, isConnected, connect]);
+
+  useEffect(() => {
+    if (!initialFriendId || !open) {
+      setActiveConversation(null);
+      return;
+    }
+
+    const loadFriend = async () => {
+      try {
+        const friends = await api.friends.getFriends();
+        const friend = friends.find((f: Friend) => f.id === initialFriendId);
+
+        if (friend) {
+          const conversation = getOrCreateConversation(
+            friend.id,
+            friend.username,
+            friend.profileImageUrl,
+            friend.isOnline,
+          );
+          setActiveConversation(conversation);
+          setActiveChat(friend.id);
+        }
+      } catch (error) {
+        console.error("Failed to load friend for chat:", error);
+      }
+    };
+    loadFriend();
+  }, [initialFriendId, open, getOrCreateConversation, setActiveChat]);
+
+  useEffect(() => {
+    if (activeChat) {
+      const conv = conversations.get(activeChat);
+      if (conv) {
+        setActiveConversation(conv);
+      }
+    }
+  }, [conversations, activeChat]);
 
   const handleSelectConversation = (conversation: ChatConversation) => {
     setActiveConversation(conversation);
-    conversation.unreadCount = 0;
+    setActiveChat(conversation.friendId);
   };
 
-  const handleSendMessage = () => {
-    if (!messageInput.trim() || !activeConversation) return;
+  const handleSendMessage = async () => {
+    if (!messageInput.trim() || !activeConversation || !isConnected) return;
 
-    toast.success("Message sent!");
-    setMessageInput("");
+    try {
+      await sendMessage(activeConversation.friendId, messageInput);
+      setMessageInput("");
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      toast.error("Failed to send message");
+    }
   };
 
   const handleBack = () => {
     setActiveConversation(null);
+    setActiveChat(null);
   };
 
-  const totalUnread = conversations.reduce(
-    (sum, conv) => sum + conv.unreadCount,
-    0,
-  );
+  const conversationList = Array.from(conversations.values());
+  const totalUnread = getTotalUnread();
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -195,12 +144,19 @@ export default function Chat({
                   </span>
                 )}
               </SheetTitle>
+              {!isConnected && (
+                <span className="text-xs text-red-400">Disconnected</span>
+              )}
             </div>
           </SheetHeader>
 
           {!activeConversation ? (
             <div className="flex-1 overflow-hidden">
-              {conversations.length === 0 ? (
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+                </div>
+              ) : conversationList.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-500 px-4">
                   <MessageCircle className="h-12 w-12 mb-3 text-gray-700" />
                   <p className="text-sm text-center">
@@ -209,7 +165,7 @@ export default function Chat({
                 </div>
               ) : (
                 <div className="divide-y divide-gray-800/50">
-                  {conversations.map((conversation) => (
+                  {conversationList.map((conversation) => (
                     <button
                       key={conversation.friendId}
                       onClick={() => handleSelectConversation(conversation)}
@@ -274,6 +230,7 @@ export default function Chat({
             </div>
           ) : (
             <>
+              {/* Friend Info */}
               <div className="p-3 border-b border-gray-800 bg-gray-900/50">
                 <div className="flex items-center gap-3">
                   <div className="relative">
@@ -304,42 +261,52 @@ export default function Chat({
                 </div>
               </div>
 
+              {/* Messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {activeConversation.messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex gap-3 ${message.isOwnMessage ? "flex-row-reverse" : ""}`}
-                  >
-                    {!message.isOwnMessage && (
-                      <Avatar className="h-8 w-8 border border-gray-800 flex-shrink-0">
-                        <AvatarImage src={message.senderProfileImageUrl} />
-                        <AvatarFallback className="bg-gray-800 text-amber-500 text-xs">
-                          {message.senderUsername[0].toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    )}
-                    <div
-                      className={`flex flex-col ${message.isOwnMessage ? "items-end" : "items-start"} max-w-[75%]`}
-                    >
-                      <div
-                        className={`rounded-2xl px-4 py-2 ${
-                          message.isOwnMessage
-                            ? "bg-amber-600 text-white"
-                            : "bg-gray-800 text-gray-200"
-                        }`}
-                      >
-                        <p className="text-sm break-words">{message.message}</p>
-                      </div>
-                      <span className="text-[10px] text-gray-600 mt-1 px-2">
-                        {formatDistanceToNow(new Date(message.timestamp), {
-                          addSuffix: true,
-                        })}
-                      </span>
-                    </div>
+                {activeConversation.messages.length === 0 ? (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <p className="text-sm">No messages yet. Say hi! 👋</p>
                   </div>
-                ))}
+                ) : (
+                  activeConversation.messages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex gap-3 ${message.isOwnMessage ? "flex-row-reverse" : ""}`}
+                    >
+                      {!message.isOwnMessage && (
+                        <Avatar className="h-8 w-8 border border-gray-800 flex-shrink-0">
+                          <AvatarImage src={message.senderProfileImageUrl} />
+                          <AvatarFallback className="bg-gray-800 text-amber-500 text-xs">
+                            {message.senderUsername[0].toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                      <div
+                        className={`flex flex-col ${message.isOwnMessage ? "items-end" : "items-start"} max-w-[75%]`}
+                      >
+                        <div
+                          className={`rounded-2xl px-4 py-2 ${
+                            message.isOwnMessage
+                              ? "bg-amber-600 text-white"
+                              : "bg-gray-800 text-gray-200"
+                          }`}
+                        >
+                          <p className="text-sm break-words">
+                            {message.message}
+                          </p>
+                        </div>
+                        <span className="text-[10px] text-gray-600 mt-1 px-2">
+                          {formatDistanceToNow(new Date(message.timestamp), {
+                            addSuffix: true,
+                          })}
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
 
+              {/* Input */}
               <div className="p-4 border-t border-gray-800 bg-gray-900/50">
                 <div className="flex gap-2">
                   <Input
@@ -352,16 +319,22 @@ export default function Chat({
                         handleSendMessage();
                       }
                     }}
+                    disabled={!isConnected}
                     className="bg-gray-800 border-gray-700 focus:border-amber-500 text-white placeholder:text-gray-500"
                   />
                   <Button
                     onClick={handleSendMessage}
-                    disabled={!messageInput.trim()}
-                    className="bg-amber-600 hover:bg-amber-700 text-white"
+                    disabled={!messageInput.trim() || !isConnected}
+                    className="bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
+                {!isConnected && (
+                  <p className="text-xs text-red-400 mt-2">
+                    Connecting to chat server...
+                  </p>
+                )}
               </div>
             </>
           )}
@@ -369,4 +342,7 @@ export default function Chat({
       </SheetContent>
     </Sheet>
   );
+}
+function connect() {
+  throw new Error("Function not implemented.");
 }
