@@ -11,22 +11,22 @@ namespace Api.Controllers;
 public class ChatController : Controller
 {
     private readonly IUserService _userService;
+    private readonly IChatService _chatService;
 
-    public ChatController(IUserService userService)
+    public ChatController(IUserService userService, IChatService chatService)
     {
         _userService = userService;
+        _chatService = chatService;
     }
 
-    [HttpGet]
-    public async Task<IActionResult> GetMessagesAsync(string friendId)
+    [HttpGet("/{friendId}")]
+    public async Task<IActionResult> GetMessagesAsync([FromRoute] string friendId)
     {
-        var friend = await _userService.GetUserById(friendId);
-        if (friend == null)
-            return BadRequest();
+        var userId = _userService.GetLoggedInUserId(User);
+        if (userId == null)
+            return Unauthorized();
 
-        return Ok(new
-        {
-            
-        });
+        var messages = await _chatService.GetMessagesAsync(userId, friendId);
+        return Ok(messages);
     }
 }
