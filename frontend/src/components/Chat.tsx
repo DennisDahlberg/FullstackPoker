@@ -46,6 +46,7 @@ export default function Chat({
     useState<ChatConversation | null>(null);
   const [messageInput, setMessageInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [initializing, setInitializing] = useState(false); // Add this
 
   useEffect(() => {
     if (open && !isConnected) {
@@ -56,10 +57,12 @@ export default function Chat({
   useEffect(() => {
     if (!initialFriendId || !open) {
       setActiveConversation(null);
+      setInitializing(false); // Reset when closing
       return;
     }
 
     const loadFriend = async () => {
+      setInitializing(true); // Set to true when starting to load
       try {
         const friends = await api.friends.getFriends();
         const friend = friends.find((f: Friend) => f.id === initialFriendId);
@@ -78,10 +81,12 @@ export default function Chat({
         }
       } catch (error) {
         console.error("Failed to load friend for chat:", error);
+      } finally {
+        setInitializing(false); // Done loading
       }
     };
     loadFriend();
-  }, [initialFriendId, open, getOrCreateConversation, setActiveChat]);
+  }, [initialFriendId, open, getOrCreateConversation, setActiveChat, loadMessages]);
 
   useEffect(() => {
     if (activeChat) {
@@ -93,12 +98,12 @@ export default function Chat({
   }, [conversations, activeChat]);
 
   useEffect(() => {
-  if (open && isConnected) {
-    loadConversations().catch(err => {
-      console.error("Failed to load conversations:", err);
-    });
-  }
-}, [open, isConnected, loadConversations]);
+    if (open && isConnected) {
+      loadConversations().catch(err => {
+        console.error("Failed to load conversations:", err);
+      });
+    }
+  }, [open, isConnected, loadConversations]);
 
   const handleSelectConversation = (conversation: ChatConversation) => {
     setActiveConversation(conversation);
@@ -162,7 +167,12 @@ export default function Chat({
             </div>
           </SheetHeader>
 
-          {!activeConversation ? (
+          {/* Show loader if initializing with initialFriendId */}
+          {initializing ? (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+            </div>
+          ) : !activeConversation ? (
             <div className="flex-1 overflow-hidden">
               {loading ? (
                 <div className="flex items-center justify-center h-full">
@@ -354,7 +364,4 @@ export default function Chat({
       </SheetContent>
     </Sheet>
   );
-}
-function connect() {
-  throw new Error("Function not implemented.");
 }
