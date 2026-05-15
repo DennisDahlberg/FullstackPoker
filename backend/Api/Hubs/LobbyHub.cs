@@ -68,6 +68,7 @@ public class LobbyHub : Hub
         {
             HostUserId = user.Id,
             HostUsername = user.UserName,
+            HostProfileImageUrl = user.ProfileImageUrl,
             TableId = tableId,
             Players = new List<LobbyPlayer>
             {
@@ -323,10 +324,18 @@ public class LobbyHub : Hub
             return;
         }
 
+        var user = await _userService.GetUserById(userId);
+        if (user is null)
+        {
+            await Clients.Caller.SendAsync("Error", "Host not found");
+            return;
+        }
+
         var invite = new LobbyInvite
         {
             LobbyId = lobbyId,
             HostUsername = lobby.HostUsername,
+            HostProfileImageUrl = user.ProfileImageUrl,
             TableId = lobby.TableId,
             InvitedUserId = friendId
         };
@@ -466,7 +475,7 @@ public class LobbyHub : Hub
                     invite.LobbyId,
                     invite.HostUsername,
                     invite.TableId,
-                    invite.SentAt
+                    invite.SentAt,
                 });
             }
             else

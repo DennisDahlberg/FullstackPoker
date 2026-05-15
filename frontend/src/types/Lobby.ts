@@ -37,6 +37,7 @@ export interface LobbyInvite {
   inviteId: string;
   lobbyId: string;
   hostUsername: string;
+  hostProfileImageUrl: string;
   tableId: number;
   sentAt: string;
 }

@@ -47,7 +47,8 @@ public class LobbyController : Controller
                     invite.LobbyId,
                     invite.HostUsername,
                     invite.TableId,
-                    invite.SentAt
+                    invite.SentAt,
+                    invite.HostProfileImageUrl
                 });
             }
             else
