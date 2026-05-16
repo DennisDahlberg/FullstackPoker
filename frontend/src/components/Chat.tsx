@@ -50,12 +50,13 @@ export default function Chat({
   useEffect(() => {
     if (!initialFriendId || !open) {
       setActiveConversation(null);
-      setInitializing(false); // Reset when closing
+      setActiveChat(null);
+      setInitializing(false); 
       return;
     }
 
     const loadFriend = async () => {
-      setInitializing(true); // Set to true when starting to load
+      setInitializing(true);
       try {
         const friends = await api.friends.getFriends();
         const friend = friends.find((f: Friend) => f.id === initialFriendId);
@@ -75,7 +76,7 @@ export default function Chat({
       } catch (error) {
         console.error("Failed to load friend for chat:", error);
       } finally {
-        setInitializing(false); // Done loading
+        setInitializing(false);
       }
     };
     loadFriend();
