@@ -119,7 +119,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       console.log("Connected to ChatHub");
     } catch (err) {
       console.error("Failed to connect to ChatHub:", err);
-      set({ isConnected: false, isConnecting: false });
+      set({ isConnected: false });
     }
   },
 
@@ -241,6 +241,8 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       }      
 
       set({ conversations });
+
+      window.dispatchEvent(new Event("refreshChatNotifications"));
     } catch (err) {
       console.error("Failed to load conversations:", err);
       throw err;
