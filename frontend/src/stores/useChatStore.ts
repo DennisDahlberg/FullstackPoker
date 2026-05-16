@@ -99,13 +99,16 @@ export const useChatStore = create<ChatStore>((set, get) => ({
             isOwnMessage: data.isOwnMessage,
           };
 
-          conversation.messages.push(message);
+          const updatedConversation = {
+            ...conversation,
+            messages: [...conversation.messages, message],
+            unreadCount:
+              !data.isOwnMessage && get().activeChat !== friendId
+                ? conversation.unreadCount + 1
+                : conversation.unreadCount,
+          };
 
-          if (!data.isOwnMessage && get().activeChat !== friendId) {
-            conversation.unreadCount++;
-            window.dispatchEvent(new Event("refreshChatNotifications"));
-          }
-
+          conversations.set(friendId, updatedConversation);
           set({ conversations: new Map(conversations) });
         },
       );
@@ -151,37 +154,69 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   },
 
   setActiveChat: (friendId: string | null) => {
-    if (friendId) {
-      get().markAsRead(friendId);
-    }
-    set({ activeChat: friendId });
-  },
-
-  getOrCreateConversation: (
-    friendId: string,
-    friendUsername: string,
-    friendProfileImageUrl: string,
-    isOnline: boolean,
-  ) => {
+  if (friendId) {
     const conversations = get().conversations;
-    let conversation = conversations.get(friendId);
-    if (!conversation) {
-      conversation = {
-        friendId,
-        friendUsername,
-        friendProfileImageUrl,
-        isOnline,
-        messages: [],
+    const conversation = conversations.get(friendId);
+    
+    if (conversation && conversation.unreadCount > 0) {
+      // Update both activeChat AND unreadCount in ONE set() call
+      const updatedConversation = {
+        ...conversation,
         unreadCount: 0,
       };
-      conversations.set(friendId, conversation);
-      set({ conversations: new Map(conversations) });
+      const newConversations = new Map(conversations);
+      newConversations.set(friendId, updatedConversation);
+      
+      set({ 
+        activeChat: friendId,
+        conversations: newConversations 
+      });
+      
+      // Mark as read on backend (async, but UI already updated)
+      api.chat.markAsRead(friendId).catch(err => {
+        console.error("Failed to mark messages as read:", err);
+      });
     } else {
-      conversation.isOnline = isOnline;
-      set({ conversations: new Map(conversations) });
+      // No unread messages, just set active chat
+      set({ activeChat: friendId });
     }
-    return conversation;
-  },
+  } else {
+    set({ activeChat: null });
+  }
+},
+
+  getOrCreateConversation: (
+  friendId: string,
+  friendUsername: string,
+  friendProfileImageUrl: string,
+  isOnline: boolean,
+) => {
+  const conversations = get().conversations;
+  let conversation = conversations.get(friendId);
+  if (!conversation) {
+    conversation = {
+      friendId,
+      friendUsername,
+      friendProfileImageUrl,
+      isOnline,
+      messages: [],
+      unreadCount: 0,
+    };
+    const newConversations = new Map(conversations);
+    newConversations.set(friendId, conversation);
+    set({ conversations: newConversations });
+  } else if (conversation.isOnline !== isOnline) {
+    const updatedConversation = {
+      ...conversation,
+      isOnline,
+    };
+    const newConversations = new Map(conversations);
+    newConversations.set(friendId, updatedConversation);
+    set({ conversations: newConversations });
+    conversation = updatedConversation;
+  }
+  return conversation;
+},
 
   loadMessages: async (friendId: string) => {
     try {
@@ -200,8 +235,13 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       const conversations = get().conversations;
       const conversation = conversations.get(friendId);
       if (conversation) {
-        conversation.messages = chatMessages;
-        set({ conversations: new Map(conversations) });
+        const updatedConversation = {
+          ...conversation,
+          messages: chatMessages,
+        };
+        const newConversations = new Map(conversations);
+        newConversations.set(friendId, updatedConversation);
+        set({ conversations: newConversations });
       }
 
       return chatMessages;
@@ -230,15 +270,18 @@ export const useChatStore = create<ChatStore>((set, get) => ({
           isOwnMessage: msg.isOwnMessage,
         }));
 
+        const activeChat = get().activeChat;
+        const unreadCount = conv.friendId === activeChat ? 0 : conv.unreadCount;
+
         conversations.set(conv.friendId, {
           friendId: conv.friendId,
           friendUsername: conv.friendUsername,
           friendProfileImageUrl: conv.friendProfileImageUrl,
           isOnline: conv.isOnline,
           messages: chatMessages,
-          unreadCount: conv.unreadCount,
+          unreadCount,
         });
-      }      
+      }
 
       set({ conversations });
 
@@ -250,19 +293,25 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   },
 
   markAsRead: async (friendId: string) => {
-  const conversations = get().conversations;
-  const conversation = conversations.get(friendId);
-  if (conversation && conversation.unreadCount > 0) {
-    conversation.unreadCount = 0;
-    set({ conversations: new Map(conversations) });
+    const conversations = get().conversations;
+    const conversation = conversations.get(friendId);
+    if (conversation && conversation.unreadCount > 0) {
+      const updatedConversation = {
+        ...conversation,
+        unreadCount: 0,
+      };
 
-    try {
-      await api.chat.markAsRead(friendId);
-    } catch (err) {
-      console.error("Failed to mark messages as read:", err);
+      const newConversations = new Map(conversations);
+      newConversations.set(friendId, updatedConversation);
+      set({ conversations: newConversations });
+
+      try {
+        await api.chat.markAsRead(friendId);
+      } catch (err) {
+        console.error("Failed to mark messages as read:", err);
+      }
     }
-  }
-},
+  },
 
   getTotalUnread: () => {
     const conversations = get().conversations;

@@ -39,8 +39,13 @@ export default function SidebarLayout() {
   const navigate = useNavigate();
   const friendsHub = useFriendsHub();
 
-  const getTotalUnread = useChatStore((state) => state.getTotalUnread);
-  const [chatUnreadCount, setChatUnreadCount] = useState(getTotalUnread());
+  const chatUnreadCount = useChatStore((state) => {
+    let total = 0;
+    state.conversations.forEach((conv) => {
+      total += conv.unreadCount;
+    });
+    return total;
+  });
 
   const fetchNotifications = useCallback(async () => {
     if (!data?.user) return;
@@ -55,18 +60,6 @@ export default function SidebarLayout() {
       setNotificationCount(0);
     }
   }, [data?.user]);
-
-  useEffect(() => {
-    const handleRefreshChat = () => {
-      setChatUnreadCount(getTotalUnread());
-    };
-
-    window.addEventListener("refreshChatNotifications", handleRefreshChat);
-
-    return () => {
-      window.removeEventListener("refreshChatNotifications", handleRefreshChat);
-    };
-  }, [getTotalUnread]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -167,11 +160,12 @@ export default function SidebarLayout() {
                   <item.icon className="w-5 h-5" />
                   <span className="font-medium">{item.label}</span>
                 </div>
-                {item.label === "Friends" && notificationCount + chatUnreadCount > 0 && (
-                  <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                    {notificationCount + chatUnreadCount}
-                  </span>
-                )}
+                {item.label === "Friends" &&
+                  notificationCount + chatUnreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                      {notificationCount + chatUnreadCount}
+                    </span>
+                  )}
               </Link>
             );
           })}
