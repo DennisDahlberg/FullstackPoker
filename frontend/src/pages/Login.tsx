@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Coins, LogIn, Eye, EyeOff } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthContext } from "@/context/AuthContext";
+import logoImage from "@/assets/poker_logo.png";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -30,7 +31,7 @@ export default function Login() {
     try {
       const response = await logIn(email, password);
       console.log("This is the response from login:", response);
-      
+
       if (response.loginBonus?.wasAwarded) {
         localStorage.setItem("loginBonus", JSON.stringify(response.loginBonus));
       }
@@ -52,14 +53,13 @@ export default function Login() {
       <div className="relative z-10 w-full max-w-md px-4">
         {/* Logo */}
         <div className="flex flex-col items-center mb-6 sm:mb-8">
-          <div className="relative mb-3 sm:mb-4">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl">
-              <Coins className="w-7 h-7 sm:w-9 sm:h-9 text-white" />
-            </div>
-            <div className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-yellow-500 rounded-full animate-pulse" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
-            PokerAI
+          <img
+            src={logoImage}
+            alt="PokerGame Logo"
+            className="w-14 h-14 mb-2"
+          />
+          <h1 className="text-2xl sm:text-3xl font-bold text-amber-500">
+            PokerGame
           </h1>
         </div>
 
@@ -129,22 +129,6 @@ export default function Login() {
                     )}
                   </button>
                 </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-0 text-xs sm:text-sm">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded border-gray-600 bg-gray-700 text-amber-500 focus:ring-amber-500 focus:ring-offset-gray-800"
-                  />
-                  <span className="text-gray-400">Remember me</span>
-                </label>
-                <a
-                  href="#"
-                  className="text-amber-400 hover:text-amber-300 transition-colors"
-                >
-                  Forgot password?
-                </a>
               </div>
 
               <Button
