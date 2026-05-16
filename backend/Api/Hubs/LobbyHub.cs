@@ -77,6 +77,7 @@ public class LobbyHub : Hub
                     UserId =  user.Id,
                     Username = user.UserName,
                     IsHost =  true,
+                    ProfileImageUrl = user.ProfileImageUrl,
                     IsReady = false
                 }
             }

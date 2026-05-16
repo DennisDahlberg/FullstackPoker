@@ -28,6 +28,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { api } from "@/lib/api";
+import logoImage from "@/assets/poker_logo.png";
 import { useChatStore } from "@/stores/useChatStore";
 
 export default function SidebarLayout() {
@@ -131,8 +132,8 @@ export default function SidebarLayout() {
         {/* Logo Area */}
         <div className="h-16 flex items-center px-6 border-b border-gray-800">
           <div className="flex items-center gap-2 text-amber-500 font-bold text-xl">
-            <Coins className="w-6 h-6" />
-            <span>PokerAI</span>
+            <img src={logoImage} alt="logo" className="h-8 w-auto" />
+            <span>PokerGame</span>            
           </div>
         </div>
 
