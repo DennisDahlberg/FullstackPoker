@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Coins, UserPlus, Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthContext } from '@/context/AuthContext';
+import logoImage from "@/assets/poker_logo.png";
 
 export default function Register() {
   const [email, setEmail] = useState('');
@@ -45,19 +46,18 @@ export default function Register() {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 py-8 sm:py-0">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden py-8 sm:py-0">
       
       <div className="relative z-10 w-full max-w-md px-4">
         {/* Logo */}
         <div className="flex flex-col items-center mb-6 sm:mb-8">
-          <div className="relative mb-3 sm:mb-4">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-xl sm:rounded-2xl flex items-center justify-center shadow-2xl">
-              <Coins className="w-7 h-7 sm:w-9 sm:h-9 text-white" />
-            </div>
-            <div className="absolute -top-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-yellow-500 rounded-full animate-pulse" />
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
-            PokerAI
+          <img
+            src={logoImage}
+            alt="PokerGame Logo"
+            className="w-14 h-14 mb-2"
+          />
+          <h1 className="text-2xl sm:text-3xl font-bold text-amber-500">
+            PokerGame
           </h1>
         </div>
 
