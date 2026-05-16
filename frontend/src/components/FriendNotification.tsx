@@ -7,10 +7,20 @@ import { useChatStore } from "@/stores/useChatStore";
 export default function FriendInviteListener() {
   const connection = useFriendsHub();
   const connectChat = useChatStore((state) => state.connect);
+  const loadConversations = useChatStore((state) => state.loadConversations);
+  const isConnected = useChatStore((state) => state.isConnected);
 
   useEffect(() => {
     connectChat();
   }, []);
+
+  useEffect(() => {
+    if (isConnected) {
+      loadConversations().catch((err) => {
+        console.error("Failed to load conversations on mount:", err);
+      });
+    }
+  }, [isConnected, loadConversations]);
 
   useEffect(() => {
     if (!connection) {
