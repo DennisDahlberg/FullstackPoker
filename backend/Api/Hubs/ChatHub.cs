@@ -30,6 +30,13 @@ public class ChatHub : Hub
             return;
         }
         
+        var recipient = await _userService.GetUserById(recipientId);
+        if (recipient == null)
+        {
+            await Clients.Caller.SendAsync("Error", "User not found");
+            return;
+        }
+        
         var result = await _chatService.SendMessageAsync(senderId, recipientId, message);
         if (result.IsFailed)
         {
@@ -52,8 +59,8 @@ public class ChatHub : Hub
         {
             SenderId = senderId,
             RecipientId = recipientId,
-            SenderUsername = sender.UserName,
-            SenderProfileImageUrl = sender.ProfileImageUrl,
+            SenderUsername = recipient.UserName,
+            SenderProfileImageUrl = recipient.ProfileImageUrl,
             Content = message,
             SentAt = DateTime.Now,
             IsOwnMessage = true

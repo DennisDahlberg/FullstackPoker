@@ -6,7 +6,7 @@ import {
   LogLevel,
   type HubConnection,
 } from "@microsoft/signalr";
-import { create } from "zustand/react";
+import { create } from "zustand";
 
 interface ChatStore {
   connection: HubConnection | null;
