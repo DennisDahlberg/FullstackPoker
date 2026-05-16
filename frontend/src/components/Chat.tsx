@@ -32,8 +32,6 @@ export default function Chat({
     isConnected,
     conversations,
     activeChat,
-    connect,
-    disconnect,
     getTotalUnread,
     sendMessage,
     getOrCreateConversation,
@@ -46,13 +44,8 @@ export default function Chat({
     useState<ChatConversation | null>(null);
   const [messageInput, setMessageInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [initializing, setInitializing] = useState(false); // Add this
+  const [initializing, setInitializing] = useState(false); 
 
-  useEffect(() => {
-    if (open && !isConnected) {
-      connect();
-    }
-  }, [open, isConnected, connect]);
 
   useEffect(() => {
     if (!initialFriendId || !open) {

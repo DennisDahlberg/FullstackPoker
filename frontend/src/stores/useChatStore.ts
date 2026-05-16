@@ -13,6 +13,7 @@ interface ChatStore {
   conversations: Map<string, ChatConversation>;
   activeChat: string | null;
   isConnected: boolean;
+  isConnecting: boolean;
 
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
@@ -35,12 +36,22 @@ export const useChatStore = create<ChatStore>((set, get) => ({
   conversations: new Map(),
   activeChat: null,
   isConnected: false,
+  isConnecting: false,
 
   connect: async () => {
     const existing = get().connection;
+    const isConnecting = get().isConnecting;
+
+    if (isConnecting) {
+      console.log("Already connecting to ChatHub...");
+      return;
+    }
+
     if (existing && existing.state !== HubConnectionState.Disconnected) {
       return;
     }
+
+    set({ isConnecting: true });
 
     try {
       const connection = new HubConnectionBuilder()
@@ -92,6 +103,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
           if (!data.isOwnMessage && get().activeChat !== friendId) {
             conversation.unreadCount++;
+            window.dispatchEvent(new Event("refreshChatNotifications"));
           }
 
           set({ conversations: new Map(conversations) });
@@ -107,7 +119,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       console.log("Connected to ChatHub");
     } catch (err) {
       console.error("Failed to connect to ChatHub:", err);
-      set({ isConnected: false });
+      set({ isConnected: false, isConnecting: false });
     }
   },
 
@@ -226,7 +238,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
           messages: chatMessages,
           unreadCount: conv.unreadCount,
         });
-      }
+      }      
 
       set({ conversations });
     } catch (err) {
@@ -251,6 +263,11 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 },
 
   getTotalUnread: () => {
-    return 0;
+    const conversations = get().conversations;
+    let totalUnread = 0;
+    conversations.forEach((conversation) => {
+      totalUnread += conversation.unreadCount;
+    });
+    return totalUnread;
   },
 }));
