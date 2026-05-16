@@ -46,6 +46,7 @@ public class ChatHub : Hub
 
         await Clients.User(recipientId).SendAsync("ReceiveMessage", new
         {
+            Id = result.Value.Id,
             SenderId = senderId,
             RecipientId = recipientId,
             SenderUsername = sender.UserName,
@@ -57,6 +58,7 @@ public class ChatHub : Hub
         
         await Clients.Caller.SendAsync("ReceiveMessage", new
         {
+            Id = result.Value.Id,
             SenderId = senderId,
             RecipientId = recipientId,
             SenderUsername = recipient.UserName,

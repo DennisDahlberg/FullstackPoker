@@ -35,7 +35,7 @@ public class ChatService : IChatService
         }).ToList();
     }
 
-    public async Task<Result> SendMessageAsync(string userId, string recipientId, string content)
+    public async Task<Result<ChatMessageDto>> SendMessageAsync(string userId, string recipientId, string content)
     {
         var user = await _userService.GetUserById(userId);
         if (user == null)
@@ -51,7 +51,17 @@ public class ChatService : IChatService
         };
         
         await _chatRepository.SaveChatMessageAsync(message);
-        return Result.Ok();
+        return Result.Ok(new ChatMessageDto
+        {
+            Id =  message.Id,
+            Content =  message.Content,
+            SentAt = message.SentAt,
+            IsRead = message.IsRead,
+            RecipientId =  message.RecipientId,
+            SenderId = message.SenderId,
+            SenderProfileImageUrl =  message.Sender.ProfileImageUrl,
+            SenderUsername = message.Sender.UserName,
+        });
     }
 
     public async Task<List<ConversationDto>> GetConversationsAsync(string userId)

@@ -172,7 +172,6 @@ export default function Chat({
             </div>
           </SheetHeader>
 
-          {/* Show loader if initializing with initialFriendId */}
           {initializing ? (
             <div className="flex items-center justify-center h-full">
               <Loader2 className="h-8 w-8 animate-spin text-amber-500" />

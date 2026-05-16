@@ -65,6 +65,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
       connection.on(
         "ReceiveMessage",
         (data: {
+          id: string;
           senderId: string;
           recipientId: string;
           senderUsername: string;
@@ -90,7 +91,7 @@ export const useChatStore = create<ChatStore>((set, get) => ({
           }
 
           const message: ChatMessage = {
-            id: `${Date.now()}-${Math.random()}`, // Temporary ID until we have DB
+            id: data.id,
             senderId: data.senderId,
             senderUsername: data.senderUsername,
             senderProfileImageUrl: data.senderProfileImageUrl,
@@ -159,7 +160,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
     const conversation = conversations.get(friendId);
     
     if (conversation && conversation.unreadCount > 0) {
-      // Update both activeChat AND unreadCount in ONE set() call
       const updatedConversation = {
         ...conversation,
         unreadCount: 0,
@@ -172,12 +172,10 @@ export const useChatStore = create<ChatStore>((set, get) => ({
         conversations: newConversations 
       });
       
-      // Mark as read on backend (async, but UI already updated)
       api.chat.markAsRead(friendId).catch(err => {
         console.error("Failed to mark messages as read:", err);
       });
     } else {
-      // No unread messages, just set active chat
       set({ activeChat: friendId });
     }
   } else {
@@ -285,7 +283,6 @@ export const useChatStore = create<ChatStore>((set, get) => ({
 
       set({ conversations });
 
-      window.dispatchEvent(new Event("refreshChatNotifications"));
     } catch (err) {
       console.error("Failed to load conversations:", err);
       throw err;
