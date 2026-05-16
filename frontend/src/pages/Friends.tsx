@@ -17,6 +17,7 @@ import { api } from "@/lib/api";
 import Chat from "@/components/Chat";
 import { toast } from "sonner";
 import { useFriendsHub } from "@/context/FriendsHubContext";
+import { useChatStore } from "@/stores/useChatStore";
 import { formatDistanceToNow } from "date-fns";
 import type { LobbyInvite } from "@/types/Lobby";
 import type { Friend, FriendRequest, TabId, User } from "@/types/Friends";
@@ -47,6 +48,7 @@ export default function Friends() {
     null,
   );
 
+  const conversations = useChatStore((state) => state.conversations);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatFriendId, setChatFriendId] = useState<string | undefined>();
 
@@ -479,6 +481,12 @@ export default function Friends() {
                         <div
                           className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-gray-950 ${friend.isOnline ? "bg-green-500" : "bg-gray-600"}`}
                         />
+                        {(conversations.get(friend.id)?.unreadCount ?? 0) >
+                          0 && (
+                          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border border-gray-950">
+                            {conversations.get(friend.id)!.unreadCount}
+                          </span>
+                        )}
                       </div>
                       <div>
                         <h4 className="font-bold text-sm text-gray-200 group-hover:text-white">
