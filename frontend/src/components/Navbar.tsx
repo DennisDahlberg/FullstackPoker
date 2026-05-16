@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Coins, Menu, X, Play } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import logoImage from "@/assets/poker_logo.png";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -12,19 +13,13 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-3">
-            <div className="relative">
-              <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-yellow-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Coins className="w-6 h-6 text-white" />
-              </div>
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full animate-pulse" />
-            </div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent">
-              PokerAI
+            <img src={logoImage} alt="PokerGame Logo" className="w-8 h-8" />
+            <span className="text-2xl font-bold text-amber-500">
+              PokerGame
             </span>
           </Link>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center space-x-8">
+          {/* <div className="hidden md:flex items-center space-x-8">
             <a
               href="#features"
               className="text-gray-300 hover:text-amber-400 transition-colors"
@@ -43,7 +38,7 @@ export default function Navbar() {
             >
               AI Opponents
             </a>
-          </div>
+          </div> */}
 
           <div className="hidden md:flex items-center space-x-4">
             <Link to="/login">
@@ -82,7 +77,7 @@ export default function Navbar() {
         }`}
       >
         <div className="px-4 py-6 space-y-4">
-          <a
+          {/* <a
             href="#features"
             onClick={() => setIsMenuOpen(false)}
             className="block text-gray-300 hover:text-amber-400 transition-colors"
@@ -102,7 +97,7 @@ export default function Navbar() {
             className="block text-gray-300 hover:text-amber-400 transition-colors"
           >
             AI Opponents
-          </a>
+          </a> */}
           <div className="pt-4 space-y-3">
             <Link to="/login">
               <Button
