@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import {
   Sheet,
@@ -44,14 +44,19 @@ export default function Chat({
     useState<ChatConversation | null>(null);
   const [messageInput, setMessageInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [initializing, setInitializing] = useState(false); 
+  const [initializing, setInitializing] = useState(false);
 
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [activeConversation?.messages]);
 
   useEffect(() => {
     if (!initialFriendId || !open) {
       setActiveConversation(null);
       setActiveChat(null);
-      setInitializing(false); 
+      setInitializing(false);
       return;
     }
 
@@ -80,7 +85,13 @@ export default function Chat({
       }
     };
     loadFriend();
-  }, [initialFriendId, open, getOrCreateConversation, setActiveChat, loadMessages]);
+  }, [
+    initialFriendId,
+    open,
+    getOrCreateConversation,
+    setActiveChat,
+    loadMessages,
+  ]);
 
   useEffect(() => {
     if (activeChat) {
@@ -93,7 +104,7 @@ export default function Chat({
 
   useEffect(() => {
     if (open && isConnected) {
-      loadConversations().catch(err => {
+      loadConversations().catch((err) => {
         console.error("Failed to load conversations:", err);
       });
     }
@@ -320,6 +331,7 @@ export default function Chat({
                     </div>
                   ))
                 )}
+                <div ref={messagesEndRef} />
               </div>
 
               {/* Input */}
