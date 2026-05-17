@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using Application.Services;
 using Core.GameModels;
 using Core.Interfaces;
 using HoldemPoker.Cards;
@@ -19,11 +20,12 @@ public class GameHub : Hub
     private readonly ILogger<GameHub> _logger;
     
     private readonly IHubContext<GameHub> _hubContext;
+    private readonly IServiceScopeFactory _scopeFactory;
 
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> _gameLocks = new();
     private static readonly ConcurrentDictionary<string, CancellationTokenSource> _turnTimers = new();
 
-    public GameHub(IGameStateManager gameStateManager, IUserService userService, IGameHistoryService gameHistoryService, IGameService gameService, ILogger<GameHub> logger, IHubContext<GameHub> hubContext)
+    public GameHub(IGameStateManager gameStateManager, IUserService userService, IGameHistoryService gameHistoryService, IGameService gameService, ILogger<GameHub> logger, IHubContext<GameHub> hubContext, IServiceScopeFactory scopeFactory)
     {
         _gameStateManager = gameStateManager;
         _userService = userService;
@@ -31,6 +33,7 @@ public class GameHub : Hub
         _gameService = gameService;
         _logger = logger;
         _hubContext = hubContext;
+        _scopeFactory = scopeFactory;
     }
 
     private SemaphoreSlim GetGameLock(string gameId)
@@ -661,17 +664,21 @@ public class GameHub : Hub
         {
             await gameLock.WaitAsync();
             lockAcquired = true;
+            
+            using var scope = _scopeFactory.CreateScope();
+            var gameService = scope.ServiceProvider.GetRequiredService<IGameService>();
+            var gameStateManager = scope.ServiceProvider.GetRequiredService<IGameStateManager>();
 
-            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+            var gameState = await gameStateManager.GetGameStateAsync(gameId);
             if (gameState == null || gameState.IsGameOver) return;
 
             var current = gameState.Players[gameState.CurrentPlayerIndex];
             if (current.UserId != userId) return;
 
-            await _gameService.HandlePlayerAction(new PlayerActionRequest { Action = "fold", Amount = 0 }, gameState);
-            await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+            await gameService.HandlePlayerAction(new PlayerActionRequest { Action = "fold", Amount = 0 }, gameState);
+            await gameStateManager.SaveGameStateAsync(gameId, gameState);
             await BroadcastGameState(gameId, gameState);
-            await ProcessBotTurns(gameId, gameState);
+            await ProcessBotTurnsInScope(gameId, gameState, gameService, gameStateManager);
         }
         catch (Exception ex)
         {
@@ -680,6 +687,33 @@ public class GameHub : Hub
         finally
         {
             if (lockAcquired) gameLock.Release();
+        }
+    }
+    
+    private async Task ProcessBotTurnsInScope(string gameId, GameState gameState,
+        IGameService gameService, IGameStateManager gameStateManager)
+    {
+        while (!gameState.IsGameOver &&
+               !gameState.Players[gameState.CurrentPlayerIndex].IsPlayer)
+        {
+            try
+            {
+                await gameService.HandleBotAction(gameState);
+                await gameStateManager.SaveGameStateAsync(gameId, gameState);
+                await BroadcastGameState(gameId, gameState);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error processing bot turn in game {GameId}", gameId);
+                break;
+            }
+        }
+
+        if (!gameState.IsGameOver)
+        {
+            var next = gameState.Players[gameState.CurrentPlayerIndex];
+            if (next.IsPlayer && next.UserId != null)
+                StartTurnTimer(gameId, next.UserId);
         }
     }
 }
