@@ -197,6 +197,12 @@ public class GameHub : Hub
         }
 
         var gameLock = GetGameLock(gameId);
+        if (_turnTimers.TryRemove(gameId, out var existingTimer))
+        {
+            existingTimer.Cancel();
+            existingTimer.Dispose();
+        }
+        
         _logger.LogDebug("User {UserId} waiting for lock on game {GameId} for PlayerAction", userId, gameId);
         await gameLock.WaitAsync();
         _logger.LogDebug("User {UserId} acquired lock on game {GameId} for PlayerAction", userId, gameId);
@@ -267,6 +273,12 @@ public class GameHub : Hub
                 _logger.LogError(ex, "Error processing bot turn for {BotName} in game {GameId}", botName, gameId);
                 break;
             }
+        }
+        if (!gameState.IsGameOver)
+        {
+            var next = gameState.Players[gameState.CurrentPlayerIndex];
+            if (next.IsPlayer && next.UserId != null)
+                StartTurnTimer(gameId, next.UserId);
         }
     }
 
@@ -548,6 +560,7 @@ public class GameHub : Hub
         {
             await _gameStateManager.DeleteGameStateAsync(gameId);
             _gameLocks.TryRemove(gameId, out _);
+            if (_turnTimers.TryRemove(gameId, out var t)) { t.Cancel(); t.Dispose(); }
         }
         else
         {
@@ -612,6 +625,57 @@ public class GameHub : Hub
 
     private void StartTurnTimer(string gameId, string userId)
     {
-        
+        if (_turnTimers.TryRemove(gameId, out var oldTimer))
+        {
+            oldTimer.Cancel();
+            oldTimer.Dispose();
+        }
+
+        var cts = new CancellationTokenSource();
+        _turnTimers[gameId] = cts;
+
+        _ = RunTurnTimerAsync(gameId, userId, cts);
+    }
+
+    private async Task RunTurnTimerAsync(string gameId, string userId, CancellationTokenSource cts)
+    {
+        try
+        {
+            await Task.Delay(TimeSpan.FromSeconds(15), cts.Token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        _turnTimers.TryRemove(gameId, out _);
+        cts.Dispose();
+
+        var gameLock = GetGameLock(gameId);
+        bool lockAcquired = false;
+        try
+        {
+            await gameLock.WaitAsync();
+            lockAcquired = true;
+
+            var gameState = await _gameStateManager.GetGameStateAsync(gameId);
+            if (gameState == null || gameState.IsGameOver) return;
+
+            var current = gameState.Players[gameState.CurrentPlayerIndex];
+            if (current.UserId != userId) return;
+
+            await _gameService.HandlePlayerAction(new PlayerActionRequest { Action = "fold", Amount = 0 }, gameState);
+            await _gameStateManager.SaveGameStateAsync(gameId, gameState);
+            await BroadcastGameState(gameId, gameState);
+            await ProcessBotTurns(gameId, gameState);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error processing turn timeout for User {UserId} in game {GameId}", userId, gameId);
+        }
+        finally
+        {
+            if (lockAcquired) gameLock.Release();
+        }
     }
 }
