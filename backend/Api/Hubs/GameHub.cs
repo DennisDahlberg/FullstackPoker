@@ -609,4 +609,9 @@ public class GameHub : Hub
         if (index == removedIndex) return removedIndex % newCount;
         return index;
     }
+
+    private void StartTurnTimer(string gameId, string userId)
+    {
+        
+    }
 }

@@ -105,6 +105,7 @@ namespace Application.Services
         GetCommunityCards(gameState);
         gameState.HighestBet = 0;
         gameState.CurrentPlayerIndex = (gameState.BigBlindPosition + 1) % gameState.Players.Count;
+        gameState.TurnStartedAt = DateTimeOffset.UtcNow;
         gameState.IsGameOver = false;
         gameState.WinnersPositions.Clear();
         gameState.RoundStartedAt = DateTimeOffset.UtcNow;
@@ -198,6 +199,7 @@ namespace Application.Services
         state.Pot += bigBlindAmount;
         state.HighestBet = bigBlindAmount;
         state.IsFirstRound = false;
+        state.TurnStartedAt = DateTimeOffset.UtcNow;
     }
 
     public void GetStartingHand(Player player, List<PlayerCard> deck)
@@ -390,6 +392,7 @@ namespace Application.Services
             if (state.Players[state.CurrentPlayerIndex].IsActive == false)
                 state.Players[state.CurrentPlayerIndex].HasActedThisRound = true;
         } while (state.Players[state.CurrentPlayerIndex].IsActive == false);
+        state.TurnStartedAt = DateTimeOffset.UtcNow;
     }
 
     public async Task HandleBotAction(GameState gameState)
