@@ -4,11 +4,7 @@ import { useAuthContext } from "@/context/AuthContext";
 import { SessionSummaryModal } from "@/components/game/SessionSummaryModal";
 import { getDynamicOffsets } from "@/lib/dealOffsets";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  Loader2,
-  LogOut,
-  Settings,
-} from "lucide-react";
+import { Loader2, LogOut, Settings } from "lucide-react";
 import PlayingCard from "@/components/PlayingCard";
 import { useEffect, useRef, useState } from "react";
 import { useGameStore } from "@/stores/useGameStore";
@@ -55,6 +51,7 @@ export default function Game() {
   const [isLeaveWarningOpen, setIsLeaveWarningOpen] = useState(false);
   const [rebuyTimeLeft, setRebuyTimeLeft] = useState(10);
   const minRaise = game ? game.smallBlind : 0;
+  const [turnTimeLeft, setTurnTimeLeft] = useState<number | null>(null);
 
   const [readyTimeLeft, setReadyTimeLeft] = useState(20);
   const [hasSubmittedReady, setHasSubmittedReady] = useState(false);
@@ -69,6 +66,8 @@ export default function Game() {
 
   const myUserId = game?.currentViewerUserId;
   const player = game?.players.find((p) => p.userId === myUserId);
+  const myPlayerIndex = game?.players.findIndex((p) => p.userId === myUserId);
+  const isMyTurn = myPlayerIndex === game?.currentPlayerIndex;
 
   useEffect(() => {
     if (!game?.isGameOver) {
@@ -116,6 +115,22 @@ export default function Game() {
       setIsRebuyModalOpen(false);
     }
   }, [player?.isAwaitingRebuy, submitRebuy]);
+
+  useEffect(() => {
+    if (!game || !isMyTurn || game?.isGameOver) {
+      setTurnTimeLeft(null);
+      return;
+    }
+    const deadline = new Date(game!.turnStartedAt).getTime() + 15_000;
+    const tick = () => {
+      const remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      setTurnTimeLeft(remaining);
+      if (remaining === 0) clearInterval(id);
+    };
+    tick();
+    const id = setInterval(tick, 250);
+    return () => clearInterval(id);
+  }, [game?.turnStartedAt, isMyTurn, game?.isGameOver]);
 
   useEffect(() => {
     if (prevIsGameOverRef.current === true && game?.isGameOver === false) {
@@ -216,19 +231,17 @@ export default function Game() {
   };
 
   if (!game && !sessionSummary) {
-  return (
-    <div className="fixed inset-0 bg-gray-950 flex flex-col items-center justify-center gap-3 sm:gap-4 z-50 px-4">
-      <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-amber-500" />
-      <p className="text-gray-400 text-base sm:text-lg font-medium animate-pulse">
-        Loading game...
-      </p>
-    </div>
-  );
-}
+    return (
+      <div className="fixed inset-0 bg-gray-950 flex flex-col items-center justify-center gap-3 sm:gap-4 z-50 px-4">
+        <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-amber-500" />
+        <p className="text-gray-400 text-base sm:text-lg font-medium animate-pulse">
+          Loading game...
+        </p>
+      </div>
+    );
+  }
 
   const activeDealerIndex = game?.players.findIndex((p) => p.isDealer) ?? 0;
-  const myPlayerIndex = game?.players.findIndex((p) => p.userId === myUserId);
-  const isMyTurn = myPlayerIndex === game?.currentPlayerIndex;
   const hasPenalty = game ? !game.isGameOver && game.penaltyAmount > 0 : false;
 
   return (
@@ -295,7 +308,8 @@ export default function Game() {
                   transition={{ duration: 0.25 }}
                   className="text-amber-400 font-bold text-xs sm:text-base md:text-lg lg:text-xl"
                 >
-                  <span className="hidden sm:inline">Pot: </span>${game?.pot.toLocaleString()}
+                  <span className="hidden sm:inline">Pot: </span>$
+                  {game?.pot.toLocaleString()}
                 </motion.span>
               </div>
 
@@ -433,6 +447,13 @@ export default function Game() {
                       </motion.div>
                     );
                   })}
+                  {isMyTurn && turnTimeLeft !== null && (
+                    <span
+                      className={`text-sm font-mono ${turnTimeLeft <= 5 ? "text-red-400 animate-pulse" : "text-gray-400"}`}
+                    >
+                      {turnTimeLeft}s
+                    </span>
+                  )}
                 </motion.div>
               ) : (
                 <motion.p
@@ -456,7 +477,9 @@ export default function Game() {
       <Dialog open={isRaiseModalOpen} onOpenChange={setIsRaiseModalOpen}>
         <DialogContent className="sm:max-w-md w-[90vw] sm:w-full bg-gray-900 text-white border-gray-700">
           <DialogHeader>
-            <DialogTitle className="text-base sm:text-lg">Place your raise</DialogTitle>
+            <DialogTitle className="text-base sm:text-lg">
+              Place your raise
+            </DialogTitle>
           </DialogHeader>
 
           <div className="flex flex-col gap-4 sm:gap-6 py-3 sm:py-4">
@@ -619,7 +642,11 @@ export default function Game() {
       {/* Session Summary Dialog */}
       <SessionSummaryModal
         isOpen={!!sessionSummary}
-        onClose={() => (navigate("/dashboard"), clearSessionSummary(), refetch())}
+        onClose={() => (
+          navigate("/dashboard"),
+          clearSessionSummary(),
+          refetch()
+        )}
         sessionSummary={sessionSummary}
       />
 
@@ -660,7 +687,9 @@ export default function Game() {
                 />
               </svg>
               <div className="absolute flex items-center justify-center w-full h-full">
-                <span className="text-2xl sm:text-3xl font-bold">{rebuyTimeLeft}</span>
+                <span className="text-2xl sm:text-3xl font-bold">
+                  {rebuyTimeLeft}
+                </span>
               </div>
             </div>
             <p className="text-gray-400 text-center text-sm sm:text-base px-4">

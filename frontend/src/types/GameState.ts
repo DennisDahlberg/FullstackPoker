@@ -42,6 +42,7 @@ export interface GameState {
     earlyLeavePayout: number;
     currentViewerUserId?: string | null;
     readyPlayerIds: string[];
+    turnStartedAt: string;
 }
 
 export interface GameSessionSummary {

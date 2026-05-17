@@ -17,17 +17,20 @@ public class GameHub : Hub
     private readonly IGameHistoryService _gameHistoryService;
     private readonly IGameService _gameService;
     private readonly ILogger<GameHub> _logger;
+    
+    private readonly IHubContext<GameHub> _hubContext;
 
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> _gameLocks = new();
     private static readonly ConcurrentDictionary<string, CancellationTokenSource> _turnTimers = new();
 
-    public GameHub(IGameStateManager gameStateManager, IUserService userService, IGameHistoryService gameHistoryService, IGameService gameService, ILogger<GameHub> logger)
+    public GameHub(IGameStateManager gameStateManager, IUserService userService, IGameHistoryService gameHistoryService, IGameService gameService, ILogger<GameHub> logger, IHubContext<GameHub> hubContext)
     {
         _gameStateManager = gameStateManager;
         _userService = userService;
         _gameHistoryService = gameHistoryService;
         _gameService = gameService;
         _logger = logger;
+        _hubContext = hubContext;
     }
 
     private SemaphoreSlim GetGameLock(string gameId)
@@ -42,7 +45,7 @@ public class GameHub : Hub
         foreach (var player in humanPlayers)
         {
             var personalizedState = CreatePersonalizedGameState(gameState, player.UserId!);
-            await Clients.User(player.UserId!).SendAsync("GameStateUpdated", personalizedState);
+            await _hubContext.Clients.User(player.UserId!).SendAsync("GameStateUpdated", personalizedState);
         }
     }
 
@@ -125,7 +128,8 @@ public class GameHub : Hub
             PenaltyAmount = penaltyAmount,
             EarlyLeavePayout = earlyLeavePayout,
             CurrentViewerUserId = viewerUserId,
-            DealerPosition = gameState.DealerPosition
+            DealerPosition = gameState.DealerPosition,
+            TurnStartedAt = gameState.TurnStartedAt
         };
     }
 
