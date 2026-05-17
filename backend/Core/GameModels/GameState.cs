@@ -36,5 +36,6 @@
         public string CurrentViewerUserId { get; set; }
         public int RoundsPlayed { get; set; }
         public List<string> ReadyPlayerIds { get; set; } = [];
+        public DateTimeOffset TurnStartedAt { get; set; } = DateTimeOffset.UtcNow;
     }
 }

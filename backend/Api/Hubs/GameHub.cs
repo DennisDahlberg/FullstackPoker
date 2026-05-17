@@ -19,6 +19,7 @@ public class GameHub : Hub
     private readonly ILogger<GameHub> _logger;
 
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> _gameLocks = new();
+    private static readonly ConcurrentDictionary<string, CancellationTokenSource> _turnTimers = new();
 
     public GameHub(IGameStateManager gameStateManager, IUserService userService, IGameHistoryService gameHistoryService, IGameService gameService, ILogger<GameHub> logger)
     {
