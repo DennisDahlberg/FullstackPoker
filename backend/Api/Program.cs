@@ -41,8 +41,8 @@ namespace Api
                 .WriteTo.Console(
                     outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u}] {Message:lj}{NewLine}{Exception}",
                     theme: AnsiConsoleTheme.Code)
-                .WriteTo.File("logs/backend.log", 
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u}] {Message:lj}{NewLine}{Exception}") 
+                .WriteTo.File("logs/backend.log",
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u}] {Message:lj}{NewLine}{Exception}")
                 .CreateLogger();
 
             try
@@ -82,7 +82,7 @@ namespace Api
                 builder.Services.AddTransient<IStatisticRepository, StatisticRepository>();
                 builder.Services.AddTransient<IChatService, ChatService>();
                 builder.Services.AddTransient<IChatRepository, ChatRepository>();
-            
+
                 // Validation
                 builder.Services.AddValidatorsFromAssemblyContaining<CreateBotValidator>();
 
@@ -100,7 +100,7 @@ namespace Api
                     })
                     .AddEntityFrameworkStores<ApplicationDbContext>()
                     .AddDefaultTokenProviders();
-            
+
                 //Blob storage
                 builder.Services.AddAzureClients(clientBuilder =>
                 {
@@ -176,7 +176,7 @@ namespace Api
                     var model = builder.Configuration["OpenAI:Model"];
                     return new ChatClient(model, apiKey);
                 });
-            
+
                 //Redis
                 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
                 {
@@ -190,13 +190,15 @@ namespace Api
 
                 var app = builder.Build();
 
-                // Configure the HTTP request pipeline.
                 if (app.Environment.IsDevelopment())
                 {
                     app.MapOpenApi();
                 }
 
-                app.UseHttpsRedirection();
+                if (!app.Environment.IsDevelopment())
+                {
+                    app.UseHttpsRedirection();
+                }
 
                 app.UseCors("AllowFrontend");
 
@@ -212,7 +214,7 @@ namespace Api
                     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                     await db.Database.MigrateAsync();
                 }
-            
+
                 using (var scope = app.Services.CreateScope())
                 {
                     var dataInitializer = scope.ServiceProvider.GetRequiredService<DataInitializer>();
