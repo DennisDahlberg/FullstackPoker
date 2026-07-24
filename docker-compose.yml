@@ -41,6 +41,5 @@ services:
       - backend
     environment:
       - VITE_API_URL=https://pokergame.win/
-# DET HÄR ÄR DELEN SOM FELMEDDELANDET KLAGAR PÅ:
 volumes:
   postgres_data:

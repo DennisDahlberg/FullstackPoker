@@ -121,7 +121,7 @@ namespace Api
                 {
                     options.AddPolicy("AllowFrontend", policy =>
                     {
-                        policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "https://poker.pokergame.win", "https://pokergame.win")
+                        policy.WithOrigins("http://localhost:3000", "http://localhost:5173", "http://localhost:8080", "https://poker.pokergame.win", "https://pokergame.win")
                             .AllowAnyMethod()
                             .AllowAnyHeader()
                             .AllowCredentials();
